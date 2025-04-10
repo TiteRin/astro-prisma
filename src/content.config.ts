@@ -16,8 +16,7 @@ const summaries = defineCollection({
             alt: z.string().optional()
         }),
         tags: z.array(z.string()),
-        summary: z.string(),
-        quotes: z.array(z.string())
+        summary: z.string()
     })
 });
 // Export a single `collections` object to register your collection(s)
