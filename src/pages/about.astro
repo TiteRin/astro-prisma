@@ -4,51 +4,46 @@ import '../styles/globals.css'
 
 const title = "About Me, My and Myself"
 const identity = {
-	firstName: 'Marine',
-	age: 37,
-	country: 'France',
-	hobbies: ['linocut', 'videogames', 'gardening']
+    firstName: 'Marine',
+    age: 37,
+    country: 'France',
+    hobbies: ['linocut', 'videogames', 'gardening']
 }
 
 const firstNameBgColor = 'lightgray';
-
 ---
 
-<Layout>
-	<a href="/">Home</a>
-	<a href="/blog/">Blog</a>
-	<a href="/about/">About</a>
-
-	<h1>{ title }</h1>
+<Layout pageTitle={title}>
 	<h2>... and my new Astro site!</h2>
 
-	<dl>
-		<dt>Name</dt>
-		<dd>{identity.firstName}</dd>
-		<dt>Country</dt>
-		<dd>{identity.country}</dd>
-		<dt>Age</dt>
-		<dd>{identity.age}</dd>
-		<dt>Hobbies</dt>
-		<dd class="hobbies">
-			<ul>
-				{identity.hobbies.map((hobby) => <li>{hobby}</li>)}
-			</ul>
-		</dd>
-	</dl>
+    <dl>
+        <dt>Name</dt>
+        <dd>{identity.firstName}</dd>
+        <dt>Country</dt>
+        <dd>{identity.country}</dd>
+        <dt>Age</dt>
+        <dd>{identity.age}</dd>
+        <dt>Hobbies</dt>
+        <dd class="hobbies">
+            <ul>
+                {identity.hobbies.map((hobby) =>
+                        <li>{hobby}</li>)}
+            </ul>
+        </dd>
+    </dl>
 </Layout>
 
 <style define:vars={{firstNameBgColor}}>
-	dl {
-		margin-left: 20px;
-		border: 1px dashed gray;
-		background-color: var(--firstNameBgColor);
-	}
+    dl {
+        margin-left: 20px;
+        border: 1px dashed gray;
+        background-color: var(--firstNameBgColor);
+    }
 
-	.hobbies {
-		list-style: none;
-		font-style: italic;
-	}
+    .hobbies {
+        list-style: none;
+        font-style: italic;
+    }
 
 
 </style>
