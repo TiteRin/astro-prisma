@@ -1,6 +1,7 @@
 ---
 import '../styles/globals.css'
 import Layout from '../layouts/Layout.astro';
+import BlogPost from "../components/BlogPost.astro";
 const title = "My Astro Learning blog"
 
 const allPost = Object.values(import.meta.glob('./posts/*.md', {eager: true}))
@@ -10,9 +11,8 @@ const allPost = Object.values(import.meta.glob('./posts/*.md', {eager: true}))
     <nav role="navigation" title="Blog posts">
         <ul>
             {allPost.map((post: any) => (
-                    <li>
-                        <a href={post.url}>{post.frontmatter.title}</a>
-                    </li>))}
+                    <BlogPost {...post.frontmatter} url={post.url}/>
+            ))}
         </ul>
     </nav>
 
