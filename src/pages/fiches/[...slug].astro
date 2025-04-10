@@ -59,4 +59,7 @@ const { Content } = await render(fiche);
     <div class="content">
         <Content />
     </div>
+    <footer role="contentinfo">
+        Fiche rédigée par { fiche.data.author }, dernière modification le { fiche.data.lastModification}.
+    </footer>
 </FicheLayout>
