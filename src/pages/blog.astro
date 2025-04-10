@@ -2,16 +2,17 @@
 import '../styles/globals.css'
 import Layout from '../layouts/Layout.astro';
 import BlogPost from "../components/BlogPost.astro";
+import {getCollection} from "astro:content";
 const title = "My Astro Learning blog"
 
-const allPost = Object.values(import.meta.glob('./posts/*.md', {eager: true}))
+const allPost = await getCollection("blog");
 ---
 
 <Layout pageTitle={title}>
     <nav role="navigation" title="Blog posts">
         <ul>
             {allPost.map((post: any) => (
-                    <BlogPost {...post.frontmatter} url={post.url}/>
+                    <BlogPost url={`/posts/${post.id}/`} title={post.data.title} />
             ))}
         </ul>
     </nav>
