@@ -3,8 +3,33 @@ import Layout from "./Layout.astro";
 const {frontmatter} = Astro.props;
 ---
 <Layout pageTitle={frontmatter.title}>
+    <ul class="tags">
+        {frontmatter.tags.map((tag: any) => (
+                <li class="tag">{tag}</li>))}
+    </ul>
     <p><em>{frontmatter.description}</em></p>
     <p>Written by {frontmatter.author}, published on {frontmatter.pubDate}</p>
-    <hr />
+    <hr/>
     <slot/>
 </Layout>
+<style>
+    a {
+        color: #00539F;
+    }
+
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        list-style: none;
+        padding: 0
+    }
+
+    .tag {
+        margin: 0.25em;
+        border: dotted 1px #a1a1a1;
+        border-radius: .5em;
+        padding: .5em 1em;
+        font-size: 1.15em;
+        background-color: #F8FCFD;
+    }
+</style>
