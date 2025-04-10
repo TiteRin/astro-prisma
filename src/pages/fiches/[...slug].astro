@@ -1,0 +1,104 @@
+---
+import { getCollection, render } from 'astro:content';
+import FicheLayout from "../../layouts/FicheLayout.astro";
+
+export async function getStaticPaths() {
+    const fiches = await getCollection('summaries');
+    return fiches.map(fiche => ({
+        params: { slug: fiche.id },
+        props: { fiche }
+    }))
+}
+
+const { fiche } = Astro.props;
+const { Content } = await render(fiche);
+---
+<FicheLayout pageTitle={ fiche.data.bookTitle }>
+    <div class="header">
+        <header role="banner">
+            <h1>{ fiche.data.bookTitle } </h1>
+            {
+                fiche.data.image && <img src={fiche.data.image.url} alt={fiche.data.image.alt || ""} />
+            }
+        </header>
+        <div class="additional-info">
+            <div class="block author-block">
+                <h2>Auteur·ice</h2>
+                {
+                    fiche.data.bookAuthors.length === 1 && <span>{fiche.data.bookAuthors[0]}</span>
+                }
+                {
+                    fiche.data.bookAuthors.length > 1 && <ul>
+                        {
+                            fiche.data.bookAuthors.map((author:string) => <li>{author}</li>)
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="block published-year-block">
+                <h2>Année</h2>
+                {
+                    fiche.data.publishedYear
+                }
+            </div>
+            <div class="block tags-block">
+                <h2>Tags</h2>
+                <ul>
+                    {
+                        fiche.data.tags.map((tag: string) => <li>{tag}</li>)
+                    }
+                </ul>
+            </div>
+        </div>
+        <div class="summary">
+            <h2>Résumé</h2>
+            { fiche.data.summary }
+        </div>
+    </div>
+    <hr />
+    <div class="content">
+        <Content />
+    </div>
+</FicheLayout>
+
+<style lang="scss">
+    h2 {
+      background-color: #A4BCDF;
+      font-variant: all-small-caps;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .header {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+      header {
+        display: flex;
+        flex-direction: row;
+
+        h1 {
+          color: #3B68A9
+        }
+
+        img {
+          max-width: 300px;
+        }
+      }
+
+      .additional-info {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 1rem;
+
+        .block {
+          width: 30%;
+
+          h2 {
+            background-color: #F1CCE0;
+          }
+        }
+      }
+    }
+</style>

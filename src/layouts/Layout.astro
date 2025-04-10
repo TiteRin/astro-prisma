@@ -1,11 +1,13 @@
+---
+const { pageTitle } = Astro.props || "Astro - Fiche de lecture";
+---
 <!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Fiche de lecture - v0.1</title>
+		<title>{pageTitle}</title>
 	</head>
 	<body>
 		<slot />
@@ -18,5 +20,10 @@
 		margin: 0;
 		width: 100%;
 		height: 100%;
+		padding: 1rem;
+	}
+
+	* {
+		box-sizing: border-box;
 	}
 </style>

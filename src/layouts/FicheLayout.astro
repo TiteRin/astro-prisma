@@ -1,0 +1,14 @@
+---
+import Layout from "./Layout.astro";
+
+const { pageTitle } = Astro.props || "Fiche de lecture";
+---
+<Layout pageTitle={ pageTitle }>
+    <slot />
+</Layout>
+
+<style>
+    html, body {
+        font-family: Avenir, Helvetica, Arial, sans-serif;
+    }
+</style>
