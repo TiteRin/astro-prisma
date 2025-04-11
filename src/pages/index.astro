@@ -1,10 +1,30 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import {getCollection} from "astro:content";
+
+const allFiches = await getCollection("summaries");
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
 <Layout>
-	<h1>Hello World</h1>
+    <h1>Liste des fiches disponibles</h1>
+    <ul>
+        {allFiches.length === 0 &&
+                <li>No data</li>}
+        {allFiches.length > 0 && (
+            allFiches.map(fiche => (
+                    <li>
+                        <a href={`fiches/${fiche.id}`}>
+                            {fiche.data.bookTitle}
+                        </a>
+                    </li>
+            ))
+        )
+        }
+    </ul>
+    <p>
+        Mise en page en <em lang="en">work in progress…</em>
+    </p>
 </Layout>
