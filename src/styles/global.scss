@@ -26,14 +26,31 @@
   font-style: italic;
 }
 
-.sr-only {
-  position: absolute;
-  left: -8000px;
-}
+@import "./colors";
+@import "./utils";
+@import "./button";
 
 .tag {
   padding: 0.25rem 0.5rem;
   background-color: #e0e8f4;
   border-radius: 0.25rem;
   text-overflow: ellipsis;
+}
+
+a {
+
+  &, &:visited {
+    color: $blue-1;
+    text-decoration: none;
+  }
+
+  &:hover,
+  &:active {
+    text-decoration: underline;
+    color: darken($blue-1, 20%);
+  }
+
+  &:focus {
+    border: 1px dashed $blue-1;
+  }
 }

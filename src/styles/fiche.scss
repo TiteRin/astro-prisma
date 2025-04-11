@@ -1,11 +1,12 @@
+@import "./colors";
+
 body * {
   overflow: hidden;
-
   line-height: 150%;
 }
 
 h2 {
-  background-color: #A4BCDF;
+  background-color: $light-blue-2;
   font-variant: all-small-caps;
   padding: 0.25rem 0.5rem;
 }
@@ -22,7 +23,7 @@ h2 {
     gap: 1rem;
 
     h1 {
-      color: #3B68A9;
+      color: $blue-1;
       font-size: 2rem;
     }
 
@@ -40,7 +41,7 @@ h2 {
       width: 100%;
 
       h2 {
-        background-color: #F1CCE0;
+        background-color: $light-pink-1;
       }
     }
 
@@ -74,15 +75,15 @@ h2 {
     font-variant: small-caps;
 
     &:nth-of-type(3n+1) {
-      background-color: #f1cce0;
+      background-color: $light-pink-1;
     }
 
     &:nth-of-type(3n+2) {
-      background-color: #e0e8f4;
+      background-color: $light-blue-1;
     }
 
     &:nth-of-type(3n+3) {
-      background-color: #a4bcdf;
+      background-color: $light-blue-2;
     }
   }
 

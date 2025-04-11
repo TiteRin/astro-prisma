@@ -1,6 +1,7 @@
 ---
-import Layout from "./Layout.astro";
+import { Icon } from "astro-icon/components";
 import '../styles/fiche.scss';
+import Layout from "./Layout.astro";
 import Navigation from "../components/Navigation.astro";
 
 const {pageTitle} = Astro.props || "Fiche de lecture";
@@ -8,7 +9,7 @@ const {pageTitle} = Astro.props || "Fiche de lecture";
 <Layout pageTitle={pageTitle}>
     <div class="wrapper">
         <div class="navigation">
-            <Navigation/>
+            <Navigation class:list={[]}/>
         </div>
         <div class="content">
             <slot/>
@@ -27,7 +28,6 @@ const {pageTitle} = Astro.props || "Fiche de lecture";
         gap: 1rem;
 
         .navigation {
-            width: 100%;
             flex-shrink: 0;
         }
 
@@ -41,12 +41,7 @@ const {pageTitle} = Astro.props || "Fiche de lecture";
             flex-direction: row;
 
             .navigation {
-                width: 230px;
-                overflow: visible;
-
-                &.collapsed {
-                    width: 25px;
-                }
+                max-width: 300px;
             }
         }
 

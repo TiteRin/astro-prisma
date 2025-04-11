@@ -1,17 +1,41 @@
 ---
 import {getCollection} from "astro:content";
+import {Icon} from 'astro-icon/components';
 const allFiches = await getCollection("summaries");
 const allTags = [...new Set(allFiches.map(fiche => fiche.data.tags).flat())];
 const allAuthors = [...new Set(allFiches.map(fiche => fiche.data.author).flat())];
 ---
-<div>
+<div class="navigation-wrapper">
     <h1>
-        <a href="/">
+        <a href="/" class="link-home">
+            <Icon name="iconoir:home"/>
             Accueil
         </a>
+        <span class="mobile-only">
+            <button class:list={["btn-action", "action-expand"]}>
+                <Icon name="iconoir:fast-arrow-down"
+                      aria-label="Ouvrir le menu" size={32}/>
+            </button>
+            <button class:list={["btn-action", "action-collapse"]}>
+                <Icon name="iconoir:fast-arrow-up"
+                      aria-label="Fermer le menu" size={32}/>
+            </button>
+        </span>
+        <span class="desktop-only">
+            <button class:list={["btn-action", "action-collapse"]}>
+                <Icon name="iconoir:fast-arrow-left"
+                      aria-label="Réduire la navigation" size={32}/>
+            </button>
+        </span>
     </h1>
+    <div class="desktop-only">
+        <button class:list={["btn-action", "action-expand"]}>
+            <Icon name="iconoir:fast-arrow-right"
+                  aria-label="Agrandir la navigation" size={32}/>
+        </button>
+    </div>
     <h1 class="sr-only">Navigation</h1>
-    <nav role="navigation" aria-label="Navigation par tags">
+    <nav role="navigation" aria-label="Navigation par tags" class="hide-collapsed">
         <h2>Par tags</h2>
         <ul>
             {allTags.length === 0 &&
@@ -29,7 +53,7 @@ const allAuthors = [...new Set(allFiches.map(fiche => fiche.data.author).flat())
             )}
         </ul>
     </nav>
-    <nav role="navigation" aria-label="Navigation par bénévole">
+    <nav role="navigation" aria-label="Navigation par bénévole" class="hide-collapsed">
         <h2>Par bénévole</h2>
         <ul>
             {allAuthors.length === 0 &&
@@ -50,16 +74,94 @@ const allAuthors = [...new Set(allFiches.map(fiche => fiche.data.author).flat())
 </div>
 
 <style>
-    ul {
-        padding: 0;
-        margin: 0;
+    .navigation-wrapper {
 
-        li {
-            margin: 1rem 0;
+        @media print {
+            display: none;
+        }
 
-            &:first-child {
-                margin-top: 0;
+        width: 100%;
+        transition: width 150ms linear;
+
+        .action-expand {
+            display: none;
+        }
+
+        .action-collapse {
+            display: block;
+        }
+
+        &.collapsed {
+
+            .action-collapse {
+                display: none;
+            }
+
+            .action-expand {
+                display: block;
+            }
+
+            .hide-collapsed {
+                display: none;
+            }
+
+            .link-home {
+                overflow: clip;
+            }
+        }
+
+        @media screen and (min-width: 768px) {
+
+            &.collapsed {
+                width: 36px;
+                padding: 2px;
+                overflow: hidden;
+            }
+        }
+
+        h1 {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+
+            a {
+                text-decoration: none;
+            }
+
+            overflow-x: hidden;
+            text-wrap: nowrap;
+        }
+
+        ul {
+            padding: 0;
+            margin: 0;
+
+            li {
+                margin: 1rem 0;
+
+                &:first-child {
+                    margin-top: 0;
+                }
             }
         }
     }
 </style>
+
+<script>
+    const btnExpand = document.querySelectorAll(".action-expand");
+    const btnCollapse = document.querySelectorAll(".action-collapse");
+    const navigation = document.querySelector(".navigation-wrapper");
+
+    btnExpand.forEach((button) => {
+        button.addEventListener("click", (e) => {
+            navigation?.classList.toggle("collapsed");
+        });
+    });
+
+    btnCollapse.forEach((button) => {
+        button.addEventListener("click", (e) => {
+            navigation?.classList.toggle("collapsed");
+        });
+    });
+</script>

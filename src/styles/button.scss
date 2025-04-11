@@ -1,0 +1,22 @@
+@import "./colors";
+
+.btn-action {
+
+  background-color: transparent;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  color: $blue-1;
+  padding: 2px;
+  width: 36px;
+  height: 36px;
+
+  &:hover,
+  &:active {
+    border-color: $blue-1;
+  }
+
+  &:focus {
+    background-color: $blue-1;
+    color: white;
+  }
+}
