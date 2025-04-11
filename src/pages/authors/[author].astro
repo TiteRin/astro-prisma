@@ -1,0 +1,40 @@
+---
+import FicheLayout from "../../layouts/FicheLayout.astro";
+import {getCollection} from "astro:content";
+import {pluralize} from "../../utils/functions";
+
+export async function getStaticPaths() {
+
+    const allReadingNotes = await getCollection("summaries");
+    const uniqueAuthors = [...new Set(allReadingNotes.map(readingNote => readingNote.data.author).flat())];
+
+    return uniqueAuthors.map((author) => {
+
+        const filteredReadingNotes = allReadingNotes.filter(readingNote => readingNote.data.author === author)
+
+        return {
+            params: {author},
+            props: {
+                filteredReadingNotes
+            }
+        }
+    })
+}
+
+const {filteredReadingNotes} = Astro.props;
+const {author} = Astro.params;
+---
+<FicheLayout pageTitle={`Navigation par bénévole - ${author}`}>
+    <h1>{`${filteredReadingNotes.length} ${pluralize(filteredReadingNotes.length, "fiche")} ${pluralize(filteredReadingNotes.length, "rédigée")}`} par {author}</h1>
+    <ul>
+        {
+            filteredReadingNotes.map(readingNote => (
+                    <li key={readingNote.id}>
+                        <a href={`/fiches/${readingNote.id}`}>
+                            {readingNote.data.bookTitle} ({readingNote.data.bookAuthors.join(", ")})
+                        </a>
+                    </li>
+            ))
+        }
+    </ul>
+</FicheLayout>

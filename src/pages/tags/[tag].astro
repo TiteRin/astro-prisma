@@ -1,0 +1,40 @@
+---
+import FicheLayout from "../../layouts/FicheLayout.astro";
+import {getCollection} from "astro:content";
+import {pluralize} from "../../utils/functions";
+
+export async function getStaticPaths() {
+
+    const allReadingNotes = await getCollection("summaries");
+    const uniqueTags = [...new Set(allReadingNotes.map(readingNote => readingNote.data.tags).flat())];
+
+    return uniqueTags.map((tag) => {
+
+        const filteredReadingNotes = allReadingNotes.filter(readingNote => readingNote.data.tags.includes(tag))
+
+        return {
+            params: {tag},
+            props: {
+                filteredReadingNotes
+            }
+        }
+    })
+}
+
+const {filteredReadingNotes} = Astro.props;
+const {tag} = Astro.params;
+---
+<FicheLayout pageTitle={`Navigation par tag - ${tag}`}>
+    <h1>{`${filteredReadingNotes.length} ${pluralize(filteredReadingNotes.length, "fiche")}`} sous le tag {tag}</h1>
+    <ul>
+        {
+            filteredReadingNotes.map(readingNote => (
+                    <li key={readingNote.id}>
+                        <a href={`/fiches/${readingNote.id}`}>
+                            {readingNote.data.bookTitle} ({readingNote.data.bookAuthors.join(", ")})
+                        </a>
+                    </li>
+            ))
+        }
+    </ul>
+</FicheLayout>

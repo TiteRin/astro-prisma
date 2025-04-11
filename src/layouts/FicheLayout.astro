@@ -1,15 +1,54 @@
 ---
 import Layout from "./Layout.astro";
 import '../styles/fiche.scss';
+import Navigation from "../components/Navigation.astro";
 
-const { pageTitle } = Astro.props || "Fiche de lecture";
+const {pageTitle} = Astro.props || "Fiche de lecture";
 ---
-<Layout pageTitle={ pageTitle }>
-    <slot />
+<Layout pageTitle={pageTitle}>
+    <div class="wrapper">
+        <div class="navigation">
+            <Navigation/>
+        </div>
+        <div class="content">
+            <slot/>
+        </div>
+    </div>
 </Layout>
 
 <style>
     html, body {
         font-family: 'opendyslexic', Avenir, Helvetica, Arial, sans-serif;
+    }
+
+    .wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .navigation {
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .content {
+            flex-grow: 1;
+        }
+    }
+
+    @media screen and (min-width: 768px) {
+        .wrapper {
+            flex-direction: row;
+
+            .navigation {
+                width: 230px;
+                overflow: visible;
+
+                &.collapsed {
+                    width: 25px;
+                }
+            }
+        }
+
     }
 </style>

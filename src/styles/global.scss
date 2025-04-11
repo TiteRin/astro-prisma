@@ -25,3 +25,15 @@
   font-weight: bold;
   font-style: italic;
 }
+
+.sr-only {
+  position: absolute;
+  left: -8000px;
+}
+
+.tag {
+  padding: 0.25rem 0.5rem;
+  background-color: #e0e8f4;
+  border-radius: 0.25rem;
+  text-overflow: ellipsis;
+}

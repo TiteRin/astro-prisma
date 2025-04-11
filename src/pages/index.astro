@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import {getCollection} from "astro:content";
+import FicheLayout from "../layouts/FicheLayout.astro";
 
 const allFiches = await getCollection("summaries");
 
@@ -8,7 +9,7 @@ const allFiches = await getCollection("summaries");
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout>
+<FicheLayout>
     <h1>Liste des fiches disponibles</h1>
     <ul>
         {allFiches.length === 0 &&
@@ -27,4 +28,4 @@ const allFiches = await getCollection("summaries");
     <p>
         Mise en page en <em lang="en">work in progress…</em>
     </p>
-</Layout>
+</FicheLayout>
