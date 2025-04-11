@@ -43,6 +43,31 @@ h2 {
         background-color: #F1CCE0;
       }
     }
+
+    .tags-block {
+      ul {
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        @media screen and (max-width: 450px) {
+          & {
+            flex-direction: column;
+          }
+        }
+
+        li.tag {
+          max-width: 100%;
+          padding: 0.25rem 0.5rem;
+          background-color: #e0e8f4;
+          border-radius: 0.25rem;
+          text-overflow: ellipsis;
+        }
+      }
+    }
   }
 }
 

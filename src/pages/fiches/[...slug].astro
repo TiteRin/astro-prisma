@@ -46,7 +46,7 @@ const { Content } = await render(fiche);
                 <h2>Tags</h2>
                 <ul>
                     {
-                        fiche.data.tags.map((tag: string) => <li>{tag}</li>)
+                        fiche.data.tags.map((tag: string) => <li class="tag">{tag}</li>)
                     }
                 </ul>
             </div>
