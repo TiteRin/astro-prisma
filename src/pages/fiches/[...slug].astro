@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import FicheLayout from "../../layouts/FicheLayout.astro";
+import {format} from "date-fns";
 
 export async function getStaticPaths() {
     const fiches = await getCollection('summaries');
@@ -60,6 +61,7 @@ const { Content } = await render(fiche);
         <Content />
     </div>
     <footer role="contentinfo">
-        Fiche rédigée par { fiche.data.author }, dernière modification le { fiche.data.lastModification}.
+        Fiche rédigée par { fiche.data.author },
+        dernière modification le { format(fiche.data.lastModification, "dd/MM/yyyy")}.
     </footer>
 </FicheLayout>
