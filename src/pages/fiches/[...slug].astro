@@ -17,10 +17,10 @@ const { Content } = await render(fiche);
 <FicheLayout pageTitle={ fiche.data.bookTitle }>
     <div class="header">
         <header role="banner">
-            <h1>{ fiche.data.bookTitle } </h1>
             {
                 fiche.data.image && <img src={fiche.data.image.url} alt={fiche.data.image.alt || ""} />
             }
+            <h1>{ fiche.data.bookTitle } </h1>
         </header>
         <div class="additional-info">
             <div class="block author-block">
