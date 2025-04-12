@@ -16,7 +16,10 @@ const fonts = [
 ]
 ---
 <aside class="accessibility-widget">
-    <form action="">
+    <button class="btn-action toggle-accessibility-widget">
+        <Icon name="iconoir:accessibility" size="4rem"/>
+    </button>
+    <form action="" class="hidden">
         <h1>Outils d’accessibilité</h1>
         <fieldset>
             <label for="font">Choisissez une police</label>
@@ -114,11 +117,23 @@ const fonts = [
     .accessibility-widget {
 
         position: sticky;
-        background-color: white;
-        top: 0;
+        bottom: 2rem;
 
         @media print {
             display: none;
+        }
+
+        .toggle-accessibility-widget {
+            float: right;
+            border-radius: 36px;
+            display: flex;
+
+            opacity: 30%;
+            transition: opacity 300ms;
+
+            &:hover, &:active {
+                opacity: 100%;
+            }
         }
 
         form, fieldset {

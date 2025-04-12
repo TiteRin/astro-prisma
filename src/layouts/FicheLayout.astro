@@ -7,7 +7,6 @@ import AccessibilityToolbar from "../components/AccessibilityToolbar.astro";
 const {pageTitle} = Astro.props || "Fiche de lecture";
 ---
 <Layout pageTitle={pageTitle}>
-    <AccessibilityToolbar />
     <div class="wrapper">
         <div class="navigation">
             <Navigation class:list={[]}/>
@@ -16,6 +15,7 @@ const {pageTitle} = Astro.props || "Fiche de lecture";
             <slot/>
         </div>
     </div>
+    <AccessibilityToolbar />
 </Layout>
 
 <style>
