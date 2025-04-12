@@ -1,12 +1,13 @@
 ---
-import { Icon } from "astro-icon/components";
 import '../styles/fiche.scss';
 import Layout from "./Layout.astro";
 import Navigation from "../components/Navigation.astro";
+import AccessibilityToolbar from "../components/AccessibilityToolbar.astro";
 
 const {pageTitle} = Astro.props || "Fiche de lecture";
 ---
 <Layout pageTitle={pageTitle}>
+    <AccessibilityToolbar />
     <div class="wrapper">
         <div class="navigation">
             <Navigation class:list={[]}/>

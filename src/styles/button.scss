@@ -19,4 +19,13 @@
     background-color: $blue-1;
     color: white;
   }
+
+  &.with-border {
+    border-color: $blue-1;
+
+    &:hover,
+    &:active {
+      border-color: darken($blue-1, 20%);
+    }
+  }
 }

@@ -1,34 +1,8 @@
-@font-face {
-  font-family: 'opendyslexic';
-  src: url('/fonts/OpenDyslexic-Regular.woff') format("woff");
-  font-style: normal;
-  font-weight: normal;
-}
-
-@font-face {
-  font-family: 'opendyslexic';
-  src: url('/fonts/OpenDyslexic-Italic.woff') format("woff");
-  font-style: italic;
-  font-weight: normal;
-}
-
-@font-face {
-  font-family: 'opendyslexic';
-  src: url('/fonts/OpenDyslexic-Bold.woff') format("woff");
-  font-weight: bold;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'opendyslexic';
-  src: url('/fonts/OpenDyslexic-Bold-Italic.woff') format("woff");
-  font-weight: bold;
-  font-style: italic;
-}
-
 @import "./colors";
 @import "./utils";
 @import "./button";
+@import "./fonts";
+
 
 .tag {
   padding: 0.25rem 0.5rem;
