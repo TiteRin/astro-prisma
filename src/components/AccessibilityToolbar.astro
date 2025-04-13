@@ -16,10 +16,13 @@ const fonts = [
 ]
 ---
 <aside class="accessibility-widget">
-    <button class="btn-action toggle-accessibility-widget">
+    <button class="btn-action toggle-accessibility-widget" aria-label="Ouvrir le widget">
         <Icon name="iconoir:accessibility" size="4rem"/>
     </button>
-    <form action="" class="hidden">
+    <form action="" class="">
+        <button class="btn-action toggle-accessibility-widget" aria-label="Fermer le widget" type="button">
+            <Icon name="iconoir:xmark" size="2rem" />
+        </button>
         <h1>Outils d’accessibilité</h1>
         <fieldset>
             <label for="font">Choisissez une police</label>
@@ -43,19 +46,25 @@ const fonts = [
             </button>
         </fieldset>
         <fieldset>
-            <button aria-label="Reset" class="btn-action reset">Reset</button>
+            <button aria-label="Reset" class="btn-action reset" type="reset">Reset</button>
         </fieldset>
     </form>
 </aside>
 
 <script define:vars={{fonts}}>
-    const selectFont = document.querySelector('#font');
-    const body = document.querySelector('body');
     const allFonts = fonts.map((font) => font.className);
-    const spanZoom = document.querySelector(".zoom-value");
-    const btnZoomMinus = document.querySelector(".btn-action.zoom-less");
-    const btnZoomPlus = document.querySelector(".btn-action.zoom-more");
-    const btnReset = document.querySelector(".btn-action.reset");
+
+    const component = document.querySelector(".accessibility-widget");
+    const body = document.querySelector('body');
+
+    const form = component.querySelector("form");
+    const btnForm = component.querySelectorAll(".btn-action.toggle-accessibility-widget");
+
+    const selectFont = form.querySelector('#font');
+    const spanZoom = form.querySelector(".zoom-value");
+    const btnZoomMinus = form.querySelector(".btn-action.zoom-less");
+    const btnZoomPlus = form.querySelector(".btn-action.zoom-more");
+    const btnReset = form.querySelector(".btn-action.reset");
 
     let zoom = 100;
     let font = "";
@@ -71,6 +80,10 @@ const fonts = [
         spanZoom.setAttribute("data-zoom", zoom);
         body.style.fontSize = `${zoom}%`;
     }
+
+    btnForm.forEach(btn => btn.onclick = () => {
+        form.classList.toggle("expanded");
+    });
 
     selectFont?.addEventListener('change', () => {
         if (!body) {
@@ -117,14 +130,15 @@ const fonts = [
     .accessibility-widget {
 
         position: sticky;
-        bottom: 2rem;
+        bottom: 1rem;
+        overflow: visible;
 
         @media print {
             display: none;
         }
 
         .toggle-accessibility-widget {
-            float: right;
+
             border-radius: 36px;
             display: flex;
 
@@ -136,6 +150,12 @@ const fonts = [
             }
         }
 
+        & > .toggle-accessibility-widget {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
         form, fieldset {
             display: flex;
             flex-direction: row;
@@ -145,6 +165,28 @@ const fonts = [
         }
 
         form {
+
+            width: 0;
+            height: 0;
+            display: none;
+
+            transition: width 300ms, height 300ms;
+
+            background-color: white;
+            border: 2px solid $blue-1;
+            border-radius: 15px;
+
+            position: absolute;
+            right: 0;
+            bottom: 0;
+
+            &.expanded {
+                width: auto;
+                height: auto;
+                min-height: calc(4rem + 5.6px);
+                display: flex;
+            }
+
             h1 {
                 margin: 0;
                 font-size: 1rem;
