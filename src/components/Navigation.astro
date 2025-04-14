@@ -35,42 +35,26 @@ const allContributors = [...new Set(allFiches.map(fiche => fiche.data.contributo
         </button>
     </div>
     <h1 class="sr-only">Navigation</h1>
-    <nav role="navigation" aria-label="Navigation par tags" class="hide-collapsed">
-        <h2>Par tags</h2>
-        <ul>
-            {allTags.length === 0 &&
-                    <li>Aucun tag</li>}
-            {allTags.length > 0 && (
-                allTags
-                    .sort((tagA, tagB) => (tagA.localeCompare(tagB)) || 0)
-                    .map((tag) => (
-                            <li class="tag">
-                                <a href={`/tags/${tag}`}>
-                                    {tag}
-                                </a>
-                            </li>
-                    ))
-            )}
-        </ul>
-    </nav>
-    <nav role="navigation" aria-label="Navigation par contributeurices" class="hide-collapsed">
-        <h2>Par contributeur·ice</h2>
-        <ul>
-            {allContributors.length === 0 &&
-                    <li>Aucun tag</li>}
-            {allContributors.length > 0 && (
-                allContributors
-                    .sort((contributorA, contributorB) => (contributorA.localeCompare(contributorB)) || 0)
-                    .map((contributor) => (
-                            <li>
-                                <a href={`/contributors/${contributor}`}>
-                                    {contributor}
-                                </a>
-                            </li>
-                    ))
-            )}
-        </ul>
-    </nav>
+    <ul>
+        <li>
+            <a href="/">
+                <Icon name="iconoir:notes" />
+                Toutes les fiches
+            </a>
+        </li>
+        <li>
+            <a href="/tags">
+                <Icon name="iconoir:label" />
+                Tous les tags
+            </a>
+        </li>
+        <li>
+            <a href="/contributors">
+                <Icon name="iconoir:user" />
+                Tous·tes les contributeur·ices
+            </a>
+        </li>
+    </ul>
 </div>
 
 <style>
@@ -142,6 +126,12 @@ const allContributors = [...new Set(allFiches.map(fiche => fiche.data.contributo
 
                 &:first-child {
                     margin-top: 0;
+                }
+
+                a {
+                    svg {
+                        vertical-align: sub;
+                    }
                 }
             }
         }

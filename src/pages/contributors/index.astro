@@ -5,7 +5,7 @@ import {pluralize} from "../../utils/functions";
 
 const allSummaries = await getCollection("summaries");
 const uniqueContributors = [...new Set(allSummaries.map(summary => summary.data.contributor))];
-const title = `Index par contributeur·ices - ${uniqueContributors.length} ${pluralize(uniqueContributors.length, "contributeur·ice")} pour ${allSummaries.length} ${pluralize(allSummaries.length, "fiche")} de lecture`;
+const title = `Tous·tes les contributeur·ices`;
 ---
 <FicheLayout pageTitle={title}>
     <h1>{title}</h1>
