@@ -1,5 +1,5 @@
 ---
-import { Icon } from "astro-icon/components";
+import {Icon} from "astro-icon/components";
 const fonts = [
     {
         name: "Open Dyslexic",
@@ -19,12 +19,14 @@ const fonts = [
     <button class="btn-action toggle-accessibility-widget" aria-label="Ouvrir le widget">
         <Icon name="iconoir:accessibility" size="4rem"/>
     </button>
-    <form action="" class="">
-        <button class="btn-action toggle-accessibility-widget" aria-label="Fermer le widget" type="button">
-            <Icon name="iconoir:xmark" size="2rem" />
-        </button>
-        <h1>Outils d’accessibilité</h1>
-        <fieldset>
+    <form action="" class="expanded">
+        <header>
+            <button class="btn-action toggle-accessibility-widget" aria-label="Fermer le widget" type="button">
+                <Icon name="iconoir:xmark" size="2rem"/>
+            </button>
+            <h1>Outils d’accessibilité</h1>
+        </header>
+        <div>
             <label for="font">Choisissez une police</label>
             <select id="font">
                 {
@@ -33,21 +35,26 @@ const fonts = [
                     ))
                 }
             </select>
-        </fieldset>
-        <fieldset>
-            <button aria-label="Bouton moins, diminuer le zoom" class="zoom-less btn-action with-border" type="button">
-                <Icon name="iconoir:minus"/>
-            </button>
-            <span aria-live="assertive">
+        </div>
+        <div>
+            <label>Modifier le zoom</label>
+            <fieldset>
+                <button aria-label="Bouton moins, diminuer le zoom" class="zoom-less btn-action with-border"
+                        type="button">
+                    <Icon name="iconoir:minus" size="36px"/>
+                </button>
+                <span aria-live="assertive">
             Zoom <span class="zoom-value" data-value="100">100%</span>
             </span>
-            <button aria-label="Bouton plus, augmenter le zoom" class="zoom-more btn-action with-border" type="button">
-                <Icon name="iconoir:plus"/>
-            </button>
-        </fieldset>
-        <fieldset>
+                <button aria-label="Bouton plus, augmenter le zoom" class="zoom-more btn-action with-border"
+                        type="button">
+                    <Icon name="iconoir:plus" size="36px"/>
+                </button>
+            </fieldset>
+        </div>
+        <footer>
             <button aria-label="Reset" class="btn-action reset" type="reset">Reset</button>
-        </fieldset>
+        </footer>
     </form>
 </aside>
 
@@ -97,12 +104,12 @@ const fonts = [
     });
 
     btnZoomMinus.addEventListener('click', () => {
-        setZoom(zoom-= 10);
+        setZoom(zoom -= 10);
         localStorage.setItem("zoom", zoom);
     });
 
     btnZoomPlus.addEventListener('click', () => {
-        setZoom(zoom+= 10);
+        setZoom(zoom += 10);
         localStorage.setItem("zoom", zoom);
     });
 
@@ -115,7 +122,7 @@ const fonts = [
 
     // load from local storage
     font = localStorage.getItem("font");
-    zoom = localStorage.getItem("zoom") || 100;
+    zoom = parseInt(localStorage.getItem("zoom"), 10) || 100;
 
     if (font) {
         setFont(font);
@@ -156,24 +163,18 @@ const fonts = [
             right: 0;
         }
 
-        form, fieldset {
-            display: flex;
-            flex-direction: row;
-            gap: 1rem;
-            align-items: center;
-            border: 0;
-        }
-
         form {
 
             width: 0;
             height: 0;
-            display: none;
+            display: none; /* flex */
+            flex-direction: column;
+            gap: 1rem;
 
             transition: width 300ms, height 300ms;
 
             background-color: white;
-            border: 2px solid $blue-1;
+            border: 2px solid black;
             border-radius: 15px;
 
             position: absolute;
@@ -181,15 +182,69 @@ const fonts = [
             bottom: 0;
 
             &.expanded {
-                width: auto;
+                width: 100%;
                 height: auto;
                 min-height: calc(4rem + 5.6px);
                 display: flex;
+
+                @media screen and (min-width: 768px) {
+                    width: 400px;
+                }
             }
 
-            h1 {
-                margin: 0;
-                font-size: 1rem;
+            > * {
+                padding: 1rem;
+            }
+
+            header {
+                display: flex;
+                flex-direction: row-reverse;
+                align-items: center;
+                width: 100%;
+
+                h1 {
+                    margin: 0;
+                    font-size: 1rem;
+                    flex-grow: 1;
+                }
+            }
+
+            > div {
+                width: 100%;
+
+                > * {
+                    width: 100%;
+                }
+
+                fieldset {
+                    border: 0;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    align-content: center;
+                    gap: 1rem;
+                    padding: 0;
+
+                    > * {
+                        flex-grow: 1;
+                        flex-shrink: 1;
+                        text-align: center;
+                    }
+
+                    > button {
+                        flex-grow: 0;
+                        flex-shrink: 0;
+                    }
+                }
+            }
+
+            footer {
+                width: 100%;
+
+                button.btn-action {
+
+                }
             }
         }
     }
