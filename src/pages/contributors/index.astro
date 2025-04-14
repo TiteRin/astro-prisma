@@ -1,0 +1,29 @@
+---
+import FicheLayout from "../../layouts/FicheLayout.astro";
+import {getCollection} from "astro:content";
+import {pluralize} from "../../utils/functions";
+
+const allSummaries = await getCollection("summaries");
+const uniqueContributors = [...new Set(allSummaries.map(summary => summary.data.contributor))];
+const title = `Index par contributeur·ices - ${uniqueContributors.length} ${pluralize(uniqueContributors.length, "contributeur·ice")} pour ${allSummaries.length} ${pluralize(allSummaries.length, "fiche")} de lecture`;
+---
+<FicheLayout pageTitle={title}>
+    <h1>{title}</h1>
+
+    <ul>
+        {
+            uniqueContributors
+                .sort((contributorA, contributorB) => contributorA.localeCompare(contributorB))
+                .map(contributor => (
+                        <li>
+                            <a href=`/contributors/${contributor}`>
+                                {contributor}
+                                ({
+                                allSummaries.filter(summary => summary.data.contributor === contributor).length
+                                })
+                            </a>
+                        </li>
+                ))
+        }
+    </ul>
+</FicheLayout>

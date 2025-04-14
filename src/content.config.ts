@@ -9,7 +9,7 @@ const summaries = defineCollection({
         bookTitle: z.string(),
         bookAuthors: z.array(z.string()),
         publishedYear: z.number(),
-        author: z.string(),
+        contributor: z.string(),
         lastModification: z.date(),
         image: z.object({
             url: z.string(),

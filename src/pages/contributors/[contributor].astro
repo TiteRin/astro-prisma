@@ -6,14 +6,14 @@ import {pluralize} from "../../utils/functions";
 export async function getStaticPaths() {
 
     const allReadingNotes = await getCollection("summaries");
-    const uniqueAuthors = [...new Set(allReadingNotes.map(readingNote => readingNote.data.author).flat())];
+    const uniqueAuthors = [...new Set(allReadingNotes.map(readingNote => readingNote.data.contributor).flat())];
 
-    return uniqueAuthors.map((author) => {
+    return uniqueAuthors.map((contributor) => {
 
-        const filteredReadingNotes = allReadingNotes.filter(readingNote => readingNote.data.author === author)
+        const filteredReadingNotes = allReadingNotes.filter(readingNote => readingNote.data.contributor === contributor)
 
         return {
-            params: {author},
+            params: {contributor},
             props: {
                 filteredReadingNotes
             }
@@ -22,10 +22,10 @@ export async function getStaticPaths() {
 }
 
 const {filteredReadingNotes} = Astro.props;
-const {author} = Astro.params;
+const {contributor} = Astro.params;
 ---
-<FicheLayout pageTitle={`Navigation par bénévole - ${author}`}>
-    <h1>{`${filteredReadingNotes.length} ${pluralize(filteredReadingNotes.length, "fiche")} ${pluralize(filteredReadingNotes.length, "rédigée")}`} par {author}</h1>
+<FicheLayout pageTitle={`Navigation par bénévole - ${contributor}`}>
+    <h1>{`${filteredReadingNotes.length} ${pluralize(filteredReadingNotes.length, "fiche")} ${pluralize(filteredReadingNotes.length, "rédigée")}`} par {contributor}</h1>
     <ul>
         {
             filteredReadingNotes.map(readingNote => (

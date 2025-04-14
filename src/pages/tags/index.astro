@@ -1,0 +1,29 @@
+---
+import FicheLayout from "../../layouts/FicheLayout.astro";
+import {getCollection} from "astro:content";
+import {pluralize} from "../../utils/functions";
+
+const allSummaries = await getCollection("summaries");
+const uniqueTags = [...new Set(allSummaries.map(summary => summary.data.tags).flat())];
+const title = `Index par tags - ${uniqueTags.length} ${pluralize(uniqueTags.length, "tag")} pour ${allSummaries.length} ${pluralize(allSummaries.length, "fiche")} de lecture`;
+---
+<FicheLayout pageTitle={title}>
+    <h1>{title}</h1>
+
+    <ul>
+        {
+            uniqueTags
+                .sort((tagA, tagB) => tagA.localeCompare(tagB))
+                .map(tag => (
+                    <li>
+                        <a href=`/tags/${tag}`>
+                            {tag}
+                            ({
+                                allSummaries.filter(summary => summary.data.tags.includes(tag)).length
+                            })
+                        </a>
+                    </li>
+            ))
+        }
+    </ul>
+</FicheLayout>
