@@ -3,7 +3,7 @@ import {getCollection} from "astro:content";
 import {Icon} from 'astro-icon/components';
 const allFiches = await getCollection("summaries");
 const allTags = [...new Set(allFiches.map(fiche => fiche.data.tags).flat())];
-const allAuthors = [...new Set(allFiches.map(fiche => fiche.data.author).flat())];
+const allContributors = [...new Set(allFiches.map(fiche => fiche.data.contributor).flat())];
 ---
 <div class="navigation-wrapper">
     <h1>
@@ -53,18 +53,18 @@ const allAuthors = [...new Set(allFiches.map(fiche => fiche.data.author).flat())
             )}
         </ul>
     </nav>
-    <nav role="navigation" aria-label="Navigation par bénévole" class="hide-collapsed">
-        <h2>Par bénévole</h2>
+    <nav role="navigation" aria-label="Navigation par contributeurices" class="hide-collapsed">
+        <h2>Par contributeur·ice</h2>
         <ul>
-            {allAuthors.length === 0 &&
+            {allContributors.length === 0 &&
                     <li>Aucun tag</li>}
-            {allAuthors.length > 0 && (
-                allAuthors
-                    .sort((authorA, authorB) => (authorA.localeCompare(authorB)) || 0)
-                    .map((author) => (
+            {allContributors.length > 0 && (
+                allContributors
+                    .sort((contributorA, contributorB) => (contributorA.localeCompare(contributorB)) || 0)
+                    .map((contributor) => (
                             <li>
-                                <a href={`/authors/${author}`}>
-                                    {author}
+                                <a href={`/contributors/${contributor}`}>
+                                    {contributor}
                                 </a>
                             </li>
                     ))
