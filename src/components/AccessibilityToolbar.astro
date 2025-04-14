@@ -1,0 +1,251 @@
+---
+import {Icon} from "astro-icon/components";
+const fonts = [
+    {
+        name: "Open Dyslexic",
+        className: "font-opendyslexic"
+    },
+    {
+        name: "Open Sans",
+        className: "font-opensans"
+    },
+    {
+        name: "Inter",
+        className: "font-inter"
+    }
+]
+---
+<aside class="accessibility-widget">
+    <button class="btn-action toggle-accessibility-widget" aria-label="Ouvrir le widget">
+        <Icon name="iconoir:accessibility" size="4rem"/>
+    </button>
+    <form action="" class="expanded">
+        <header>
+            <button class="btn-action toggle-accessibility-widget" aria-label="Fermer le widget" type="button">
+                <Icon name="iconoir:xmark" size="2rem"/>
+            </button>
+            <h1>Outils d’accessibilité</h1>
+        </header>
+        <div>
+            <label for="font">Choisissez une police</label>
+            <select id="font">
+                {
+                    fonts.map(font => (
+                            <option key={font.className} value={font.className}>{font.name}</option>
+                    ))
+                }
+            </select>
+        </div>
+        <div>
+            <label>Modifier le zoom</label>
+            <fieldset>
+                <button aria-label="Bouton moins, diminuer le zoom" class="zoom-less btn-action with-border"
+                        type="button">
+                    <Icon name="iconoir:minus" size="36px"/>
+                </button>
+                <span aria-live="assertive">
+            Zoom <span class="zoom-value" data-value="100">100%</span>
+            </span>
+                <button aria-label="Bouton plus, augmenter le zoom" class="zoom-more btn-action with-border"
+                        type="button">
+                    <Icon name="iconoir:plus" size="36px"/>
+                </button>
+            </fieldset>
+        </div>
+        <footer>
+            <button aria-label="Reset" class="btn-action reset" type="reset">Reset</button>
+        </footer>
+    </form>
+</aside>
+
+<script define:vars={{fonts}}>
+    const allFonts = fonts.map((font) => font.className);
+
+    const component = document.querySelector(".accessibility-widget");
+    const body = document.querySelector('body');
+
+    const form = component.querySelector("form");
+    const btnForm = component.querySelectorAll(".btn-action.toggle-accessibility-widget");
+
+    const selectFont = form.querySelector('#font');
+    const spanZoom = form.querySelector(".zoom-value");
+    const btnZoomMinus = form.querySelector(".btn-action.zoom-less");
+    const btnZoomPlus = form.querySelector(".btn-action.zoom-more");
+    const btnReset = form.querySelector(".btn-action.reset");
+
+    let zoom = 100;
+    let font = "";
+
+    function setFont(font) {
+        body.classList.remove(...allFonts);
+        body.classList.add(font);
+        selectFont.value = font;
+    }
+
+    function setZoom(zoom) {
+        spanZoom.innerHTML = `${zoom}%`;
+        spanZoom.setAttribute("data-zoom", zoom);
+        body.style.fontSize = `${zoom}%`;
+    }
+
+    btnForm.forEach(btn => btn.onclick = () => {
+        form.classList.toggle("expanded");
+    });
+
+    selectFont?.addEventListener('change', () => {
+        if (!body) {
+            return;
+        }
+        const value = selectFont.options[selectFont.selectedIndex].value;
+        setFont(value);
+
+        // store in local storage
+        localStorage.setItem("font", value);
+    });
+
+    btnZoomMinus.addEventListener('click', () => {
+        setZoom(zoom -= 10);
+        localStorage.setItem("zoom", zoom);
+    });
+
+    btnZoomPlus.addEventListener('click', () => {
+        setZoom(zoom += 10);
+        localStorage.setItem("zoom", zoom);
+    });
+
+    btnReset.addEventListener("click", () => {
+        localStorage.removeItem("zoom");
+        localStorage.removeItem("font");
+        setZoom(100);
+        setFont(fonts[0].className);
+    });
+
+    // load from local storage
+    font = localStorage.getItem("font");
+    zoom = parseInt(localStorage.getItem("zoom"), 10) || 100;
+
+    if (font) {
+        setFont(font);
+    }
+
+    if (zoom) {
+        setZoom(zoom);
+    }
+</script>
+
+<style>
+    .accessibility-widget {
+
+        position: sticky;
+        bottom: 1rem;
+        overflow: visible;
+
+        @media print {
+            display: none;
+        }
+
+        .toggle-accessibility-widget {
+
+            border-radius: 36px;
+            display: flex;
+
+            opacity: 30%;
+            transition: opacity 300ms;
+
+            &:hover, &:active {
+                opacity: 100%;
+            }
+        }
+
+        & > .toggle-accessibility-widget {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        form {
+
+            width: 0;
+            height: 0;
+            display: none; /* flex */
+            flex-direction: column;
+            gap: 1rem;
+
+            transition: width 300ms, height 300ms;
+
+            background-color: white;
+            border: 2px solid black;
+            border-radius: 15px;
+
+            position: absolute;
+            right: 0;
+            bottom: 0;
+
+            &.expanded {
+                width: 100%;
+                height: auto;
+                min-height: calc(4rem + 5.6px);
+                display: flex;
+
+                @media screen and (min-width: 768px) {
+                    width: 400px;
+                }
+            }
+
+            > * {
+                padding: 1rem;
+            }
+
+            header {
+                display: flex;
+                flex-direction: row-reverse;
+                align-items: center;
+                width: 100%;
+
+                h1 {
+                    margin: 0;
+                    font-size: 1rem;
+                    flex-grow: 1;
+                }
+            }
+
+            > div {
+                width: 100%;
+
+                > * {
+                    width: 100%;
+                }
+
+                fieldset {
+                    border: 0;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    align-content: center;
+                    gap: 1rem;
+                    padding: 0;
+
+                    > * {
+                        flex-grow: 1;
+                        flex-shrink: 1;
+                        text-align: center;
+                    }
+
+                    > button {
+                        flex-grow: 0;
+                        flex-shrink: 0;
+                    }
+                }
+            }
+
+            footer {
+                width: 100%;
+
+                button.btn-action {
+
+                }
+            }
+        }
+    }
+</style>

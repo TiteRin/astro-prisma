@@ -15,16 +15,15 @@ const { pageTitle } = Astro.props || "Astro - Fiche de lecture";
 	</body>
 </html>
 
-<style>
-	html,
-	body {
+<style is:global={true}>
+	html body {
 		margin: 0;
 		width: 100%;
 		height: 100%;
 		padding: 1rem;
-	}
 
-	* {
-		box-sizing: border-box;
+		&, * {
+			box-sizing: border-box;
+		}
 	}
 </style>

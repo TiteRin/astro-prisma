@@ -2,13 +2,13 @@
 
 .btn-action {
 
-  background-color: transparent;
+  background-color: white;
   border-radius: 2px;
   border: 1px solid transparent;
   color: $blue-1;
   padding: 2px;
-  width: 36px;
-  height: 36px;
+
+  overflow: auto;
 
   &:hover,
   &:active {
@@ -18,5 +18,14 @@
   &:focus {
     background-color: $blue-1;
     color: white;
+  }
+
+  &.with-border {
+    border-color: $blue-1;
+
+    &:hover,
+    &:active {
+      border-color: darken($blue-1, 20%);
+    }
   }
 }
