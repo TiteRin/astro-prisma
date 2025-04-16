@@ -1,0 +1,19 @@
+---
+// No props — listens to `window` event
+---
+<script is:inline>
+    const container = document.currentScript.closest(".search-results");
+    window.addEventListener("search:results", (e) => {
+        const data = e.detail;
+        container.innerHTML = data.map(result => `
+      <div class="result">
+        <h3>${result.meta.title}</h3>
+        <p>${result.excerpt}</p>
+      </div>
+    `).join('');
+    });
+</script>
+
+<div class="search-results">
+    <!-- Results rendered here -->
+</div>

@@ -1,0 +1,19 @@
+---
+
+---
+<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script is:inline src="/pagefind/pagefind-ui.js"></script>
+<div id="global-search">
+
+</div>
+<style>
+    input {
+        width: 100%
+    }
+</style>
+<script is:inline>
+const input = document.querySelector("input#global-search");
+window.addEventListener("DOMContentLoaded", (event) => {
+    new PagefindUI({element: "#global-search"});
+})
+</script>

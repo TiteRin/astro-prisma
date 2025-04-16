@@ -1,10 +1,11 @@
 ---
 import '../styles/fiche.scss';
 import Layout from "./Layout.astro";
-import Navigation from "../components/Navigation.astro";
-import AccessibilityToolbar from "../components/AccessibilityToolbar.astro";
+import Navigation from "../components/layout/Navigation.astro";
+import AccessibilityToolbar from "../components/features/accessibility/Widget.astro";
+import SearchContainer from "../components/features/search/SearchContainer.astro";
 
-const {pageTitle} = Astro.props || "Fiche de lecture";
+const { pageTitle = "Fiche de lecture" } = Astro.props;
 ---
 <Layout pageTitle={pageTitle}>
     <div class="wrapper">
@@ -12,7 +13,10 @@ const {pageTitle} = Astro.props || "Fiche de lecture";
             <Navigation class:list={[]}/>
         </div>
         <div class="content">
-            <slot/>
+            <SearchContainer />
+            <div data-pagefind-body lang="fr">
+                <slot/>
+            </div>
         </div>
     </div>
     <AccessibilityToolbar />

@@ -1,7 +1,7 @@
 ---
 import {getCollection} from "astro:content";
 import FicheLayout from "../layouts/FicheLayout.astro";
-import Search from "../components/Search.astro";
+import Search from "../components/features/search/[old] SearchContainer.astro";
 
 const allFiches = await getCollection("summaries");
 
@@ -10,11 +10,6 @@ const allFiches = await getCollection("summaries");
 ---
 
 <FicheLayout>
-    <div class="search">
-        <Search />
-    </div>
-
-
     <h1>Liste des fiches disponibles</h1>
     <ul>
         {allFiches.length === 0 &&
