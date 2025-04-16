@@ -27,14 +27,14 @@ const {Content} = await render(fiche);
                 <h2>Auteur·ice</h2>
                 {
                     fiche.data.bookAuthors.length === 1 &&
-                        <span data-pagefind-filter="authors">{fiche.data.bookAuthors[0]}</span>
+                        <span data-pagefind-meta="authors[]">{fiche.data.bookAuthors[0]}</span>
                 }
                 {
                     fiche.data.bookAuthors.length > 1 &&
                         <ul>
                             {
                                 fiche.data.bookAuthors.map((author: string) =>
-                                        <li data-pagefind-filter="authors">{author}</li>)
+                                        <li data-pagefind-meta="authors[]">{author}</li>)
                             }
                         </ul>
                 }
@@ -52,7 +52,7 @@ const {Content} = await render(fiche);
                 <ul>
                     {
                         fiche.data.tags.map((tag: string) =>
-                                <li class="tag" data-pagefind-filter="tag" >{tag}</li>)
+                                <li class="tag" data-pagefind-meta="tags[]" >{tag}</li>)
                     }
                 </ul>
             </div>
@@ -69,7 +69,7 @@ const {Content} = await render(fiche);
         <Content/>
     </div>
     <footer role="contentinfo">
-        Fiche rédigée par <span data-pagefind-filter="collaborator">{fiche.data.collaborator}</span>,
+        Fiche rédigée par <span data-pagefind-meta="collaborator">{fiche.data.contributor}</span>,
         dernière modification le {format(fiche.data.lastModification, "dd/MM/yyyy")}.
     </footer>
 </FicheLayout>

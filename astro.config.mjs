@@ -22,9 +22,7 @@ export default defineConfig({
     },
     resolve: {
       alias: {
-        '@components': path.resolve('./src/components'),
-        '@layout': path.resolve('./src/components/layout'),
-        '@features': path.resolve('./src/components/features'),
+        '@': path.resolve('./src/'),
       },
     },
   }

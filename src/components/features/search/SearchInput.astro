@@ -1,19 +1,174 @@
 ---
-
+import "@/styles/features/search.scss";
 ---
-<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
-<script is:inline src="/pagefind/pagefind-ui.js"></script>
-<div id="global-search">
+<div class="search-wrapper">
+    <input
+            type="search"
+            placeholder="Rechercher parmi les fiches"
+            aria-label="Rechercher parmi les fiches"
+            id="global-search"
+    />
+    <div class="results-wrapper">
+        <h1 class="sr-only">Résultat de la recherche</h1>
+        <ul id="results" class="results">
+            <li class="result-item loading hidden">Chargement des résultats…</li>
+            <li class="result-item no-result hidden">Aucun résultat</li>
 
+            <li class="result-item">
+                <a href="/">
+                    <img src="https://placehold.co/75x150" alt=""/>
+                    <div>
+                        <h2>Titre <span class="author">par auteur, auteur et auteur</span></h2>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur
+                            <mark>adipisicing elit. Accusamus asperiores</mark>
+                            atque commodi cumque eius est eum fugiat id
+                        </p>
+                        <p class="summary">
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Assumenda distinctio facilis
+                            reiciendis voluptas. Adipisci aliquid animi debitis doloribus ea laboriosam nemo tempore?
+                            Adipisci beatae blanditiis cumque non pariatur. Hic, obcaecati?
+                        </p>
+                        <ul class="tags">
+                            <li class="tag">tag1</li>
+                            <li class="tag">tag2</li>
+                            <li class="tag">tag3</li>
+                        </ul>
+                    </div>
+                </a>
+            </li>
+            <li class="result-item">
+                <a href="/">
+                    <img src="https://placehold.co/75x150" alt=""/>
+                    <div>
+                        <h2>Titre <span class="author">par auteur, auteur et auteur</span></h2>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur
+                            <mark>adipisicing elit. Accusamus asperiores</mark>
+                            atque commodi cumque eius est eum fugiat id
+                        </p>
+                        <p class="summary">
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Assumenda distinctio facilis
+                            reiciendis voluptas. Adipisci aliquid animi debitis doloribus ea laboriosam nemo tempore?
+                            Adipisci beatae blanditiis cumque non pariatur. Hic, obcaecati?
+                        </p>
+                        <ul class="tags">
+                            <li class="tag">tag1</li>
+                            <li class="tag">tag2</li>
+                            <li class="tag">tag3</li>
+                        </ul>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
 </div>
-<style>
-    input {
-        width: 100%
-    }
-</style>
-<script is:inline>
-const input = document.querySelector("input#global-search");
-window.addEventListener("DOMContentLoaded", (event) => {
-    new PagefindUI({element: "#global-search"});
-})
+<script client:load>
+    (async () => {
+        const input = document.querySelector("input#global-search");
+        const resultsList = document.querySelector("#results");
+        const noResult = results.querySelector(".no-result");
+        const loadingResults = results.querySelector(".loading");
+
+        let pagefind;
+
+        function createResultItem(
+            url,
+            title,
+            authors,
+            img,
+            summary,
+            excerpt,
+            tags
+        ) {
+
+            return `<li class="result-item">
+                <a href="${url}">
+                { img && <img src="${img}" alt="" /> }
+                    <div>
+                        <h2>${title} <span class="author">par ${authors.join(", ")}</span></h2>
+                        <p>
+                            ${excerpt}
+                        </p>
+                        <p class="summary">
+                            ${summary}
+                        </p>
+                        <ul class="tags">
+                            {
+                                tags.map((tag) => <li class="tag">{tag}</li>)
+                            }
+                        </ul>
+                    </div>
+                </a>
+            </li>`;
+        }
+
+        input.onfocus = async () => {
+            if (!pagefind) {
+                pagefind = await import("/pagefind/pagefind.js");
+                await pagefind.options({
+                    ranking: {
+                        pageLength: 0.5
+                    }
+                })
+                pagefind.init();
+            }
+        }
+
+        input.onkeyup = async (e) => {
+
+            const query = e.target.value.trim();
+
+            if (!query || query.length < 3) {
+                resultsList.classList.add("hidden");
+                return;
+            }
+
+            if (!pagefind) {
+                return;
+            }
+
+            resultsList.classList.remove("hidden");
+            loadingResults.classList.remove("hidden");
+            noResult.classList.add("hidden");
+
+
+            const search = await pagefind.debouncedSearch(query, {}, 700);
+
+            if (!search) {
+                loadingResults.classList.add("hidden");
+                noResult.classList.remove("hidden");
+
+                return;
+            }
+
+            const results = await search.results;
+
+            if (results.length === 0) {
+                loadingResults.classList.add("hidden");
+                noResult.classList.remove("hidden");
+
+                return;
+            }
+
+            resultsList.innerHTML = "";
+            loadingResults.classList.remove("hidden");
+
+            for (const result of results) {
+                const data = await result.data();
+
+
+                console.log(data, data.meta, data.excerpt);
+                resultsList.innerHTML += createResultItem(
+                    data.url,
+                    data.meta.title,
+                    ["Auteur"],
+                    data.meta.image,
+                    data.meta.summary,
+                    data.excerpt,
+                    ["tag 1", "tag 2"]
+                );
+            }
+        }
+    })();
 </script>
