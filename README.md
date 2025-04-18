@@ -34,3 +34,5 @@ All commands are run from the root of the project, from a terminal:
 | `yarn preview`         | Preview your build locally, before deploying     |
 | `yarn astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `yarn astro -- --help` | Get help using the Astro CLI                     |
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/34286945-ff9a-4d18-9c66-0042e5269beb/deploy-status)](https://app.netlify.com/sites/astro-prisma-102442/deploys)
