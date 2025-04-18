@@ -2,9 +2,29 @@
 
 .search-wrapper {
   width: 100%;
+  margin-bottom: 1rem;
 
-  input {
-    width: 100%
+  .input-with-icon {
+    width: 100%;
+
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    border: 1px solid $light-blue-2;
+
+    input {
+      border: none;
+      flex-grow: 1;
+
+      &:focus {
+        border: none;
+        outline: none;
+      }
+    }
   }
 
   .results-wrapper {

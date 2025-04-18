@@ -1,13 +1,18 @@
 ---
 import "@/styles/features/search.scss";
+
+import { Icon } from "astro-icon/components";
 ---
 <div class="search-wrapper">
-    <input
-            type="search"
-            placeholder="Rechercher parmi les fiches"
-            aria-label="Rechercher parmi les fiches"
-            id="global-search"
-    />
+    <div class="input-with-icon">
+        <input
+                type="search"
+                placeholder="Rechercher parmi les fiches"
+                aria-label="Rechercher parmi les fiches"
+                id="global-search"
+        />
+        <Icon name="iconoir:search" />
+    </div>
     <div class="results-wrapper">
         <h1 class="sr-only">Résultat de la recherche</h1>
         <ul id="results" class="results hidden">
@@ -37,7 +42,7 @@ import "@/styles/features/search.scss";
 
             return `<li class="result-item">
                 <a href="${url}">
-                ${ img && `<img src="${img}" alt="" />` }
+                ${img && `<img src="${img}" alt="" />`}
                     <div>
                         <h2>${title} <span class="author">par ${authors.join(", ")}</span></h2>
                         <p>
@@ -48,8 +53,8 @@ import "@/styles/features/search.scss";
                         </p>
                         <ul class="tags">
                             ${
-                                tags.map((tag) => `<li class="tag">${tag}</li>`).join('')
-                            }
+                tags.map((tag) => `<li class="tag">${tag}</li>`).join('')
+            }
                         </ul>
                     </div>
                 </a>
@@ -104,7 +109,7 @@ import "@/styles/features/search.scss";
                 return;
             }
 
-            [... new Set(resultsList.querySelectorAll(".result-item"))].map((item) => item.remove());
+            [...new Set(resultsList.querySelectorAll(".result-item"))].map((item) => item.remove());
 
             loadingResults.classList.add("hidden");
             noResult.classList.add("hidden");
