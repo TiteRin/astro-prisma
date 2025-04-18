@@ -1,67 +1,75 @@
 ---
-import { getCollection, render } from 'astro:content';
+import {getCollection, render} from 'astro:content';
 import FicheLayout from "../../layouts/FicheLayout.astro";
 import {format} from "date-fns";
 
 export async function getStaticPaths() {
     const fiches = await getCollection('summaries');
     return fiches.map(fiche => ({
-        params: { slug: fiche.id },
-        props: { fiche }
+        params: {slug: fiche.id},
+        props: {fiche}
     }))
 }
 
-const { fiche } = Astro.props;
-const { Content } = await render(fiche);
+const {fiche} = Astro.props;
+const {Content} = await render(fiche);
 ---
-<FicheLayout pageTitle={ fiche.data.bookTitle }>
+<FicheLayout pageTitle={fiche.data.bookTitle}>
     <div class="header">
         <header role="banner">
             {
-                fiche.data.image && <img src={fiche.data.image.url} alt={fiche.data.image.alt || ""} />
+                fiche.data.image && <img src={fiche.data.image.url} alt={fiche.data.image.alt || ""}/>
             }
-            <h1>{ fiche.data.bookTitle } </h1>
+            <h1 data-pagefind-meta="title">{fiche.data.bookTitle} </h1>
         </header>
         <div class="additional-info">
             <div class="block author-block">
                 <h2>Auteur·ice</h2>
                 {
-                    fiche.data.bookAuthors.length === 1 && <span>{fiche.data.bookAuthors[0]}</span>
+                    fiche.data.bookAuthors.length === 1 &&
+                        <span data-pagefind-meta="authors">{fiche.data.bookAuthors[0]}</span>
                 }
                 {
-                    fiche.data.bookAuthors.length > 1 && <ul>
-                        {
-                            fiche.data.bookAuthors.map((author:string) => <li>{author}</li>)
-                        }
-                    </ul>
+                    fiche.data.bookAuthors.length > 1 &&
+                        <ul data-pagefind-meta=`authors:${fiche.data.bookAuthors.join("$$")}`>
+                            {
+                                fiche.data.bookAuthors.map((author: string) =>
+                                        <li>{author}</li>)
+                            }
+                        </ul>
                 }
             </div>
             <div class="block published-year-block">
                 <h2>Année</h2>
+                <span data-pagefind-meta="published-year">
                 {
                     fiche.data.publishedYear
                 }
+                </span>
             </div>
             <div class="block tags-block">
                 <h2>Tags</h2>
-                <ul>
+                <ul data-pagefind-meta={`tags:${fiche.data.tags.join("$$")}`}>
                     {
-                        fiche.data.tags.map((tag: string) => <li class="tag">{tag}</li>)
+                        fiche.data.tags.map((tag: string) =>
+                                <li class="tag">{tag}</li>)
                     }
                 </ul>
             </div>
         </div>
         <div class="summary">
             <h2>Résumé</h2>
-            { fiche.data.summary }
+            <div data-pagefind-meta="summary">
+            {fiche.data.summary}
+            </div>
         </div>
     </div>
-    <hr />
+    <hr/>
     <div class="content">
-        <Content />
+        <Content/>
     </div>
     <footer role="contentinfo">
-        Fiche rédigée par { fiche.data.author },
-        dernière modification le { format(fiche.data.lastModification, "dd/MM/yyyy")}.
+        Fiche rédigée par <span data-pagefind-meta="collaborator">{fiche.data.contributor}</span>,
+        dernière modification le {format(fiche.data.lastModification, "dd/MM/yyyy")}.
     </footer>
 </FicheLayout>

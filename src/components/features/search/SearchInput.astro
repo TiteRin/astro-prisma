@@ -1,0 +1,133 @@
+---
+import "@/styles/features/search.scss";
+
+import { Icon } from "astro-icon/components";
+---
+<div class="search-wrapper">
+    <div class="input-with-icon">
+        <input
+                type="search"
+                placeholder="Rechercher parmi les fiches"
+                aria-label="Rechercher parmi les fiches"
+                id="global-search"
+        />
+        <Icon name="iconoir:search" />
+    </div>
+    <div class="results-wrapper">
+        <h1 class="sr-only">Résultat de la recherche</h1>
+        <ul id="results" class="results hidden">
+            <li class="loading hidden">Chargement des résultats…</li>
+            <li class="no-result hidden">Aucun résultat</li>
+        </ul>
+    </div>
+</div>
+<script is:inline>
+    (async () => {
+        const input = document.querySelector("input#global-search");
+        const resultsList = document.querySelector("#results");
+        const noResult = resultsList.querySelector(".no-result");
+        const loadingResults = resultsList.querySelector(".loading");
+
+        let pagefind;
+
+        function createResultItem(
+            url,
+            title,
+            authors,
+            img,
+            summary,
+            excerpt,
+            tags
+        ) {
+
+            return `<li class="result-item">
+                <a href="${url}">
+                ${img && `<img src="${img}" alt="" />`}
+                    <div>
+                        <h2>${title} <span class="author">par ${authors.join(", ")}</span></h2>
+                        <p>
+                            ${excerpt}
+                        </p>
+                        <p class="summary">
+                            ${summary}
+                        </p>
+                        <ul class="tags">
+                            ${
+                tags.map((tag) => `<li class="tag">${tag}</li>`).join('')
+            }
+                        </ul>
+                    </div>
+                </a>
+            </li>`;
+        }
+
+        input.onfocus = async () => {
+            if (!pagefind) {
+                pagefind = await import("/pagefind/pagefind.js");
+                await pagefind.options({
+                    ranking: {
+                        pageLength: 0.5
+                    }
+                })
+                pagefind.init();
+            }
+        }
+
+        input.onkeyup = async (e) => {
+
+            const query = e.target.value.trim();
+
+            if (!query || query.length < 3) {
+                resultsList.classList.add("hidden");
+                return;
+            }
+
+            if (!pagefind) {
+                return;
+            }
+
+            resultsList.classList.remove("hidden");
+            loadingResults.classList.remove("hidden");
+            noResult.classList.add("hidden");
+
+
+            const search = await pagefind.debouncedSearch(query, {}, 700);
+
+            if (!search) {
+                loadingResults.classList.add("hidden");
+                noResult.classList.remove("hidden");
+
+                return;
+            }
+
+            const results = await search.results;
+
+            if (results.length === 0) {
+                loadingResults.classList.add("hidden");
+                noResult.classList.remove("hidden");
+
+                return;
+            }
+
+            [...new Set(resultsList.querySelectorAll(".result-item"))].map((item) => item.remove());
+
+            loadingResults.classList.add("hidden");
+            noResult.classList.add("hidden");
+
+            for (const result of results) {
+                const data = await result.data();
+
+                console.log(data, data.meta, data.excerpt);
+                resultsList.innerHTML += createResultItem(
+                    data.url,
+                    data.meta.title,
+                    data.meta.authors.split("$$"),
+                    data.meta.image,
+                    data.meta.summary,
+                    data.excerpt,
+                    data.meta.tags.split("$$")
+                );
+            }
+        }
+    })();
+</script>

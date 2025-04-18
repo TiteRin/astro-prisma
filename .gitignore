@@ -29,3 +29,5 @@ pnpm-debug.log*
 
 # lock files
 yarn.lock
+
+/public/pagefind/**
