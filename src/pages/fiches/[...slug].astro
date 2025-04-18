@@ -27,14 +27,14 @@ const {Content} = await render(fiche);
                 <h2>Auteur·ice</h2>
                 {
                     fiche.data.bookAuthors.length === 1 &&
-                        <span data-pagefind-meta="authors[]">{fiche.data.bookAuthors[0]}</span>
+                        <span data-pagefind-meta="authors">{fiche.data.bookAuthors[0]}</span>
                 }
                 {
                     fiche.data.bookAuthors.length > 1 &&
-                        <ul>
+                        <ul data-pagefind-meta=`authors:${fiche.data.bookAuthors.join("$$")}`>
                             {
                                 fiche.data.bookAuthors.map((author: string) =>
-                                        <li data-pagefind-meta="authors[]">{author}</li>)
+                                        <li>{author}</li>)
                             }
                         </ul>
                 }
@@ -49,10 +49,10 @@ const {Content} = await render(fiche);
             </div>
             <div class="block tags-block">
                 <h2>Tags</h2>
-                <ul>
+                <ul data-pagefind-meta={`tags:${fiche.data.tags.join("$$")}`}>
                     {
                         fiche.data.tags.map((tag: string) =>
-                                <li class="tag" data-pagefind-meta="tags[]" >{tag}</li>)
+                                <li class="tag">{tag}</li>)
                     }
                 </ul>
             </div>
@@ -65,7 +65,7 @@ const {Content} = await render(fiche);
         </div>
     </div>
     <hr/>
-    <div class="content" data-pagefind-body>
+    <div class="content">
         <Content/>
     </div>
     <footer role="contentinfo">

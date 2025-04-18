@@ -18,7 +18,6 @@
       z-index: 10;
 
       width: 100%;
-      padding: 1rem;
       margin: 0;
       background-color: white;
 
@@ -34,13 +33,29 @@
       align-items: start;
       gap: 0.5rem;
 
+      padding: 0;
+
+      li {
+        padding: 1rem;
+      }
+
       li.result-item {
+
+        &:hover {
+          background-color: lighten($light-blue-2, 10);
+        }
 
         a {
           display: flex;
           flex-direction: row;
           align-items: start;
           gap: 0.5rem;
+
+          text-decoration: none;
+        }
+
+        img {
+          max-width: 75px;
         }
 
         h2 {

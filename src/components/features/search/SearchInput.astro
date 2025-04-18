@@ -116,11 +116,11 @@ import "@/styles/features/search.scss";
                 resultsList.innerHTML += createResultItem(
                     data.url,
                     data.meta.title,
-                    ["Auteur 1", "Auteur 2"],
+                    data.meta.authors.split("$$"),
                     data.meta.image,
                     data.meta.summary,
                     data.excerpt,
-                    ["tag 1", "tag 2"]
+                    data.meta.tags.split("$$")
                 );
             }
         }
