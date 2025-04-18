@@ -10,65 +10,18 @@ import "@/styles/features/search.scss";
     />
     <div class="results-wrapper">
         <h1 class="sr-only">Résultat de la recherche</h1>
-        <ul id="results" class="results">
-            <li class="result-item loading hidden">Chargement des résultats…</li>
-            <li class="result-item no-result hidden">Aucun résultat</li>
-
-            <li class="result-item">
-                <a href="/">
-                    <img src="https://placehold.co/75x150" alt=""/>
-                    <div>
-                        <h2>Titre <span class="author">par auteur, auteur et auteur</span></h2>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur
-                            <mark>adipisicing elit. Accusamus asperiores</mark>
-                            atque commodi cumque eius est eum fugiat id
-                        </p>
-                        <p class="summary">
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Assumenda distinctio facilis
-                            reiciendis voluptas. Adipisci aliquid animi debitis doloribus ea laboriosam nemo tempore?
-                            Adipisci beatae blanditiis cumque non pariatur. Hic, obcaecati?
-                        </p>
-                        <ul class="tags">
-                            <li class="tag">tag1</li>
-                            <li class="tag">tag2</li>
-                            <li class="tag">tag3</li>
-                        </ul>
-                    </div>
-                </a>
-            </li>
-            <li class="result-item">
-                <a href="/">
-                    <img src="https://placehold.co/75x150" alt=""/>
-                    <div>
-                        <h2>Titre <span class="author">par auteur, auteur et auteur</span></h2>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur
-                            <mark>adipisicing elit. Accusamus asperiores</mark>
-                            atque commodi cumque eius est eum fugiat id
-                        </p>
-                        <p class="summary">
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Assumenda distinctio facilis
-                            reiciendis voluptas. Adipisci aliquid animi debitis doloribus ea laboriosam nemo tempore?
-                            Adipisci beatae blanditiis cumque non pariatur. Hic, obcaecati?
-                        </p>
-                        <ul class="tags">
-                            <li class="tag">tag1</li>
-                            <li class="tag">tag2</li>
-                            <li class="tag">tag3</li>
-                        </ul>
-                    </div>
-                </a>
-            </li>
+        <ul id="results" class="results hidden">
+            <li class="loading hidden">Chargement des résultats…</li>
+            <li class="no-result hidden">Aucun résultat</li>
         </ul>
     </div>
 </div>
-<script client:load>
+<script is:inline>
     (async () => {
         const input = document.querySelector("input#global-search");
         const resultsList = document.querySelector("#results");
-        const noResult = results.querySelector(".no-result");
-        const loadingResults = results.querySelector(".loading");
+        const noResult = resultsList.querySelector(".no-result");
+        const loadingResults = resultsList.querySelector(".loading");
 
         let pagefind;
 
@@ -84,7 +37,7 @@ import "@/styles/features/search.scss";
 
             return `<li class="result-item">
                 <a href="${url}">
-                { img && <img src="${img}" alt="" /> }
+                ${ img && `<img src="${img}" alt="" />` }
                     <div>
                         <h2>${title} <span class="author">par ${authors.join(", ")}</span></h2>
                         <p>
@@ -94,8 +47,8 @@ import "@/styles/features/search.scss";
                             ${summary}
                         </p>
                         <ul class="tags">
-                            {
-                                tags.map((tag) => <li class="tag">{tag}</li>)
+                            ${
+                                tags.map((tag) => `<li class="tag">${tag}</li>`).join('')
                             }
                         </ul>
                     </div>
@@ -151,18 +104,19 @@ import "@/styles/features/search.scss";
                 return;
             }
 
-            resultsList.innerHTML = "";
-            loadingResults.classList.remove("hidden");
+            [... new Set(resultsList.querySelectorAll(".result-item"))].map((item) => item.remove());
+
+            loadingResults.classList.add("hidden");
+            noResult.classList.add("hidden");
 
             for (const result of results) {
                 const data = await result.data();
-
 
                 console.log(data, data.meta, data.excerpt);
                 resultsList.innerHTML += createResultItem(
                     data.url,
                     data.meta.title,
-                    ["Auteur"],
+                    ["Auteur 1", "Auteur 2"],
                     data.meta.image,
                     data.meta.summary,
                     data.excerpt,
