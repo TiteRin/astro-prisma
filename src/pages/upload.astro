@@ -1,0 +1,46 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout pageTitle="PoC upload">
+    <form id="upload-to-github" method="POST" enctype="multipart/form-data">
+        <input type="file" name="new-note" accept=".md,.mdx,text/markdown"/>
+        <button type="submit">Envoyer</button>
+    </form>
+</Layout>
+
+<script is:inline>
+    const form = document.querySelector("#upload-to-github");
+    let isUploading = false;
+
+    async function submitFile(e) {
+        isUploading = true;
+
+        e.preventDefault();
+
+        const formData = new FormData(e.currentTarget);
+        const request = await fetch("/api/submit-note", {
+            method: "POST",
+            body: formData,
+        });
+
+        const response = await request.json();
+        url = response.data();
+        isUploading = false;
+    }
+
+    form?.addEventListener("submit", e => {
+        e.preventDefault();
+        console.log(e);
+        submitFile(e);
+    })
+</script>
+
+<style>
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: start;
+        justify-items: start;
+    }
+</style>
