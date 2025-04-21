@@ -1,4 +1,6 @@
 ---
+import "../../../styles/features/accessibility/font-selector.scss";
+
 const fonts = [
     {
         name: "Open Dyslexic",
@@ -14,43 +16,107 @@ const fonts = [
     }
 ]
 ---
+
 <section class="font-selector">
-    <label for="font-selector__font" class="sr-only">Police de caractères</label>
-    <select id="font-selector__font" aria-label="Police de caractères">
-        <option value="">Police de caractères</option>
-        {
-            fonts.map(font => (
-                    <option value={font.className}>{font.name}</option>
-            ))
-        }
-    </select>
+    <div class="font-selector__select-wrapper">
+        <button 
+            id="font-selector__button"
+            class="font-selector__button"
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            aria-label="Select font"
+        >
+            <span id="font-selector__selected" class="font-selector__selected">Police d’écriture</span>
+            <span class="font-selector__arrow" aria-hidden="true">▼</span>
+        </button>
+        <ul 
+            id="font-selector__list"
+            class="font-selector__list"
+            role="listbox"
+            hidden
+        >
+            {
+                fonts.map(font => (
+                    <li 
+                        role="option"
+                        data-value={font.className}
+                        class="font-selector__option"
+                    >
+                        {font.name}
+                    </li>
+                ))
+            }
+        </ul>
+    </div>
 </section>
 
-<script define:vars={{fonts}}>
-    const body = document.body;
-    const allFonts = fonts.map(font => font.className);
-    const selectFont = document.querySelector("#font-selector__font");
-    let font = localStorage.getItem("font");;
-
-    function setFont(font) {
-        body.classList.remove(...allFonts);
-        body.classList.add(font);
-        selectFont.value = "";
+<script define:vars={{fonts}} is:inline>
+    const FONT_KEY = 'app-font';
+    const DEFAULT_FONT = 'font-opensans';
+    const button = document.getElementById('font-selector__button');
+    const list = document.getElementById('font-selector__list');
+    const selected = document.getElementById('font-selector__selected');
+    
+    function getStoredFont() {
+        return localStorage.getItem(FONT_KEY) || DEFAULT_FONT;
+    }
+    
+    function setStoredFont(font) {
+        localStorage.setItem(FONT_KEY, font);
     }
 
-    selectFont.addEventListener("change", (e) => {
-        if (e.target.value === "") {
-            localStorage.removeItem("font");
-            setFont(fonts[0].className);
+    function updateFont(font) {
+        // Update body font
+        document.body.classList.remove(...fonts.map(f => f.className));
+        document.body.classList.add(font);
+        
+        // Update selected text and font
+        if (selected) {
+            selected.classList.remove(...fonts.map(f => f.className));
+            selected.classList.add(font);
+        }
+    }
+
+    function toggleList() {
+        if (list && button) {
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+            list.hidden = isExpanded;
+            button.setAttribute('aria-expanded', !isExpanded);
+        }
+    }
+
+    function handleOptionClick(option) {
+        const font = option.getAttribute('data-value');
+        if (!font) {
+            setStoredFont(DEFAULT_FONT);
+            updateFont(DEFAULT_FONT);
             return;
         }
-
-        const font = e.target.value;
-        setFont(font);
-        localStorage.setItem("font", font);
-    });
-
-    if (font) {
-        setFont(font);
+        setStoredFont(font);
+        updateFont(font);
+        toggleList();
     }
+
+    if (button && list) {
+        // Toggle dropdown
+        button.addEventListener('click', toggleList);
+
+        // Handle option selection
+        list.querySelectorAll('.font-selector__option').forEach(option => {
+            option.addEventListener('click', () => handleOptionClick(option));
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!button.contains(e.target) && !list.contains(e.target)) {
+                list.hidden = true;
+                button.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+    
+    // Initialize font on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        updateFont(getStoredFont());
+    });
 </script>
