@@ -31,6 +31,10 @@
         &:focus {
             @include focus-ring;
         }
+
+        h1 {
+            margin: 0;
+        }
     }
 
     &__app-name {
