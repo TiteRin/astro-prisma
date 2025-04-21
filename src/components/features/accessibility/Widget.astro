@@ -1,5 +1,7 @@
 ---
 import {Icon} from "astro-icon/components";
+import "../../../styles/theme.scss";
+
 const fonts = [
     {
         name: "Open Dyslexic",
@@ -15,6 +17,7 @@ const fonts = [
     }
 ]
 ---
+
 <aside class="accessibility-widget">
     <button class="btn-action toggle-accessibility-widget" aria-label="Ouvrir le widget">
         <Icon name="iconoir:accessibility" size="4rem"/>
@@ -24,14 +27,14 @@ const fonts = [
             <button class="btn-action toggle-accessibility-widget" aria-label="Fermer le widget" type="button">
                 <Icon name="iconoir:xmark" size="2rem"/>
             </button>
-            <h1>Outils d’accessibilité</h1>
+            <h1>Outils d'accessibilité</h1>
         </header>
         <div>
             <label for="font">Choisissez une police</label>
             <select id="font">
                 {
                     fonts.map(font => (
-                            <option key={font.className} value={font.className}>{font.name}</option>
+                            <option value={font.className}>{font.name}</option>
                     ))
                 }
             </select>
@@ -57,6 +60,116 @@ const fonts = [
         </footer>
     </form>
 </aside>
+
+<style>
+    .accessibility-widget {
+        position: sticky;
+        bottom: var(--spacing-md);
+        overflow: visible;
+
+        @include print-hidden;
+
+        .toggle-accessibility-widget {
+            border-radius: var(--border-radius-full);
+            display: flex;
+            opacity: 30%;
+            transition: opacity var(--transition-normal);
+
+            &:hover, &:active {
+                opacity: 100%;
+            }
+        }
+
+        & > .toggle-accessibility-widget {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        form {
+            width: 0;
+            height: 0;
+            display: none;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            transition: width var(--transition-normal), height var(--transition-normal);
+            background-color: var(--color-background);
+            border: 2px solid var(--color-border);
+            border-radius: var(--border-radius-lg);
+            position: absolute;
+            right: 0;
+            bottom: 0;
+
+            &.expanded {
+                width: 100%;
+                height: auto;
+                min-height: calc(4rem + 5.6px);
+                display: flex;
+
+                @include respond-to(md) {
+                    width: 400px;
+                }
+            }
+
+            > * {
+                padding: var(--spacing-md);
+            }
+
+            header {
+                display: flex;
+                flex-direction: row-reverse;
+                align-items: center;
+                width: 100%;
+
+                h1 {
+                    margin: 0;
+                    font-size: var(--font-size-base);
+                    flex-grow: 1;
+                }
+            }
+
+            > div {
+                width: 100%;
+
+                > * {
+                    width: 100%;
+                }
+
+                fieldset {
+                    border: 0;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    align-content: center;
+                    gap: var(--spacing-md);
+                    padding: 0;
+
+                    > * {
+                        flex-grow: 1;
+                        flex-shrink: 1;
+                        text-align: center;
+                    }
+
+                    > button {
+                        flex-grow: 0;
+                        flex-shrink: 0;
+                    }
+                }
+            }
+
+            footer {
+                width: 100%;
+
+                button.btn-action {
+                    &:focus {
+                        @include focus-ring;
+                    }
+                }
+            }
+        }
+    }
+</style>
 
 <script define:vars={{fonts}}>
     const allFonts = fonts.map((font) => font.className);
@@ -132,120 +245,3 @@ const fonts = [
         setZoom(zoom);
     }
 </script>
-
-<style>
-    .accessibility-widget {
-
-        position: sticky;
-        bottom: 1rem;
-        overflow: visible;
-
-        @media print {
-            display: none;
-        }
-
-        .toggle-accessibility-widget {
-
-            border-radius: 36px;
-            display: flex;
-
-            opacity: 30%;
-            transition: opacity 300ms;
-
-            &:hover, &:active {
-                opacity: 100%;
-            }
-        }
-
-        & > .toggle-accessibility-widget {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-        }
-
-        form {
-
-            width: 0;
-            height: 0;
-            display: none; /* flex */
-            flex-direction: column;
-            gap: 1rem;
-
-            transition: width 300ms, height 300ms;
-
-            background-color: white;
-            border: 2px solid black;
-            border-radius: 15px;
-
-            position: absolute;
-            right: 0;
-            bottom: 0;
-
-            &.expanded {
-                width: 100%;
-                height: auto;
-                min-height: calc(4rem + 5.6px);
-                display: flex;
-
-                @media screen and (min-width: 768px) {
-                    width: 400px;
-                }
-            }
-
-            > * {
-                padding: 1rem;
-            }
-
-            header {
-                display: flex;
-                flex-direction: row-reverse;
-                align-items: center;
-                width: 100%;
-
-                h1 {
-                    margin: 0;
-                    font-size: 1rem;
-                    flex-grow: 1;
-                }
-            }
-
-            > div {
-                width: 100%;
-
-                > * {
-                    width: 100%;
-                }
-
-                fieldset {
-                    border: 0;
-                    width: 100%;
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: space-between;
-                    align-content: center;
-                    gap: 1rem;
-                    padding: 0;
-
-                    > * {
-                        flex-grow: 1;
-                        flex-shrink: 1;
-                        text-align: center;
-                    }
-
-                    > button {
-                        flex-grow: 0;
-                        flex-shrink: 0;
-                    }
-                }
-            }
-
-            footer {
-                width: 100%;
-
-                button.btn-action {
-
-                }
-            }
-        }
-    }
-</style>

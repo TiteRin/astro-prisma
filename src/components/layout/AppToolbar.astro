@@ -1,0 +1,24 @@
+---
+import { Icon } from "astro-icon/components";
+import "../../styles/layout/app-toolbar.scss";
+---
+
+<header class="app-toolbar">
+    <div class="app-toolbar__brand">
+        <a href="/" class="app-toolbar__home-link">
+            <h1 class="app-toolbar__app-name">Prisma</h1>
+            <span class="app-toolbar__app-subtitle">Pôle recherche</span>
+        </a>
+    </div>
+
+    <div class="app-toolbar__accessibility">
+        <!-- Font selection will be moved here -->
+        <!-- Zoom controls will be moved here -->
+    </div>
+
+    <div class="app-toolbar__user">
+        <button class="app-toolbar__avatar" aria-label="User menu">
+            <Icon name="iconoir:user" />
+        </button>
+    </div>
+</header>
