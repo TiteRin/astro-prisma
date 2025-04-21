@@ -2,8 +2,10 @@
 import { Icon } from "astro-icon/components";
 import "../../styles/layout/app-toolbar.scss";
 import "../../styles/features/accessibility/zoom-controls.scss";
+import "../../styles/features/accessibility/theme-switcher.scss";
 import FontSelector from "../features/accessibility/FontSelector.astro";
 import ZoomControls from "../features/accessibility/ZoomControls.astro";
+import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
 ---
 
 <header class="app-toolbar">
@@ -19,6 +21,7 @@ import ZoomControls from "../features/accessibility/ZoomControls.astro";
          <FontSelector />
         <!-- Zoom controls will be moved here -->
          <ZoomControls />
+        <ThemeSwitcher />
     </div>
 
     <div class="app-toolbar__user">
