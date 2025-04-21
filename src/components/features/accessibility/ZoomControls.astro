@@ -1,0 +1,72 @@
+---
+import { Icon } from "astro-icon/components";
+---
+
+<div class="zoom-controls">
+    <button 
+        class="zoom-controls__button" 
+        onclick="handleZoom('out')"
+        aria-label="Zoom out"
+    >
+        <Icon name="iconoir:zoom-out" />
+    </button>
+    
+    <span class="zoom-controls__value">
+        <span id="zoom-value">100%</span>
+    </span>
+    
+    <button 
+        class="zoom-controls__button" 
+        onclick="handleZoom('in')"
+        aria-label="Zoom in"
+    >
+        <Icon name="iconoir:zoom-in" />
+    </button>
+</div>
+
+<script is:inline>
+    // Store zoom level in localStorage for persistence
+    const ZOOM_KEY = 'app-zoom-level';
+    const MIN_ZOOM = 0.5;
+    const MAX_ZOOM = 2;
+    const ZOOM_STEP = 0.1;
+    const BASE_FONT_SIZE = 16; // Base font size in pixels
+
+    function getStoredZoom() {
+        const stored = localStorage.getItem(ZOOM_KEY);
+        return stored ? parseFloat(stored) : 1;
+    }
+
+    function setStoredZoom(level) {
+        localStorage.setItem(ZOOM_KEY, level.toString());
+    }
+
+    function handleZoom(direction) {
+        const currentZoom = getStoredZoom();
+        let newZoom = direction === 'in' 
+            ? Math.min(currentZoom + ZOOM_STEP, MAX_ZOOM)
+            : Math.max(currentZoom - ZOOM_STEP, MIN_ZOOM);
+
+        setStoredZoom(newZoom);
+        updateZoom(newZoom);
+    }
+
+    function updateZoom(level) {
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            // Calculate new font size based on zoom level
+            const newFontSize = BASE_FONT_SIZE * level;
+            mainContent.style.fontSize = `${newFontSize}px`;
+        }
+        
+        const zoomValue = document.getElementById('zoom-value');
+        if (zoomValue) {
+            zoomValue.textContent = `${Math.round(level * 100)}%`;
+        }
+    }
+
+    // Initialize zoom on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        updateZoom(getStoredZoom());
+    });
+</script>

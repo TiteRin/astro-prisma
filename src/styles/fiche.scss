@@ -78,6 +78,8 @@ h2 {
   color: var(--color-text);
   padding: var(--spacing-md);
 
+  overflow: scroll;
+
   > h2 {
     font-variant: small-caps;
 
