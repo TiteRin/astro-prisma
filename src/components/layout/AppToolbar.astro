@@ -16,11 +16,13 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
         </a>
     </div>
 
-    <div class="app-toolbar__accessibility">
-        <!-- Font selection will be moved here -->
-         <FontSelector />
-        <!-- Zoom controls will be moved here -->
-         <ZoomControls />
+    <button class="app-toolbar__menu-toggle" aria-label="Toggle accessibility menu" aria-expanded="false" aria-controls="accessibility-menu">
+        <Icon name="iconoir:accessibility" />
+    </button>
+
+    <div id="accessibility-menu" class="app-toolbar__accessibility" hidden>
+        <FontSelector />
+        <ZoomControls />
         <ThemeSwitcher />
     </div>
 
@@ -30,3 +32,36 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
         </button>
     </div>
 </header>
+
+<script>
+    const menuToggle = document.querySelector<HTMLButtonElement>('.app-toolbar__menu-toggle');
+    const accessibilityMenu = document.querySelector<HTMLDivElement>('#accessibility-menu');
+
+    if (menuToggle && accessibilityMenu) {
+        menuToggle.addEventListener('click', () => {
+            const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', String(!isExpanded));
+            accessibilityMenu.hidden = isExpanded;
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const target = e.target as Node;
+            if (menuToggle && accessibilityMenu && 
+                !menuToggle.contains(target) && 
+                !accessibilityMenu.contains(target) && 
+                !accessibilityMenu.hidden) {
+                menuToggle.setAttribute('aria-expanded', 'false');
+                accessibilityMenu.hidden = true;
+            }
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !accessibilityMenu.hidden) {
+                menuToggle.setAttribute('aria-expanded', 'false');
+                accessibilityMenu.hidden = true;
+            }
+        });
+    }
+</script>
