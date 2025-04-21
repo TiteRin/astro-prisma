@@ -50,7 +50,7 @@ We are creating a new App Toolbar that will:
 
 **To-Do List:**
 - [x] Create new AppToolbar.astro component
-- [ ] Move accessibility features from Widget.astro
+- [x] Move accessibility features from Widget.astro
 - [ ] Implement responsive design with mobile support
 - [ ] Add scroll-based collapse behavior
 - [ ] Add app name/logo with home link
