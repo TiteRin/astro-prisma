@@ -1,11 +1,13 @@
 import {Octokit} from "octokit";
 import type {APIRoute} from "astro";
+import fm from "front-matter";
+import {summaryValidationSchema} from "../../content.config.js";
+import { z } from "zod";
 
 export const prerender = false;
 
 function getOctokitClient() {
     const token = import.meta.env.GITHUB_TOKEN;
-    console.log(token);
     return new Octokit({auth: token});
 }
 
@@ -49,6 +51,63 @@ export const POST: APIRoute = async ({request}) => {
         )
     }
 
+    // Read the file, and look for some keys in the frontmatter
+    const text = await file.text();
+    // @ts-ignore
+    const { attributes, body } = fm(text);
+
+    if (Object.keys(attributes).length === 0) {
+        return new Response(
+            JSON.stringify({
+                message: "No frontmatter data"
+            }),
+            {
+                status: 400
+            }
+        );
+    }
+
+    // Got attributes - gotta validate them
+    try {
+        const validationData = summaryValidationSchema.parse(attributes);
+    } catch (e: any) {
+
+        if (e instanceof z.ZodError) {
+
+            const errors = e.errors.map((error) => {
+                return {
+                    field: error.path.join("."),
+                    message: error.message
+                }
+            });
+
+            return new Response(JSON.stringify({
+                message: "Validation failed",
+                errors
+            }), {
+                status: 400
+            })
+            
+        }
+
+        throw e;
+    }
+    // Contributor and lastModification can be missing - you have to add them in that case
+
+
+    return new Response(
+        JSON.stringify({
+            message: "Test validation"
+        }),
+        {
+            status: 200
+        }
+    );
+
+    // Validate the file against summary configuration
+
+
+
     // Does the file exists?
     const filePath = `src/summaries/${file.name}`;
     let existingFile = null;
@@ -63,8 +122,6 @@ export const POST: APIRoute = async ({request}) => {
             throw e;
         }
     }
-
-    console.log(existingFile);
 
     const message = `[fiche] ${existingFile ? "Mise à jour d’une fiche existante" : "Ajout d’une nouvelle fiche"} - ${file.name}`
 
