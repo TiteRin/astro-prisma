@@ -46,7 +46,7 @@ h2 {
       width: 100%;
 
       h2 {
-        background-color: var(--color-accent);
+        background-color: var(--color-primary-heading);
       }
     }
 
@@ -84,15 +84,18 @@ h2 {
     font-variant: small-caps;
 
     &:nth-of-type(3n+1) {
-      background-color: var(--color-accent);
+      background-color: var(--color-primary-heading);
+      color: var(--color-primary-heading-text);
     }
 
     &:nth-of-type(3n+2) {
-      background-color: var(--color-primary-lighter);
+      background-color: var(--color-secondary-heading);
+      color: var(--color-secondary-heading-text);
     }
 
     &:nth-of-type(3n+3) {
-      background-color: var(--color-primary-light);
+      background-color: var(--color-tertiary-heading);
+      color: var(--color-tertiary-heading-text);
     }
   }
 

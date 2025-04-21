@@ -62,23 +62,43 @@
     --color-text: #333333;
     --color-text-alt: #666666;
     --color-border: #e0e0e0;
+    
+    // Main colors
     --color-primary: #3B68A9;
     --color-primary-light: #a4bcdf;
     --color-primary-lighter: #e0e8f4;
     --color-accent: #f1cce0;
+
+    // Heading background colors
+    --color-primary-heading: var(--color-accent);
+    --color-secondary-heading: var(--color-primary-lighter);
+    --color-tertiary-heading: var(--color-primary-light);
 }
 
 // Light high contrast theme
 [data-theme="light-high-contrast"] {
+    // Base colors
     --color-background: #ffffff;
     --color-background-alt: #f0f0f0;
     --color-text: #000000;
     --color-text-alt: #333333;
     --color-border: #000000;
-    --color-primary: #0000ff;
-    --color-primary-light: #0000cc;
-    --color-primary-lighter: #e6e6ff;
-    --color-accent: #ff0000;
+    
+    // Main colors
+    --color-primary: #0000ff;        // Pure blue
+    --color-primary-light: #0000cc;  // Darker blue
+    --color-primary-lighter: #e6e6ff; // Very light blue
+    --color-accent: #ff00ff;         // Pure magenta
+
+    // Heading background colors
+    --color-primary-heading: #ff00ff;    // Pure magenta
+    --color-secondary-heading: #0000ff;  // Pure blue
+    --color-tertiary-heading: #800080;   // Pure purple
+
+    // Heading text colors
+    --color-primary-heading-text: #ffffff;    // White text on magenta
+    --color-secondary-heading-text: #ffffff;  // White text on blue
+    --color-tertiary-heading-text: #ffffff;   // White text on purple
 }
 
 // Dark theme
@@ -92,6 +112,11 @@
     --color-primary-light: #2d5a9e;
     --color-primary-lighter: #1a3a6e;
     --color-accent: #e64d8b;
+
+    // Heading background colors
+    --color-primary-heading: var(--color-accent);
+    --color-secondary-heading: var(--color-primary-lighter);
+    --color-tertiary-heading: var(--color-primary-light);
 }
 
 // Dark high contrast theme
@@ -101,10 +126,15 @@
     --color-text: #ffffff;
     --color-text-alt: #cccccc;
     --color-border: #ffffff;
-    --color-primary: #4169e1;        // Royal Blue
-    --color-primary-light: #1e40af;  // Darker Royal Blue
-    --color-primary-lighter: #1e3a8a; // Navy Blue
-    --color-accent: #ff1493;         // Deep Pink
+    --color-primary: #1e90ff;        // Dodger Blue (brighter than Royal Blue)
+    --color-primary-light: #9370db;  // Medium Purple
+    --color-primary-lighter: #000080; // Navy Blue (darker than before)
+    --color-accent: #ff69b4;         // Hot Pink (brighter than Deep Pink)
+
+    // Heading background colors
+    --color-primary-heading: var(--color-accent);
+    --color-secondary-heading: var(--color-primary-lighter);
+    --color-tertiary-heading: var(--color-primary-light);
 }
 
 // Media queries
