@@ -10,17 +10,17 @@ const { contributor = "" } = Astro.props;
 ---
 
 <form class="upload-form" id="uploadForm" enctype="multipart/form-data">
-    <h2 class="upload-form__title">Upload a New Reading Note</h2>
+    <h2 class="upload-form__title">Ajouter une nouvelle fiche de lecture</h2>
 
     <div class="upload-form__field">
-        <label for="contributor">Your Name</label>
+        <label for="contributor">Votre nom</label>
         <input
             type="text"
             id="contributor"
             name="contributor"
-            value={contributor || "Default Name"}
+            value={contributor || "Nom par défaut"}
             required
-            placeholder="Enter your name"
+            placeholder="Entrez votre nom"
         />
     </div>
 
@@ -34,22 +34,20 @@ const { contributor = "" } = Astro.props;
         />
         <label for="fileInput" class="upload-form__file-upload-label">
             <Icon name="mdi:upload" />
-            <span id="fileName">Choose a file or drag it here</span>
-            <p>Only .md and .mdx files are accepted</p>
+            <span id="fileName">Choisissez un fichier ou glissez-le ici</span>
+            <p>Seuls les fichiers .md et .mdx sont acceptés</p>
         </label>
     </div>
 
     <div class="upload-form__submit">
         <button type="button" id="submitButton" class="btn-action with-border">
-            Upload Note
+            Envoyer la fiche
         </button>
     </div>
 </form>
 
 <script is:inline>
     (function() {
-        console.log('Script loaded');
-        
         const form = document.getElementById('uploadForm');
         const fileInput = document.getElementById('fileInput');
         const fileName = document.getElementById('fileName');
@@ -60,10 +58,7 @@ const { contributor = "" } = Astro.props;
             return;
         }
 
-        console.log('Form elements found');
-
         submitButton.addEventListener('click', async (e) => {
-            console.log('Submit button clicked');
             e.preventDefault();
             
             if (!form.checkValidity()) {
@@ -72,26 +67,19 @@ const { contributor = "" } = Astro.props;
             }
             
             const formData = new FormData(form);
-            console.log('Form data:', {
-                contributor: formData.get('contributor'),
-                file: formData.get('new-note')
-            });
             
             try {
-                console.log('Sending request...');
                 const response = await fetch('/api/submit-note', {
                     method: 'POST',
                     body: formData
                 });
                 
-                console.log('Response received:', response.status);
                 const result = await response.json();
-                console.log('Result:', result);
                 
                 if (response.ok) {
                     alert('Votre fiche a été envoyée avec succès ! Elle sera disponible dans moins de 5 minutes, le temps que le site se mette à jour.');
                     form.reset();
-                    fileName.textContent = 'Choose a file or drag it here';
+                    fileName.textContent = 'Choisissez un fichier ou glissez-le ici';
                 } else {
                     let errorMessage = 'Une erreur est survenue : ';
                     
@@ -114,7 +102,6 @@ const { contributor = "" } = Astro.props;
         });
 
         fileInput.addEventListener('change', (e) => {
-            console.log('File selected');
             const file = e.target.files?.[0];
             if (file) {
                 fileName.textContent = file.name;
@@ -152,7 +139,6 @@ const { contributor = "" } = Astro.props;
             dropZone.addEventListener('drop', handleDrop, false);
 
             function handleDrop(e) {
-                console.log('File dropped');
                 const dt = e.dataTransfer;
                 if (!dt) return;
                 const files = dt.files;
