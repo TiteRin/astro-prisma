@@ -15,11 +15,13 @@
       }
     ],
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "moduleResolution": "node16",
+    "module": "node16",
   },
   "paths": {
     "@/*": [
       "src/*"
     ]
-  }
+  },
 }

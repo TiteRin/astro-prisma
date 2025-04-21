@@ -1,0 +1,300 @@
+---
+import { Icon } from "astro-icon/components";
+import "../styles/upload-form.scss";
+
+interface Props {
+    contributor?: string;
+}
+
+const { contributor = "" } = Astro.props;
+---
+
+<form class="upload-form" id="uploadForm" enctype="multipart/form-data">
+    <h2 class="upload-form__title">Ajouter une nouvelle fiche de lecture</h2>
+
+    <div class="upload-form__field">
+        <label for="contributor">Votre nom</label>
+        <input
+            type="text"
+            id="contributor"
+            name="contributor"
+            value={contributor || "Nom par défaut"}
+            required
+            placeholder="Entrez votre nom"
+        />
+    </div>
+
+    <div class="upload-form__file-upload">
+        <input
+            type="file"
+            id="fileInput"
+            name="new-note"
+            accept=".md,.mdx"
+            required
+        />
+        <label for="fileInput" class="upload-form__file-upload-label">
+            <Icon name="mdi:upload" />
+            <span id="fileName">Choisissez un fichier ou glissez-le ici</span>
+            <p>Seuls les fichiers .md et .mdx sont acceptés</p>
+        </label>
+    </div>
+
+    <div class="upload-form__submit">
+        <button type="button" id="submitButton" class="btn-action with-border">
+            <span class="button-text">Envoyer la fiche</span>
+            <span class="loading-spinner" hidden>
+                <Icon name="mdi:loading" />
+            </span>
+        </button>
+    </div>
+</form>
+
+<div id="toast-container" class="toast-container"></div>
+
+<style>
+    .upload-form {
+        &[data-loading="true"] {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+    }
+
+    .loading-spinner {
+        display: inline-flex;
+        animation: spin 1s linear infinite;
+        margin-left: 0.5rem;
+        
+        svg {
+            width: 1em;
+            height: 1em;
+        }
+    }
+
+    .button-text {
+        display: inline-block;
+    }
+
+    .loading-spinner {
+        display: none;
+    }
+
+    .btn-action[data-loading="true"] {
+        .button-text {
+            display: inline-block;
+        }
+        
+        .loading-spinner {
+            display: inline-flex;
+        }
+    }
+
+    .toast-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast {
+        background: var(--color-background);
+        color: var(--color-text);
+        padding: 1rem;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        animation: slideIn 0.3s ease-out;
+        min-width: 300px;
+        max-width: 400px;
+        border-left: 4px solid;
+        
+        &--success {
+            border-left-color: #4CAF50;
+        }
+        
+        &--error {
+            border-left-color: #f44336;
+        }
+
+        .toast-icon {
+            flex-shrink: 0;
+        }
+
+        .toast-content {
+            flex-grow: 1;
+        }
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+</style>
+
+<script is:inline>
+    (function() {
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const submitButton = document.getElementById('submitButton');
+        const toastContainer = document.getElementById('toast-container');
+
+        if (!form || !fileInput || !fileName || !submitButton || !toastContainer) {
+            console.error('Required DOM elements not found');
+            return;
+        }
+
+        // Test toast on page load
+        showToast('Ceci est un test de notification', 'success');
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast--${type}`;
+            
+            const icon = document.createElement('span');
+            icon.className = 'toast-icon';
+            icon.innerHTML = type === 'success' 
+                ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>'
+                : '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>';
+            
+            const content = document.createElement('span');
+            content.className = 'toast-content';
+            content.textContent = message;
+
+            const closeButton = document.createElement('button');
+            closeButton.className = 'toast-close';
+            closeButton.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>';
+            closeButton.addEventListener('click', () => {
+                toast.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => toast.remove(), 300);
+            });
+            
+            toast.appendChild(icon);
+            toast.appendChild(content);
+            toast.appendChild(closeButton);
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        function setLoading(isLoading) {
+            form.setAttribute('data-loading', isLoading);
+            submitButton.setAttribute('data-loading', isLoading);
+            const buttonText = submitButton.querySelector('.button-text');
+            if (buttonText) {
+                buttonText.textContent = isLoading ? 'En cours d\'envoi' : 'Envoyer la fiche';
+            }
+        }
+
+        submitButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            setLoading(true);
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/api/submit-note', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast('Votre fiche a été envoyée avec succès ! Elle sera disponible dans moins de 5 minutes, le temps que le site se mette à jour.');
+                    form.reset();
+                    fileName.textContent = 'Choisissez un fichier ou glissez-le ici';
+                } else {
+                    let errorMessage = 'Une erreur est survenue : ';
+                    
+                    if (result.errors) {
+                        errorMessage += result.errors.map((err) => 
+                            `\n- ${err.field}: ${err.message}`
+                        ).join('');
+                    } else if (result.message.includes('github')) {
+                        errorMessage += 'Erreur lors de la communication avec GitHub. Veuillez réessayer plus tard.';
+                    } else {
+                        errorMessage += result.message || 'Erreur inconnue. Veuillez réessayer plus tard.';
+                    }
+                    
+                    showToast(errorMessage, 'error');
+                }
+            } catch (error) {
+                console.error('Error during submission:', error);
+                showToast('Une erreur est survenue lors de l\'envoi du fichier. Veuillez vérifier votre connexion et réessayer.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+                fileName.textContent = file.name;
+            }
+        });
+
+        // Drag and drop handling
+        const dropZone = document.querySelector('.upload-form__file-upload');
+        if (dropZone) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropZone.classList.add('highlight');
+            }
+
+            function unhighlight() {
+                dropZone.classList.remove('highlight');
+            }
+
+            dropZone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                if (!dt) return;
+                const files = dt.files;
+                if (!files || files.length === 0) return;
+                fileInput.files = files;
+                fileName.textContent = files[0].name;
+            }
+        }
+    })();
+</script>
+
