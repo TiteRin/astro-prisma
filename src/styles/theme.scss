@@ -40,6 +40,18 @@
 
     // Layout
     --app-toolbar-height: 70px;
+
+    // Tag colors - Light theme
+    --tag-bg: #e0e8f4;
+    --tag-text: #3B68A9;
+    --tag-border: #a4bcdf;
+
+    @media (prefers-color-scheme: dark) {
+        // Tag colors - Dark theme
+        --tag-bg: #1a365d;
+        --tag-text: #93c5fd;
+        --tag-border: #3b82f6;
+    }
 }
 
 // Light theme (default)
