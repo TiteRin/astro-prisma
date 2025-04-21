@@ -1,7 +1,7 @@
-@import "./colors";
-@import "./utils";
-@import "./button";
-@import "./fonts";
+@use "./colors" as *;
+@use "./utils" as *;
+@use "./button" as *;
+@use "./fonts" as *;
 
 
 .tag {
