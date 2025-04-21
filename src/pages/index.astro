@@ -1,6 +1,7 @@
 ---
 import {getCollection} from "astro:content";
 import FicheLayout from "../layouts/FicheLayout.astro";
+
 const allFiches = await getCollection("summaries");
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
@@ -23,6 +24,7 @@ const allFiches = await getCollection("summaries");
         )
         }
     </ul>
+
     <p>
         Mise en page en <em lang="en">work in progress…</em>
     </p>

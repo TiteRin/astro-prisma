@@ -1,0 +1,166 @@
+---
+import { Icon } from "astro-icon/components";
+import "../styles/upload-form.scss";
+
+interface Props {
+    contributor?: string;
+}
+
+const { contributor = "" } = Astro.props;
+---
+
+<form class="upload-form" id="uploadForm" enctype="multipart/form-data">
+    <h2 class="upload-form__title">Upload a New Reading Note</h2>
+
+    <div class="upload-form__field">
+        <label for="contributor">Your Name</label>
+        <input
+            type="text"
+            id="contributor"
+            name="contributor"
+            value={contributor || "Default Name"}
+            required
+            placeholder="Enter your name"
+        />
+    </div>
+
+    <div class="upload-form__file-upload">
+        <input
+            type="file"
+            id="fileInput"
+            name="new-note"
+            accept=".md,.mdx"
+            required
+        />
+        <label for="fileInput" class="upload-form__file-upload-label">
+            <Icon name="mdi:upload" />
+            <span id="fileName">Choose a file or drag it here</span>
+            <p>Only .md and .mdx files are accepted</p>
+        </label>
+    </div>
+
+    <div class="upload-form__submit">
+        <button type="button" id="submitButton" class="btn-action with-border">
+            Upload Note
+        </button>
+    </div>
+</form>
+
+<script is:inline>
+    (function() {
+        console.log('Script loaded');
+        
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const submitButton = document.getElementById('submitButton');
+
+        if (!form || !fileInput || !fileName || !submitButton) {
+            console.error('Required DOM elements not found');
+            return;
+        }
+
+        console.log('Form elements found');
+
+        submitButton.addEventListener('click', async (e) => {
+            console.log('Submit button clicked');
+            e.preventDefault();
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const formData = new FormData(form);
+            console.log('Form data:', {
+                contributor: formData.get('contributor'),
+                file: formData.get('new-note')
+            });
+            
+            try {
+                console.log('Sending request...');
+                const response = await fetch('/api/submit-note', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response received:', response.status);
+                const result = await response.json();
+                console.log('Result:', result);
+                
+                if (response.ok) {
+                    alert('Votre fiche a été envoyée avec succès ! Elle sera disponible dans moins de 5 minutes, le temps que le site se mette à jour.');
+                    form.reset();
+                    fileName.textContent = 'Choose a file or drag it here';
+                } else {
+                    let errorMessage = 'Une erreur est survenue : ';
+                    
+                    if (result.errors) {
+                        errorMessage += result.errors.map((err) => 
+                            `\n- ${err.field}: ${err.message}`
+                        ).join('');
+                    } else if (result.message.includes('github')) {
+                        errorMessage += 'Erreur lors de la communication avec GitHub. Veuillez réessayer plus tard.';
+                    } else {
+                        errorMessage += result.message || 'Erreur inconnue. Veuillez réessayer plus tard.';
+                    }
+                    
+                    alert(errorMessage);
+                }
+            } catch (error) {
+                console.error('Error during submission:', error);
+                alert('Une erreur est survenue lors de l\'envoi du fichier. Veuillez vérifier votre connexion et réessayer.');
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            console.log('File selected');
+            const file = e.target.files?.[0];
+            if (file) {
+                fileName.textContent = file.name;
+            }
+        });
+
+        // Drag and drop handling
+        const dropZone = document.querySelector('.upload-form__file-upload');
+        if (dropZone) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropZone.classList.add('highlight');
+            }
+
+            function unhighlight() {
+                dropZone.classList.remove('highlight');
+            }
+
+            dropZone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                console.log('File dropped');
+                const dt = e.dataTransfer;
+                if (!dt) return;
+                const files = dt.files;
+                if (!files || files.length === 0) return;
+                fileInput.files = files;
+                fileName.textContent = files[0].name;
+            }
+        }
+    })();
+</script>
+

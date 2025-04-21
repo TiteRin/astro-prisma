@@ -12,9 +12,7 @@ function getOctokitClient() {
 }
 
 export const GET: APIRoute = async ({request}) => {
-
     const octokit = getOctokitClient();
-
     const {
         data: {login},
     } = await octokit.rest.users.getAuthenticated();
@@ -30,7 +28,6 @@ export const GET: APIRoute = async ({request}) => {
 }
 
 export const POST: APIRoute = async ({request}) => {
-
     const octokit = getOctokitClient();
     const payload = {
         owner: import.meta.env.GITHUB_OWNER,
@@ -39,6 +36,7 @@ export const POST: APIRoute = async ({request}) => {
 
     const data = await request.formData();
     const file = data.get("new-note") as File;
+    const contributor = data.get("contributor") as string;
 
     if (!file) {
         return new Response(
@@ -68,19 +66,19 @@ export const POST: APIRoute = async ({request}) => {
 
     let processedAttributes = { ...attributes};
 
-        // Contributor and lastModification can be missing - you have to add them in that case
-    if (!processedAttributes.contributor) {
+    // Use the contributor from the form if provided
+    if (contributor) {
+        processedAttributes.contributor = contributor;
+    } else if (!processedAttributes.contributor) {
         processedAttributes.contributor = "Default contributor";
     }
 
     if (!processedAttributes.lastModification) {
         processedAttributes.lastModification = new Date();
     } else {
-        // Convert string date to Date object
         processedAttributes.lastModification = new Date(processedAttributes.lastModification);
     }
 
-    // Got attributes - gotta validate them
     try {
         const validationData = summaryValidationSchema.parse(processedAttributes);
 
@@ -113,9 +111,7 @@ export const POST: APIRoute = async ({request}) => {
             sha: existingFile?.data?.sha || undefined
         });
 
-        console.log(response);
-
-        if (response.status === 200) {
+        if (response.status === 201) {
             return new Response(
                 JSON.stringify({
                     message: `Upload successful of ${file.name}`,
