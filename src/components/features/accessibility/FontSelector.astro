@@ -1,0 +1,56 @@
+---
+const fonts = [
+    {
+        name: "Open Dyslexic",
+        className: "font-opendyslexic"
+    },
+    {
+        name: "Open Sans",
+        className: "font-opensans"
+    },
+    {
+        name: "Inter",
+        className: "font-inter"
+    }
+]
+---
+<section class="font-selector">
+    <label for="font-selector__font" class="sr-only">Police de caractères</label>
+    <select id="font-selector__font" aria-label="Police de caractères">
+        <option value="">Police de caractères</option>
+        {
+            fonts.map(font => (
+                    <option value={font.className}>{font.name}</option>
+            ))
+        }
+    </select>
+</section>
+
+<script define:vars={{fonts}}>
+    const body = document.body;
+    const allFonts = fonts.map(font => font.className);
+    const selectFont = document.querySelector("#font-selector__font");
+    let font = localStorage.getItem("font");;
+
+    function setFont(font) {
+        body.classList.remove(...allFonts);
+        body.classList.add(font);
+        selectFont.value = "";
+    }
+
+    selectFont.addEventListener("change", (e) => {
+        if (e.target.value === "") {
+            localStorage.removeItem("font");
+            setFont(fonts[0].className);
+            return;
+        }
+
+        const font = e.target.value;
+        setFont(font);
+        localStorage.setItem("font", font);
+    });
+
+    if (font) {
+        setFont(font);
+    }
+</script>

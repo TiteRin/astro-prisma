@@ -1,6 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import "../../styles/layout/app-toolbar.scss";
+import FontSelector from "../features/accessibility/FontSelector.astro";
 ---
 
 <header class="app-toolbar">
@@ -13,6 +14,7 @@ import "../../styles/layout/app-toolbar.scss";
 
     <div class="app-toolbar__accessibility">
         <!-- Font selection will be moved here -->
+         <FontSelector />
         <!-- Zoom controls will be moved here -->
     </div>
 

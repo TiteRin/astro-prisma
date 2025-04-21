@@ -49,7 +49,7 @@ We are creating a new App Toolbar that will:
    - Maintain screen reader compatibility
 
 **To-Do List:**
-- [ ] Create new AppToolbar.astro component
+- [x] Create new AppToolbar.astro component
 - [ ] Move accessibility features from Widget.astro
 - [ ] Implement responsive design with mobile support
 - [ ] Add scroll-based collapse behavior
