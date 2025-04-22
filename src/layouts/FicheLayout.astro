@@ -2,24 +2,24 @@
 import '../styles/fiche.scss';
 import Layout from "./Layout.astro";
 import Navigation from "../components/layout/Navigation.astro";
-import AccessibilityToolbar from "../components/features/accessibility/Widget.astro";
 import SearchContainer from "../components/features/search/SearchContainer.astro";
 
 const { pageTitle = "Fiche de lecture" } = Astro.props;
 ---
 <Layout pageTitle={pageTitle}>
-    <div class="wrapper">
-        <div class="navigation">
-            <Navigation class:list={[]}/>
+    <main role="main" class="wrapper">
+        <div class="navigation print-hidden">
+            <Navigation />
         </div>
         <div class="content">
-            <SearchContainer />
-            <div data-pagefind-body lang="fr">
-                <slot/>
+            <div class="print-hidden">
+                <SearchContainer />
             </div>
+            <section>
+                <slot/>
+            </section>
         </div>
-    </div>
-    <AccessibilityToolbar />
+    </main>
 </Layout>
 
 <style>
@@ -49,6 +49,33 @@ const { pageTitle = "Fiche de lecture" } = Astro.props;
                 max-width: 300px;
             }
         }
+    }
 
+    @media print {
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            font-size: 12pt;
+            line-height: 1.5;
+        }
+
+        .wrapper {
+            display: block;
+            width: 100%;
+            max-width: 21cm;
+            margin: 0 auto;
+        }
+
+        .print-hidden {
+            display: none !important;
+        }
+
+        .content {
+            padding: 0;
+            overflow: visible;
+        }
     }
 </style>

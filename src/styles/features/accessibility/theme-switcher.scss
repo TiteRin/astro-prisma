@@ -1,0 +1,164 @@
+@use "../../theme.scss" as *;
+
+.theme-switcher {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background-color: var(--color-background-alt);
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-md);
+
+    &__mode {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    &__contrast {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-xs);
+        border-left: 1px solid var(--color-border);
+    }
+
+    &__button {
+        background: none;
+        border: none;
+        padding: var(--spacing-xs);
+        cursor: pointer;
+        color: var(--color-text);
+        border-radius: var(--border-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-fast) ease;
+        min-width: 2.5rem;
+        height: 2.5rem;
+        border: 1px solid var(--color-border);
+
+        &:hover {
+            background-color: var(--color-background-alt);
+            color: var(--color-primary);
+        }
+
+        &:focus-visible {
+            @include focus-ring;
+        }
+
+        &.active {
+            background-color: var(--color-primary) !important;
+            color: var(--color-background);
+            font-weight: var(--font-weight-medium);
+            border-color: var(--color-primary);
+
+            svg {
+                color: var(--color-background);
+            }
+
+            &:hover {
+                background-color: var(--color-primary-light) !important;
+            }
+        }
+
+        svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: var(--color-text);
+        }
+    }
+
+    &__switch {
+        position: relative;
+        display: inline-block;
+        width: 2.5rem;
+        height: 1.25rem;
+
+        input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+
+            &:checked + .theme-switcher__slider {
+                background-color: var(--color-primary);
+            }
+
+            &:checked + .theme-switcher__slider:before {
+                transform: translateX(1.25rem);
+                background-color: var(--color-background);
+            }
+
+            &:focus-visible + .theme-switcher__slider {
+                @include focus-ring;
+            }
+        }
+    }
+
+    &__slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--color-background);
+        transition: all var(--transition-fast) ease;
+        border-radius: var(--border-radius-full);
+        border: 1px solid var(--color-border);
+
+        &:before {
+            position: absolute;
+            content: "";
+            height: 1rem;
+            width: 1rem;
+            left: 0.125rem;
+            bottom: 0.125rem;
+            background-color: var(--color-text);
+            transition: all var(--transition-fast) ease;
+            border-radius: var(--border-radius-full);
+        }
+    }
+
+    &__label {
+        font-size: var(--font-size-sm);
+        color: var(--color-text);
+        font-weight: var(--font-weight-medium);
+    }
+}
+
+// Theme-specific active state colors
+[data-theme="light"] .theme-switcher__button.active,
+[data-theme="light-high-contrast"] .theme-switcher__button.active {
+    background-color: var(--color-primary-light) !important; // Lighter blue (#a4bcdf)
+    color: var(--color-text) !important; // Dark text (#333333)
+    svg {
+        color: var(--color-text) !important; // Dark icon (#333333)
+    }
+}
+
+[data-theme="dark"] .theme-switcher__button.active,
+[data-theme="dark-high-contrast"] .theme-switcher__button.active {
+    background-color: var(--color-primary) !important; // Blue (#4d8be8)
+    color: var(--color-text) !important; // Light gray text (#e6e6e6)
+    svg {
+        color: var(--color-text) !important; // Light gray icon (#e6e6e6)
+    }
+}
+
+// Theme-specific icon colors
+[data-theme="light"] .theme-switcher__button svg {
+    color: var(--color-text);
+}
+
+[data-theme="dark"] .theme-switcher__button svg {
+    color: var(--color-text);
+}
+
+[data-theme="light-high-contrast"] .theme-switcher__button svg {
+    color: var(--color-text);
+}
+
+[data-theme="dark-high-contrast"] .theme-switcher__button svg {
+    color: var(--color-text);
+} 

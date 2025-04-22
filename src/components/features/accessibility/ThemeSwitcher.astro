@@ -1,0 +1,92 @@
+---
+import { Icon } from "astro-icon/components";
+---
+
+<section class="theme-switcher">
+    <div class="theme-switcher__mode">
+        <button 
+            class="theme-switcher__button"
+            onclick="handleThemeSwitch('light')"
+            aria-label="Switch to light theme"
+            data-theme="light"
+        >
+            <Icon name="iconoir:sun-light" />
+        </button>
+        
+        <button 
+            class="theme-switcher__button"
+            onclick="handleThemeSwitch('dark')"
+            aria-label="Switch to dark theme"
+            data-theme="dark"
+        >
+            <Icon name="iconoir:half-moon" />
+        </button>
+    </div>
+
+    <div class="theme-switcher__contrast">
+        <label class="theme-switcher__switch">
+            <input 
+                type="checkbox" 
+                onchange="handleContrastToggle(this.checked)"
+                aria-label="Toggle high contrast mode"
+            >
+            <span class="theme-switcher__slider"></span>
+        </label>
+        <span class="theme-switcher__label">High contrast</span>
+    </div>
+</section>
+
+<script is:inline>
+    const THEME_KEY = 'app-theme';
+    const CONTRAST_KEY = 'app-high-contrast';
+    
+    function getStoredTheme() {
+        return localStorage.getItem(THEME_KEY) || 'light';
+    }
+    
+    function setStoredTheme(theme) {
+        localStorage.setItem(THEME_KEY, theme);
+    }
+
+    function getStoredContrast() {
+        return localStorage.getItem(CONTRAST_KEY) === 'true';
+    }
+    
+    function setStoredContrast(contrast) {
+        localStorage.setItem(CONTRAST_KEY, contrast.toString());
+    }
+    
+    function handleThemeSwitch(theme) {
+        setStoredTheme(theme);
+        updateTheme();
+    }
+
+    function handleContrastToggle(contrast) {
+        setStoredContrast(contrast);
+        updateTheme();
+    }
+    
+    function updateTheme() {
+        const theme = getStoredTheme();
+        const contrast = getStoredContrast();
+        const themeValue = contrast ? `${theme}-high-contrast` : theme;
+        
+        document.body.setAttribute('data-theme', themeValue);
+        
+        // Update button states
+        document.querySelectorAll('.theme-switcher__button').forEach(button => {
+            button.classList.toggle('active', button.getAttribute('data-theme') === theme);
+        });
+
+        // Update switch state
+        const switchInput = document.querySelector('.theme-switcher__switch input');
+        if (switchInput) {
+            switchInput.checked = contrast;
+        }
+    }
+    
+    // Initialize theme on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        updateTheme();
+    });
+</script> 

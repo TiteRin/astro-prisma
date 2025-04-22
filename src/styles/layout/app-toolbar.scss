@@ -1,0 +1,259 @@
+@use "../theme.scss" as *;
+
+.app-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-index-toolbar);
+    background-color: var(--color-background);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    @include respond-to(md) {
+        padding: var(--spacing-sm) var(--spacing-md);
+        gap: var(--spacing-md);
+    }
+
+    @include print-hidden;
+
+    &__brand {
+        display: flex;
+        align-items: center;
+        min-width: 0; // Allow text truncation
+        flex-grow: 1;
+    }
+
+    &__home-link {
+        text-decoration: none;
+        color: var(--color-text);
+        font-weight: var(--font-weight-medium);
+        display: flex;
+        align-items: baseline;
+        gap: var(--spacing-xs);
+        min-width: 0; // Allow text truncation
+        outline: none;
+        border-radius: var(--border-radius-sm);
+        transition: color var(--transition-fast);
+
+        @include respond-to(md) {
+            display: block;
+        }
+
+        &:hover {
+            color: var(--color-primary);
+        }
+
+        &:focus-visible {
+            @include focus-ring;
+        }
+
+        h1 {
+            margin: 0;
+        }
+    }
+
+    &__app-name {
+        font-size: var(--font-size-base);
+        white-space: nowrap;
+
+        @include respond-to(md) {
+            font-size: var(--font-size-large);
+            margin-bottom: var(--spacing-xs);
+        }
+    }
+
+    &__app-subtitle {
+        font-size: var(--font-size-small);
+        color: var(--color-text-alt);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        @include respond-to(md) {
+            display: block;
+            white-space: normal;
+        }
+    }
+
+    &__menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        padding: var(--spacing-sm);
+        cursor: pointer;
+        border-radius: var(--border-radius-full);
+        transition: background-color var(--transition-fast);
+        margin-left: auto; // Push to the right
+        outline: none;
+
+        @include respond-to(md) {
+            display: none;
+        }
+
+        &:hover {
+            background-color: var(--color-background-alt);
+        }
+
+        &:focus-visible {
+            @include focus-ring;
+        }
+
+        svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        &[aria-expanded="true"] {
+            background-color: var(--color-background-alt);
+        }
+    }
+
+    &__accessibility {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: var(--color-background);
+        border: 1px solid var(--color-border);
+        border-top: none;
+        padding: var(--spacing-sm);
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        width: 100%;
+        box-shadow: var(--shadow-md);
+
+        &:not([hidden]) {
+            display: flex;
+        }
+
+        @include respond-to(md) {
+            position: static;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            border: none;
+            padding: 0;
+            width: auto;
+            box-shadow: none;
+            background: none;
+            gap: var(--spacing-md);
+        }
+
+        // Compact styles for accessibility controls on mobile
+        .font-selector,
+        .zoom-controls,
+        .theme-switcher {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs);
+            border-radius: var(--border-radius-sm);
+            background-color: var(--color-background-alt);
+            width: 100%;
+
+            @include respond-to(md) {
+                background: none;
+                padding: 0;
+                width: auto;
+                justify-content: flex-start;
+            }
+
+            button {
+                padding: var(--spacing-xs);
+                min-width: 2rem;
+                height: 2rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                outline: none;
+                border: none;
+                background: none;
+                cursor: pointer;
+                border-radius: var(--border-radius-sm);
+                transition: background-color var(--transition-fast);
+
+                @include respond-to(md) {
+                    padding: var(--spacing-sm);
+                    min-width: 2.5rem;
+                    height: 2.5rem;
+                }
+
+                &:hover {
+                    background-color: var(--color-background-alt);
+                }
+
+                &:focus-visible {
+                    @include focus-ring;
+                }
+
+                svg {
+                    width: 1.25rem;
+                    height: 1.25rem;
+
+                    @include respond-to(md) {
+                        width: 1.5rem;
+                        height: 1.5rem;
+                    }
+                }
+            }
+
+            select {
+                padding: var(--spacing-xs);
+                font-size: var(--font-size-small);
+                min-width: 0;
+                flex: 1;
+                border: 1px solid var(--color-border);
+                border-radius: var(--border-radius-sm);
+                background-color: var(--color-background);
+                outline: none;
+                transition: border-color var(--transition-fast);
+
+                @include respond-to(md) {
+                    padding: var(--spacing-sm);
+                    font-size: var(--font-size-base);
+                    min-width: 8rem;
+                }
+
+                &:focus-visible {
+                    border-color: var(--color-primary);
+                }
+            }
+        }
+    }
+
+    &__user {
+        display: flex;
+        align-items: center;
+    }
+
+    &__avatar {
+        background: none;
+        border: none;
+        padding: var(--spacing-sm);
+        cursor: pointer;
+        border-radius: var(--border-radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color var(--transition-fast);
+        outline: none;
+
+        &:hover {
+            background-color: var(--color-background-alt);
+        }
+
+        &:focus-visible {
+            @include focus-ring;
+        }
+
+        svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+    }
+} 

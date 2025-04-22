@@ -1,33 +1,25 @@
 ---
-import {getCollection} from "astro:content";
 import {Icon} from 'astro-icon/components';
-const allFiches = await getCollection("summaries");
-const allTags = [...new Set(allFiches.map(fiche => fiche.data.tags).flat())];
-const allContributors = [...new Set(allFiches.map(fiche => fiche.data.contributor).flat())];
+import "../../styles/theme.scss";
 ---
-<div class="navigation-wrapper">
-    <h1>
-        <a href="/" class="link-home">
-            <Icon name="iconoir:home"/>
-            Accueil
-        </a>
-        <span class="mobile-only">
-            <button class:list={["btn-action", "action-expand"]}>
-                <Icon name="iconoir:fast-arrow-down"
-                      aria-label="Ouvrir le menu" size={32}/>
-            </button>
-            <button class:list={["btn-action", "action-collapse"]}>
-                <Icon name="iconoir:fast-arrow-up"
-                      aria-label="Fermer le menu" size={32}/>
-            </button>
-        </span>
-        <span class="desktop-only">
-            <button class:list={["btn-action", "action-collapse"]}>
-                <Icon name="iconoir:fast-arrow-left"
-                      aria-label="Réduire la navigation" size={32}/>
-            </button>
-        </span>
-    </h1>
+
+<div class="navigation-wrapper">    
+    <span class="mobile-only">
+        <button class:list={["btn-action", "action-expand"]}>
+            <Icon name="iconoir:fast-arrow-down"
+                    aria-label="Ouvrir le menu" size={32}/>
+        </button>
+        <button class:list={["btn-action", "action-collapse"]}>
+            <Icon name="iconoir:fast-arrow-up"
+                    aria-label="Fermer le menu" size={32}/>
+        </button>
+    </span>
+    <span class="desktop-only">
+        <button class:list={["btn-action", "action-collapse"]}>
+            <Icon name="iconoir:fast-arrow-left"
+                    aria-label="Réduire la navigation" size={32}/>
+        </button>
+    </span>
     <div class="desktop-only">
         <button class:list={["btn-action", "action-expand"]}>
             <Icon name="iconoir:fast-arrow-right"
@@ -35,110 +27,136 @@ const allContributors = [...new Set(allFiches.map(fiche => fiche.data.contributo
         </button>
     </div>
     <h1 class="sr-only">Navigation</h1>
+    <nav>
     <ul>
         <li>
-            <a href="/public">
-                <Icon name="iconoir:notes" />
-                Toutes les fiches
+            <a href="/">
+                <Icon name="iconoir:home"/>
+                Accueil
             </a>
         </li>
         <li>
             <a href="/tags">
-                <Icon name="iconoir:label" />
-                Tous les tags
+                <Icon name="iconoir:label"/>
+                Index par tag
             </a>
         </li>
         <li>
             <a href="/contributors">
-                <Icon name="iconoir:user" />
-                Tous·tes les contributeur·ices
+                <Icon name="iconoir:user"/>
+                Index par contributeur·ice
             </a>
         </li>
         <li>
             <a href="/upload">
-                <Icon name="iconoir:upload" />
-                Ajouter une fiche
+                <Icon name="iconoir:upload"/>
+                Ajouter une fiche de lecture
             </a>
         </li>
     </ul>
+</nav>
 </div>
 
 <style>
     .navigation-wrapper {
-
-        @media print {
-            display: none;
-        }
-
-        width: 100%;
-        transition: width 150ms linear;
-
-        .action-expand {
-            display: none;
-        }
-
-        .action-collapse {
-            display: block;
-        }
+        background-color: var(--color-background);
+        border-right: 1px solid var(--color-border);
+        padding: var(--spacing-md);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        height: 100%;
+        transition: width var(--transition-normal) ease;
 
         &.collapsed {
-
-            .action-collapse {
-                display: none;
-            }
-
-            .action-expand {
-                display: block;
-            }
-
-            .hide-collapsed {
-                display: none;
-            }
-
-            .link-home {
-                overflow: clip;
-            }
-        }
-
-        @media screen and (min-width: 768px) {
-
-            &.collapsed {
-                width: 36px;
-                padding: 2px;
-                overflow: hidden;
-            }
+            width: 0;
+            padding: 0;
+            overflow: hidden;
         }
 
         h1 {
             display: flex;
-            flex-direction: row;
             align-items: center;
             justify-content: space-between;
+            margin: 0;
+            font-size: var(--font-size-large);
+            font-weight: var(--font-weight-medium);
 
-            a {
+            .link-home {
+                display: flex;
+                align-items: center;
+                gap: var(--spacing-sm);
+                color: var(--color-text);
                 text-decoration: none;
-            }
 
-            overflow-x: hidden;
-            text-wrap: nowrap;
+                &:hover {
+                    color: var(--color-primary);
+                }
+
+                &:focus {
+                    @include focus-ring;
+                }
+
+                svg {
+                    width: var(--spacing-lg);
+                    height: var(--spacing-lg);
+                }
+            }
         }
 
-        ul {
-            padding: 0;
-            margin: 0;
+        nav {
+            h2 {
+                font-size: var(--font-size-base);
+                font-weight: var(--font-weight-medium);
+                margin: var(--spacing-md) 0 var(--spacing-sm);
+            }
 
-            li {
-                margin: 1rem 0;
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: var(--spacing-sm);
 
-                &:first-child {
-                    margin-top: 0;
-                }
+                li {
+                    a {
+                        display: flex;
+                        align-items: center;
+                        gap: var(--spacing-sm);
+                        color: var(--color-text);
+                        text-decoration: none;
+                        padding: var(--spacing-xs) var(--spacing-sm);
+                        border-radius: var(--border-radius-sm);
 
-                a {
-                    svg {
-                        vertical-align: sub;
+                        &:hover {
+                            background-color: var(--color-background-alt);
+                            color: var(--color-primary);
+                        }
+
+                        &:focus {
+                            @include focus-ring;
+                        }
+
+                        svg {
+                            width: var(--spacing-md);
+                            height: var(--spacing-md);
+                        }
                     }
                 }
+            }
+        }
+
+        .mobile-only {
+            @include respond-to(md) {
+                display: none;
+            }
+        }
+
+        .desktop-only {
+            display: none;
+            @include respond-to(md) {
+                display: block;
             }
         }
     }

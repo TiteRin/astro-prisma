@@ -1,14 +1,32 @@
-@import "./colors";
-@import "./utils";
-@import "./button";
-@import "./fonts";
-
+@use "./colors" as *;
+@use "./utils" as *;
+@use "./button" as *;
+@use "./fonts" as *;
+@use "sass:color";
+@use "./theme.scss" as *;
 
 .tag {
-  padding: 0.25rem 0.5rem;
-  background-color: #e0e8f4;
-  border-radius: 0.25rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-primary-lighter);
+  color: var(--color-primary);
+  border-radius: var(--border-radius-sm);
   text-overflow: ellipsis;
+  font-weight: var(--font-weight-medium);
+}
+
+[data-theme="dark"] .tag {
+  background-color: var(--color-primary-lighter);
+  color: var(--color-text);
+}
+
+[data-theme="light-high-contrast"] .tag {
+  background-color: var(--color-primary-lighter);
+  color: var(--color-primary);
+}
+
+[data-theme="dark-high-contrast"] .tag {
+  background-color: var(--color-primary);
+  color: var(--color-text);
 }
 
 a {
@@ -21,7 +39,7 @@ a {
   &:hover,
   &:active {
     text-decoration: underline;
-    color: darken($blue-1, 20%);
+    color: color.adjust($blue-1, $lightness: -20%);
   }
 
   &:focus {
@@ -61,7 +79,7 @@ a {
   
   &--error {
     border-left-color: $light-pink-1;
-    background: lighten($light-pink-1, 10%);
+    background: color.adjust($light-pink-1, $lightness: 10%);
   }
 
   .toast-icon {

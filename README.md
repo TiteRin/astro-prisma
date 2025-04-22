@@ -1,8 +1,59 @@
 # Astro & Fiches de lecture
 
-Le but de ce projet est de pouvoir mettre à disposition des fiches de lectures et d’optimiser leur accessibilité. 
+Le but de ce projet est de pouvoir mettre à disposition des fiches de lectures et d'optimiser leur accessibilité. 
 
 # Développement
+
+## Features in Progress
+
+### App Toolbar
+**Branch:** `feat/app-toolbar`
+
+**Summary:**
+We are creating a new App Toolbar that will:
+- Be positioned at the top of the app
+- Not be visible on print
+- Include accessibility options (font and font-size controls) from the current AccessibilityWidget
+- Add a User Avatar placeholder on the right end
+- Add the app name as a link to the home page
+- Be mobile-friendly and collapse on scroll
+- Maintain current accessibility features (font selection, zoom, localStorage persistence)
+- Include proper ARIA labels and keyboard navigation
+
+**Implementation Guidance:**
+1. Component Structure:
+   - Create new AppToolbar.astro component
+   - Move accessibility features from Widget.astro
+   - Add app name/logo section
+   - Add user avatar section
+
+2. Accessibility Features Migration:
+   - Move font selection functionality
+   - Move zoom controls
+   - Maintain localStorage persistence
+   - Add reset functionality
+
+3. Responsive Design:
+   - Implement mobile-friendly layout
+   - Add scroll-based collapse behavior
+   - Ensure proper spacing and alignment
+
+4. User Interface:
+   - Add app name/logo with home link
+   - Add placeholder user avatar
+   - Style all elements consistently
+
+5. Accessibility:
+   - Add proper ARIA labels
+   - Ensure keyboard navigation
+   - Maintain screen reader compatibility
+
+**To-Do List:**
+- [x] Create new AppToolbar.astro component
+- [x] Move accessibility features from Widget.astro
+- [x] Implement responsive design with mobile support
+- [x] Add app name/logo with home link
+- [x] Implement proper ARIA labels and keyboard navigation
 
 ## 🚀 Project Structure
 
