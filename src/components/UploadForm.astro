@@ -39,6 +39,31 @@ const { contributor = "" } = Astro.props;
         </label>
     </div>
 
+    <div class="upload-form__file-upload">
+        <input
+            type="file"
+            id="coverImageInput"
+            name="cover-image"
+            accept="image/*"
+            required
+        />
+        <label for="coverImageInput" class="upload-form__file-upload-label">
+            <Icon name="mdi:image" />
+            <span id="coverImageName">Choisissez une image de couverture</span>
+            <p>Formats acceptés : JPG, PNG, GIF</p>
+        </label>
+    </div>
+
+    <div class="upload-form__info">
+        <h3>Important concernant les images</h3>
+        <p>Pour les images dans le contenu de votre fiche :</p>
+        <ul>
+            <li>Les images doivent être hébergées sur un service externe (comme Imgur, GitHub, etc.)</li>
+            <li>Utilisez des URLs absolues pour vos images</li>
+            <li>Vérifiez que les URLs sont accessibles publiquement</li>
+        </ul>
+    </div>
+
     <div class="upload-form__submit">
         <button type="button" id="submitButton" class="btn-action with-border">
             <span class="button-text">Envoyer la fiche</span>
@@ -149,11 +174,13 @@ const { contributor = "" } = Astro.props;
     (function() {
         const form = document.getElementById('uploadForm');
         const fileInput = document.getElementById('fileInput');
+        const coverImageInput = document.getElementById('coverImageInput');
         const fileName = document.getElementById('fileName');
+        const coverImageName = document.getElementById('coverImageName');
         const submitButton = document.getElementById('submitButton');
         const toastContainer = document.getElementById('toast-container');
 
-        if (!form || !fileInput || !fileName || !submitButton || !toastContainer) {
+        if (!form || !fileInput || !coverImageInput || !fileName || !coverImageName || !submitButton || !toastContainer) {
             console.error('Required DOM elements not found');
             return;
         }
@@ -226,6 +253,7 @@ const { contributor = "" } = Astro.props;
                     showToast('Votre fiche a été envoyée avec succès ! Elle sera disponible dans moins de 5 minutes, le temps que le site se mette à jour.');
                     form.reset();
                     fileName.textContent = 'Choisissez un fichier ou glissez-le ici';
+                    coverImageName.textContent = 'Choisissez une image de couverture';
                 } else {
                     let errorMessage = 'Une erreur est survenue : ';
                     
@@ -249,10 +277,18 @@ const { contributor = "" } = Astro.props;
             }
         });
 
+        // Add event listeners for file inputs
         fileInput.addEventListener('change', (e) => {
-            const file = e.target.files?.[0];
+            const file = e.target.files[0];
             if (file) {
                 fileName.textContent = file.name;
+            }
+        });
+
+        coverImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                coverImageName.textContent = file.name;
             }
         });
 
