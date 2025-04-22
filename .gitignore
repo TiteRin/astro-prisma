@@ -31,3 +31,6 @@ pnpm-debug.log*
 yarn.lock
 
 /public/pagefind/**
+
+# Netlify
+.netlify
