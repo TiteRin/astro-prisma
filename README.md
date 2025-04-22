@@ -51,13 +51,9 @@ We are creating a new App Toolbar that will:
 **To-Do List:**
 - [x] Create new AppToolbar.astro component
 - [x] Move accessibility features from Widget.astro
-- [ ] Implement responsive design with mobile support
-- [ ] Add scroll-based collapse behavior
-- [ ] Add app name/logo with home link
-- [ ] Add placeholder user avatar
-- [ ] Implement proper ARIA labels and keyboard navigation
-- [ ] Test and verify all functionality
-- [ ] Remove old AccessibilityWidget component
+- [x] Implement responsive design with mobile support
+- [x] Add app name/logo with home link
+- [x] Implement proper ARIA labels and keyboard navigation
 
 ## 🚀 Project Structure
 

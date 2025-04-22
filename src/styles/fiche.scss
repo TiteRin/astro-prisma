@@ -1,5 +1,24 @@
 @use "./theme.scss" as *;
 
+/**
+ * Print-specific break properties mixin
+ * 
+ * @param {string} $inside - Value for break-inside property
+ * @param {string} $before - Value for break-before property
+ * @param {string} $after - Value for break-after property
+ * 
+ * Usage:
+ * @include break-properties(avoid, auto, avoid);
+ */
+@mixin break-properties($inside: auto, $before: auto, $after: auto) {
+    break-inside: $inside;
+    page-break-inside: $inside;
+    break-before: $before;
+    page-break-before: $before;
+    break-after: $after;
+    page-break-after: $after;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-text);
@@ -171,5 +190,93 @@ footer {
 @media print {
   body * {
     overflow: visible;
+  }
+
+  .header {
+    header {
+      flex-direction: row;
+      align-items: center;
+      margin-bottom: var(--spacing-lg);
+
+      h1 {
+        font-size: var(--font-size-large);
+        margin: 0;
+      }
+
+      img {
+        max-width: 200px;
+        margin-left: var(--spacing-lg);
+      }
+    }
+
+    .additional-info {
+      flex-direction: row;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+
+      .block {
+        width: 30%;
+      }
+    }
+  }
+
+  .content {
+    @include break-properties(auto, auto, auto);
+    
+    h1, h2, h3, h4, h5, h6 {
+      @include break-properties(auto, auto, avoid);
+      margin-top: var(--spacing-xl);
+      margin-bottom: var(--spacing-md);
+      padding-top: var(--spacing-md);
+    }
+
+    h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p,
+    h1 + ul, h1 + ol, h2 + ul, h2 + ol, h3 + ul, h3 + ol,
+    h4 + ul, h4 + ol, h5 + ul, h5 + ol, h6 + ul, h6 + ol,
+    h1 + blockquote, h2 + blockquote, h3 + blockquote,
+    h4 + blockquote, h5 + blockquote, h6 + blockquote {
+      @include break-properties(auto, avoid, auto);
+    }
+
+    p {
+      @include break-properties(avoid, auto, auto);
+      margin-bottom: var(--spacing-md);
+    }
+
+    ul, ol {
+      @include break-properties(auto, auto, auto);
+      margin: var(--spacing-md) 0;
+
+      li {
+        @include break-properties(avoid, auto, auto);
+        margin-bottom: var(--spacing-sm);
+      }
+    }
+
+    blockquote {
+      @include break-properties(avoid, auto, auto);
+      margin: var(--spacing-md) 0;
+      padding-left: var(--spacing-lg);
+      border-left: 2px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+
+      p {
+        @include break-properties(avoid, auto, auto);
+        margin: 0;
+      }
+
+      footer {
+        @include break-properties(avoid, avoid, avoid);
+        padding: 0;
+        text-align: left;
+        margin-left: var(--spacing-lg);
+      }
+    }
+  }
+
+  footer {
+    page-break-before: always;
+    margin-top: var(--spacing-xl);
   }
 }

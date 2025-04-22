@@ -1,3 +1,34 @@
+// Print theme (must be first to override all other themes)
+@media print {
+    :root,
+    [data-theme="light"],
+    [data-theme="dark"],
+    [data-theme="light-high-contrast"],
+    [data-theme="dark-high-contrast"] {
+        // Force light theme colors for print
+        --color-background: #ffffff !important;
+        --color-background-alt: #f5f5f5 !important;
+        --color-text: #000000 !important;
+        --color-text-alt: #333333 !important;
+        --color-border: #000000 !important;
+        --color-primary: #3B68A9 !important;
+        --color-primary-light: #a4bcdf !important;
+        --color-primary-lighter: #e0e8f4 !important;
+        --color-accent: #f1cce0 !important;
+
+        // Heading background colors
+        --color-primary-heading: var(--color-accent) !important;
+        --color-secondary-heading: var(--color-primary-lighter) !important;
+        --color-tertiary-heading: var(--color-primary-light) !important;
+
+        // Typography
+        --font-size-base: 12pt !important;
+        --font-size-small: 10pt !important;
+        --font-size-large: 14pt !important;
+        --line-height-base: 1.5 !important;
+    }
+}
+
 // Base theme variables
 :root {
     // Typography
