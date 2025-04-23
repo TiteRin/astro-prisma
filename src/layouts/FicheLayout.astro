@@ -4,8 +4,15 @@ import Layout from "./Layout.astro";
 import Navigation from "../components/layout/Navigation.astro";
 import SearchContainer from "../components/features/search/SearchContainer.astro";
 
-const { pageTitle = "Fiche de lecture" } = Astro.props;
+interface Props {
+    pageTitle?: string;
+    title?: string;
+    description?: string;
+}
+
+const { pageTitle = "Fiche de lecture", title, description } = Astro.props;
 ---
+
 <Layout pageTitle={pageTitle}>
     <main role="main" class="wrapper">
         <div class="navigation print-hidden">
@@ -79,3 +86,18 @@ const { pageTitle = "Fiche de lecture" } = Astro.props;
         }
     }
 </style>
+
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content={description} />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+    </head>
+    <body>
+        <slot />
+    </body>
+</html>
