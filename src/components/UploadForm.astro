@@ -39,6 +39,31 @@ const { contributor = "" } = Astro.props;
         </label>
     </div>
 
+    <div class="upload-form__file-upload">
+        <input
+            type="file"
+            id="coverImageInput"
+            name="cover-image"
+            accept="image/*"
+            required
+        />
+        <label for="coverImageInput" class="upload-form__file-upload-label">
+            <Icon name="mdi:image" />
+            <span id="coverImageName">Choisissez une image de couverture</span>
+            <p>Formats acceptés : JPG, PNG, GIF</p>
+        </label>
+    </div>
+
+    <div class="upload-form__info">
+        <h3>Important concernant les images</h3>
+        <p>Pour les images dans le contenu de votre fiche :</p>
+        <ul>
+            <li>Les images doivent être hébergées sur un service externe (comme Imgur, GitHub, etc.)</li>
+            <li>Utilisez des URLs absolues pour vos images</li>
+            <li>Vérifiez que les URLs sont accessibles publiquement</li>
+        </ul>
+    </div>
+
     <div class="upload-form__submit">
         <button type="button" id="submitButton" class="btn-action with-border">
             <span class="button-text">Envoyer la fiche</span>
@@ -88,119 +113,144 @@ const { contributor = "" } = Astro.props;
         }
     }
 
-    .toast-container {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .toast {
-        background: var(--color-background);
-        color: var(--color-text);
-        padding: 1rem;
-        border-radius: 4px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        animation: slideIn 0.3s ease-out;
-        min-width: 300px;
-        max-width: 400px;
-        border-left: 4px solid;
-        
-        &--success {
-            border-left-color: #4CAF50;
-        }
-        
-        &--error {
-            border-left-color: #f44336;
-        }
-
-        .toast-icon {
-            flex-shrink: 0;
-        }
-
-        .toast-content {
-            flex-grow: 1;
-        }
-    }
-
     @keyframes spin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
     }
 
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+    .toast-container {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
 
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
+    .toast {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.3s ease-out;
+        max-width: 400px;
+    }
+
+    .toast--success {
+        border-left: 4px solid #4caf50;
+    }
+
+    .toast--error {
+        border-left: 4px solid #f44336;
+    }
+
+    .toast--warning {
+        border-left: 4px solid #ff9800;
+    }
+
+    .toast--info {
+        border-left: 4px solid #2196f3;
+    }
+
+    .toast-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .toast-content {
+        flex-grow: 1;
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        padding: 0.25rem;
+        cursor: pointer;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+
+    .icon {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
 </style>
 
-<script is:inline>
-    (function() {
-        const form = document.getElementById('uploadForm');
-        const fileInput = document.getElementById('fileInput');
-        const fileName = document.getElementById('fileName');
+<script>
+    function setLoading(isLoading: boolean): void {
+        const form = document.getElementById('uploadForm') as HTMLFormElement;
         const submitButton = document.getElementById('submitButton');
-        const toastContainer = document.getElementById('toast-container');
-
-        if (!form || !fileInput || !fileName || !submitButton || !toastContainer) {
-            console.error('Required DOM elements not found');
-            return;
-        }
-
-        // Test toast on page load
-        showToast('Ceci est un test de notification', 'success');
-
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast--${type}`;
-            
-            const icon = document.createElement('span');
-            icon.className = 'toast-icon';
-            icon.innerHTML = type === 'success' 
-                ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>'
-                : '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>';
-            
-            const content = document.createElement('span');
-            content.className = 'toast-content';
-            content.textContent = message;
-
-            const closeButton = document.createElement('button');
-            closeButton.className = 'toast-close';
-            closeButton.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>';
-            closeButton.addEventListener('click', () => {
-                toast.style.animation = 'slideOut 0.3s ease-out forwards';
-                setTimeout(() => toast.remove(), 300);
-            });
-            
-            toast.appendChild(icon);
-            toast.appendChild(content);
-            toast.appendChild(closeButton);
-            toastContainer.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease-out forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, 5000);
-        }
-
-        function setLoading(isLoading) {
-            form.setAttribute('data-loading', isLoading);
-            submitButton.setAttribute('data-loading', isLoading);
+        if (form && submitButton) {
+            form.setAttribute('data-loading', isLoading.toString());
+            submitButton.setAttribute('data-loading', isLoading.toString());
             const buttonText = submitButton.querySelector('.button-text');
             if (buttonText) {
                 buttonText.textContent = isLoading ? 'En cours d\'envoi' : 'Envoyer la fiche';
             }
+        }
+    }
+
+    function showToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success'): void {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast--${type}`;
+        toast.innerHTML = `
+            <span class="toast-icon">
+                ${type === 'success' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>' : ''}
+                ${type === 'error' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>' : ''}
+                ${type === 'warning' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"/></svg>' : ''}
+                ${type === 'info' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>' : ''}
+            </span>
+            <span class="toast-content">${message}</span>
+            <button class="toast-close" onclick="this.parentElement.remove()">
+                <svg viewBox="0 0 24 24" width="24" height="24" class="icon">
+                    <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                </svg>
+            </button>
+        `;
+
+        container.appendChild(toast);
+
+        // Auto-remove success and info toasts after 5 seconds
+        if (type === 'success' || type === 'info') {
+            setTimeout(() => toast.remove(), 5000);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('uploadForm') as HTMLFormElement;
+        const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+        const coverImageInput = document.getElementById('coverImageInput') as HTMLInputElement;
+        const fileName = document.getElementById('fileName');
+        const coverImageName = document.getElementById('coverImageName');
+        const submitButton = document.getElementById('submitButton');
+        const dropZone = document.querySelector('.upload-form__file-upload');
+
+        if (!form || !fileInput || !coverImageInput || !fileName || !coverImageName || !submitButton || !dropZone) {
+            console.error('Required DOM elements not found');
+            return;
         }
 
         submitButton.addEventListener('click', async (e) => {
@@ -219,27 +269,43 @@ const { contributor = "" } = Astro.props;
                     method: 'POST',
                     body: formData
                 });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showToast('Votre fiche a été envoyée avec succès ! Elle sera disponible dans moins de 5 minutes, le temps que le site se mette à jour.');
-                    form.reset();
-                    fileName.textContent = 'Choisissez un fichier ou glissez-le ici';
-                } else {
-                    let errorMessage = 'Une erreur est survenue : ';
-                    
-                    if (result.errors) {
-                        errorMessage += result.errors.map((err) => 
-                            `\n- ${err.field}: ${err.message}`
-                        ).join('');
-                    } else if (result.message.includes('github')) {
-                        errorMessage += 'Erreur lors de la communication avec GitHub. Veuillez réessayer plus tard.';
-                    } else {
-                        errorMessage += result.message || 'Erreur inconnue. Veuillez réessayer plus tard.';
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const reader = response.body?.getReader();
+                if (!reader) {
+                    throw new Error('No reader available');
+                }
+
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        try {
+                            const notification = JSON.parse(line);
+                            showToast(notification.message, notification.type);
+                            
+                            // If it's a final success message, reset the form
+                            if (notification.type === 'success' && notification.step === 'complete') {
+                                form.reset();
+                                fileName.textContent = 'Choisissez un fichier ou glissez-le ici';
+                                coverImageName.textContent = 'Choisissez une image de couverture';
+                            }
+                        } catch (e) {
+                            console.error('Error parsing notification:', e);
+                        }
                     }
-                    
-                    showToast(errorMessage, 'error');
                 }
             } catch (error) {
                 console.error('Error during submission:', error);
@@ -249,52 +315,64 @@ const { contributor = "" } = Astro.props;
             }
         });
 
+        // Add event listeners for file inputs
         fileInput.addEventListener('change', (e) => {
-            const file = e.target.files?.[0];
+            const target = e.target as HTMLInputElement;
+            const file = target.files?.[0];
             if (file) {
                 fileName.textContent = file.name;
             }
         });
 
+        coverImageInput.addEventListener('change', (e) => {
+            const target = e.target as HTMLInputElement;
+            const file = target.files?.[0];
+            if (file) {
+                coverImageName.textContent = file.name;
+            }
+        });
+
         // Drag and drop handling
-        const dropZone = document.querySelector('.upload-form__file-upload');
-        if (dropZone) {
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, preventDefaults, false);
-            });
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone?.addEventListener(eventName, preventDefaults, false);
+        });
 
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
+        function preventDefaults(e: Event): void {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, highlight, false);
-            });
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone?.addEventListener(eventName, highlight, false);
+        });
 
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, unhighlight, false);
-            });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone?.addEventListener(eventName, unhighlight, false);
+        });
 
-            function highlight() {
-                dropZone.classList.add('highlight');
-            }
+        function highlight(): void {
+            dropZone?.classList.add('highlight');
+        }
 
-            function unhighlight() {
-                dropZone.classList.remove('highlight');
-            }
+        function unhighlight(): void {
+            dropZone?.classList.remove('highlight');
+        }
 
-            dropZone.addEventListener('drop', handleDrop, false);
+        dropZone?.addEventListener('drop', handleDrop as EventListener, false);
 
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                if (!dt) return;
-                const files = dt.files;
-                if (!files || files.length === 0) return;
-                fileInput.files = files;
+        function handleDrop(e: DragEvent): void {
+            const dt = e.dataTransfer;
+            if (!dt) return;
+            const files = dt.files;
+            if (!files || files.length === 0) return;
+            
+            // Update the file input and label
+            fileInput.files = files;
+            if (fileName) {
                 fileName.textContent = files[0].name;
             }
         }
-    })();
+    });
 </script>
+
 

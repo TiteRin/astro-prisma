@@ -1,29 +1,54 @@
-@import "./colors";
+@use "./theme.scss" as *;
+
+/**
+ * Print-specific break properties mixin
+ * 
+ * @param {string} $inside - Value for break-inside property
+ * @param {string} $before - Value for break-before property
+ * @param {string} $after - Value for break-after property
+ * 
+ * Usage:
+ * @include break-properties(avoid, auto, avoid);
+ */
+@mixin break-properties($inside: auto, $before: auto, $after: auto) {
+    break-inside: $inside;
+    page-break-inside: $inside;
+    break-before: $before;
+    page-break-before: $before;
+    break-after: $after;
+    page-break-after: $after;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
 
 body * {
-  line-height: 150%;
+  line-height: var(--line-height-base);
 }
 
 h2 {
-  background-color: $light-blue-2;
+  background-color: var(--color-background-alt);
   font-variant: all-small-caps;
-  padding: 0.25rem 0.5rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  color: var(--color-text);
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--spacing-md);
 
   header {
     display: flex;
     flex-direction: column;
     align-items: start;
-    gap: 1rem;
+    gap: var(--spacing-md);
 
     h1 {
-      color: $blue-1;
-      font-size: 2rem;
+      color: var(--color-primary);
+      font-size: var(--font-size-large);
     }
 
     img {
@@ -34,13 +59,13 @@ h2 {
   .additional-info {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--spacing-md);
 
     .block {
       width: 100%;
 
       h2 {
-        background-color: $light-pink-1;
+        background-color: var(--color-primary-heading);
       }
     }
 
@@ -51,7 +76,7 @@ h2 {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: var(--spacing-md);
 
         @media screen and (max-width: 450px) {
           & {
@@ -61,7 +86,6 @@ h2 {
 
         li.tag {
           max-width: 100%;
-
         }
       }
     }
@@ -69,47 +93,55 @@ h2 {
 }
 
 .content {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  padding: var(--spacing-md);
+
+  overflow: scroll;
 
   > h2 {
     font-variant: small-caps;
 
     &:nth-of-type(3n+1) {
-      background-color: $light-pink-1;
+      background-color: var(--color-primary-heading);
+      color: var(--color-primary-heading-text);
     }
 
     &:nth-of-type(3n+2) {
-      background-color: $light-blue-1;
+      background-color: var(--color-secondary-heading);
+      color: var(--color-secondary-heading-text);
     }
 
     &:nth-of-type(3n+3) {
-      background-color: $light-blue-2;
+      background-color: var(--color-tertiary-heading);
+      color: var(--color-tertiary-heading-text);
     }
   }
 
   blockquote {
-
     margin-left: 0;
     margin-right: 0;
+    color: var(--color-text-alt);
 
     &::before {
-      content: '“';
-      font-size: 2rem;
-      margin: 1rem 0.5rem;
+      content: '"';
+      font-size: var(--font-size-large);
+      margin: var(--spacing-md) var(--spacing-sm);
       float: left;
     }
 
     p {
-
+      margin: 0;
     }
 
     footer {
       padding: 0;
       text-align: left;
-      margin-left: 2rem;
+      margin-left: var(--spacing-lg);
 
       &::before {
         content: '—';
-        margin-right: 1rem;
+        margin-right: var(--spacing-md);
       }
     }
   }
@@ -122,22 +154,20 @@ h2 {
 }
 
 footer {
-  font-size: 80%;
+  font-size: var(--font-size-small);
   text-align: center;
-  padding-bottom: 2rem;
+  padding-bottom: var(--spacing-lg);
+  color: var(--color-text-alt);
 }
 
 /* DESKTOP */
 @media screen and (min-width: 768px), print {
-
   .header {
-
     header {
-
       flex-direction: row-reverse;
 
       h1 {
-        font-size: 3rem;
+        font-size: calc(var(--font-size-large) * 1.5);
       }
 
       img {
@@ -148,7 +178,7 @@ footer {
     .additional-info {
       flex-direction: row;
       justify-content: space-between;
-      gap: 1rem;
+      gap: var(--spacing-md);
 
       .block {
         width: 30%;
@@ -160,5 +190,93 @@ footer {
 @media print {
   body * {
     overflow: visible;
+  }
+
+  .header {
+    header {
+      flex-direction: row;
+      align-items: center;
+      margin-bottom: var(--spacing-lg);
+
+      h1 {
+        font-size: var(--font-size-large);
+        margin: 0;
+      }
+
+      img {
+        max-width: 200px;
+        margin-left: var(--spacing-lg);
+      }
+    }
+
+    .additional-info {
+      flex-direction: row;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+
+      .block {
+        width: 30%;
+      }
+    }
+  }
+
+  .content {
+    @include break-properties(auto, auto, auto);
+    
+    h1, h2, h3, h4, h5, h6 {
+      @include break-properties(auto, auto, avoid);
+      margin-top: var(--spacing-xl);
+      margin-bottom: var(--spacing-md);
+      padding-top: var(--spacing-md);
+    }
+
+    h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p,
+    h1 + ul, h1 + ol, h2 + ul, h2 + ol, h3 + ul, h3 + ol,
+    h4 + ul, h4 + ol, h5 + ul, h5 + ol, h6 + ul, h6 + ol,
+    h1 + blockquote, h2 + blockquote, h3 + blockquote,
+    h4 + blockquote, h5 + blockquote, h6 + blockquote {
+      @include break-properties(auto, avoid, auto);
+    }
+
+    p {
+      @include break-properties(avoid, auto, auto);
+      margin-bottom: var(--spacing-md);
+    }
+
+    ul, ol {
+      @include break-properties(auto, auto, auto);
+      margin: var(--spacing-md) 0;
+
+      li {
+        @include break-properties(avoid, auto, auto);
+        margin-bottom: var(--spacing-sm);
+      }
+    }
+
+    blockquote {
+      @include break-properties(avoid, auto, auto);
+      margin: var(--spacing-md) 0;
+      padding-left: var(--spacing-lg);
+      border-left: 2px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+
+      p {
+        @include break-properties(avoid, auto, auto);
+        margin: 0;
+      }
+
+      footer {
+        @include break-properties(avoid, avoid, avoid);
+        padding: 0;
+        text-align: left;
+        margin-left: var(--spacing-lg);
+      }
+    }
+  }
+
+  footer {
+    page-break-before: always;
+    margin-top: var(--spacing-xl);
   }
 }

@@ -1,0 +1,117 @@
+---
+import { Icon } from "astro-icon/components";
+import "../../styles/layout/app-toolbar.scss";
+import "../../styles/features/accessibility/zoom-controls.scss";
+import "../../styles/features/accessibility/theme-switcher.scss";
+import FontSelector from "../features/accessibility/FontSelector.astro";
+import ZoomControls from "../features/accessibility/ZoomControls.astro";
+import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
+---
+
+<header class="app-toolbar" role="banner">
+    <div class="app-toolbar__brand">
+        <a href="/" class="app-toolbar__home-link" aria-label="Retour à l'accueil">
+            <h1 class="app-toolbar__app-name">Prisma</h1>
+            <span class="app-toolbar__app-subtitle">Pôle recherche</span>
+        </a>
+    </div>
+
+    <button 
+        class="app-toolbar__menu-toggle" 
+        aria-label="Menu d'accessibilité" 
+        aria-expanded="false" 
+        aria-controls="accessibility-menu"
+        aria-haspopup="true"
+    >
+        <Icon name="iconoir:accessibility" aria-hidden="true" />
+    </button>
+
+    <div 
+        id="accessibility-menu" 
+        class="app-toolbar__accessibility" 
+        role="menu"
+        aria-label="Options d'accessibilité"
+        hidden
+    >
+        <FontSelector />
+        <ZoomControls />
+        <ThemeSwitcher />
+    </div>
+
+    <div class="app-toolbar__user">
+        <button 
+            class="app-toolbar__avatar" 
+            aria-label="Menu utilisateur"
+            aria-haspopup="true"
+        >
+            <Icon name="iconoir:user" aria-hidden="true" />
+        </button>
+    </div>
+</header>
+
+<script>
+    const menuToggle = document.querySelector<HTMLButtonElement>('.app-toolbar__menu-toggle');
+    const accessibilityMenu = document.querySelector<HTMLDivElement>('#accessibility-menu');
+    const toolbar = document.querySelector<HTMLElement>('.app-toolbar');
+
+    if (menuToggle && accessibilityMenu) {
+        // Handle menu toggle
+        menuToggle.addEventListener('click', () => {
+            const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', String(!isExpanded));
+            accessibilityMenu.hidden = isExpanded;
+        });
+
+        // Handle keyboard navigation
+        menuToggle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                menuToggle.click();
+            }
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const target = e.target as Node;
+            if (menuToggle && accessibilityMenu && 
+                !menuToggle.contains(target) && 
+                !accessibilityMenu.contains(target) && 
+                !accessibilityMenu.hidden) {
+                menuToggle.setAttribute('aria-expanded', 'false');
+                accessibilityMenu.hidden = true;
+            }
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !accessibilityMenu.hidden) {
+                menuToggle.setAttribute('aria-expanded', 'false');
+                accessibilityMenu.hidden = true;
+                menuToggle.focus();
+            }
+        });
+
+        // Trap focus within the menu when open
+        accessibilityMenu.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                const focusableElements = accessibilityMenu.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                const firstFocusable = focusableElements[0] as HTMLElement;
+                const lastFocusable = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+                if (e.shiftKey) {
+                    if (document.activeElement === firstFocusable) {
+                        e.preventDefault();
+                        lastFocusable.focus();
+                    }
+                } else {
+                    if (document.activeElement === lastFocusable) {
+                        e.preventDefault();
+                        firstFocusable.focus();
+                    }
+                }
+            }
+        });
+    }
+</script>

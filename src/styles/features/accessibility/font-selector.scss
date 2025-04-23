@@ -1,0 +1,93 @@
+@use "../../theme.scss" as *;
+
+.font-selector {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+
+    &__title {
+        font-size: var(--font-size-md);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text);
+        margin: 0;
+    }
+
+    &__select-wrapper {
+        position: relative;
+        width: 200px;
+    }
+
+    &__button {
+        width: 100%;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        background-color: var(--color-background);
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-sm);
+        color: var(--color-text);
+        font-size: var(--font-size-sm);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all var(--transition-fast);
+
+        &:hover {
+            background-color: var(--color-background-alt);
+        }
+
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--color-primary);
+        }
+    }
+
+    &__arrow {
+        font-size: var(--font-size-xs);
+        transition: transform var(--transition-fast);
+    }
+
+    &__list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: var(--spacing-xs);
+        background-color: var(--color-background);
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--shadow-md);
+        z-index: var(--z-index-dropdown);
+        max-height: 200px;
+        overflow-y: auto;
+        list-style: none;
+        padding-left: 0;
+    }
+
+    &__option {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        cursor: pointer;
+        transition: background-color var(--transition-fast);
+
+        &:hover {
+            background-color: var(--color-background-alt);
+        }
+
+        &[aria-selected="true"] {
+            background-color: var(--color-primary);
+            color: var(--color-text-inverse);
+        }
+    }
+}
+
+// Font classes
+.font-opendyslexic {
+    font-family: 'OpenDyslexic', sans-serif;
+}
+
+.font-opensans {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.font-inter {
+    font-family: 'Inter', sans-serif;
+} 
