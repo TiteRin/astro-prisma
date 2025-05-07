@@ -1,8 +1,7 @@
-import {Octokit} from "octokit";
-import type {APIRoute} from "astro";
+import type { APIRoute } from "astro";
 import matter from 'gray-matter';
-import {summaryValidationSchema} from "../../content.config.js";
-import { z } from "zod";
+import { GitHubService } from "../../lib/services/github.js";
+import { FileValidator } from "../../lib/services/file-validator.js";
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -15,11 +14,6 @@ type ProgressNotification = {
     step: string;
 };
 
-function getOctokitClient() {
-    const token = import.meta.env.GITHUB_TOKEN;
-    return new Octokit({auth: token});
-}
-
 async function saveFileLocally(filePath: string, content: Buffer | string) {
     // Ensure the directory exists
     await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -27,98 +21,15 @@ async function saveFileLocally(filePath: string, content: Buffer | string) {
     await fs.writeFile(filePath, content);
 }
 
-// Function to extract image URLs from markdown content
-function extractImageUrls(content: string): string[] {
-    // Match both markdown image syntax ![alt](url) and HTML img tags
-    const imageRegex = /!\[.*?\]\((.*?)\)|<img[^>]+src="([^">]+)"/g;
-    const urls: string[] = [];
-    let match;
-
-    while ((match = imageRegex.exec(content)) !== null) {
-        // match[1] is for markdown syntax, match[2] is for HTML img tags
-        const url = match[1] || match[2];
-        if (url) {
-            urls.push(url);
-        }
-    }
-
-    return urls;
-}
-
-// Function to validate image URLs
-async function validateImageUrls(urls: string[]): Promise<{ valid: boolean; errors: string[] }> {
-    const errors: string[] = [];
-    
-    // Parse domain lists from environment variables
-    const allowedDomains = import.meta.env.ALLOWED_IMAGE_DOMAINS?.split(',').filter(Boolean) || [];
-    const blockedDomains = import.meta.env.BLOCKED_IMAGE_DOMAINS?.split(',').filter(Boolean) || [];
-
-    for (const url of urls) {
-        // Check if URL is absolute
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-            errors.push(`L'image "${url}" doit utiliser une URL absolue (commençant par http:// ou https://)`);
-            continue;
-        }
-
-        try {
-            const urlObj = new URL(url);
-            
-            // Check blocked domains first
-            if (blockedDomains.length > 0 && blockedDomains.some((domain: string) => urlObj.hostname.includes(domain))) {
-                errors.push(`Le domaine de l'image "${url}" est bloqué.`);
-                continue;
-            }
-
-            // Check allowed domains if specified
-            if (allowedDomains.length > 0 && !allowedDomains.some((domain: string) => urlObj.hostname.includes(domain))) {
-                errors.push(`Le domaine de l'image "${url}" n'est pas dans la liste des domaines autorisés.`);
-                continue;
-            }
-
-            // Try to fetch the image to verify it exists and is accessible
-            const response = await fetch(url, { method: 'HEAD' });
-            if (!response.ok) {
-                errors.push(`L'image "${url}" n'est pas accessible (code ${response.status})`);
-            }
-        } catch (error) {
-            errors.push(`Impossible de vérifier l'accessibilité de l'image "${url}"`);
-        }
-    }
-
-    return {
-        valid: errors.length === 0,
-        errors
-    };
-}
-
-export const GET: APIRoute = async ({request}) => {
-    const octokit = getOctokitClient();
-    const {
-        data: {login},
-    } = await octokit.rest.users.getAuthenticated();
-
-    return new Response(
-        JSON.stringify({
-            message: `Hello ${login}`
-        }),
-        {
-            status: 200
-        }
-    )
-}
-
 export const POST: APIRoute = async ({request}) => {
     const uploadMode = import.meta.env.UPLOAD_MODE || 'remote';
-    const octokit = getOctokitClient();
-    const payload = {
-        owner: import.meta.env.GITHUB_OWNER,
-        repo: import.meta.env.GITHUB_REPO
-    }
+    const github = new GitHubService();
 
     const data = await request.formData();
     const file = data.get("new-note") as File;
     const coverImage = data.get("cover-image") as File;
     const contributor = data.get("contributor") as string;
+    const isDraft = data.get("is_draft") === "true";
 
     // Create a TransformStream for progress notifications
     const { readable, writable } = new TransformStream();
@@ -143,27 +54,30 @@ export const POST: APIRoute = async ({request}) => {
 
             await sendProgress({ type: 'info', message: "Validation des fichiers en cours...", step: "validation" });
 
-            // Read the file, and look for some keys in the frontmatter
-            const text = await file.text();
-            const { data: attributes, content: body } = matter(text);
-
-            if (Object.keys(attributes).length === 0) {
-                await sendProgress({ type: 'error', message: "Aucune donnée dans le frontmatter", step: "validation" });
+            // Validate note
+            const validation = await FileValidator.validateNote(file, contributor);
+            if (!validation.valid || !validation.data || !validation.content) {
+                await sendProgress({ type: 'error', message: "Échec de la validation", step: "validation" });
+                if (validation.errors) {
+                    for (const error of validation.errors) {
+                        await sendProgress({ type: 'error', message: `${error.field}: ${error.message}`, step: "validation" });
+                    }
+                }
                 return;
             }
 
             // Validate images in the markdown content
-            const imageUrls = extractImageUrls(body);
+            const imageUrls = FileValidator.extractImageUrls(validation.content);
             if (imageUrls.length > 0) {
                 await sendProgress({ type: 'info', message: "Validation des images en cours...", step: "validation" });
-                const validationResult = await validateImageUrls(imageUrls);
-                if (!validationResult.valid) {
+                const imageValidation = await FileValidator.validateImageUrls(imageUrls);
+                if (!imageValidation.valid) {
                     await sendProgress({ 
                         type: 'error', 
                         message: "Échec de la validation des images",
                         step: "validation"
                     });
-                    for (const error of validationResult.errors) {
+                    for (const error of imageValidation.errors) {
                         await sendProgress({ type: 'error', message: error, step: "validation" });
                     }
                     return;
@@ -171,34 +85,18 @@ export const POST: APIRoute = async ({request}) => {
                 await sendProgress({ type: 'success', message: "Validation des images réussie", step: "validation" });
             }
 
-            let processedAttributes = { ...attributes};
-
-            // Use the contributor from the form if provided
-            if (contributor) {
-                processedAttributes.contributor = contributor;
-            } else if (!processedAttributes.contributor) {
-                processedAttributes.contributor = "Default contributor";
-            }
-
-            if (!processedAttributes.lastModification) {
-                processedAttributes.lastModification = new Date();
-            } else {
-                processedAttributes.lastModification = new Date(processedAttributes.lastModification);
-            }
-
-            // Prepare both files
+            // Prepare files
             const coverImageName = `${file.name.replace(/\.(md|mdx)$/, '')}.${coverImage.name.split('.').pop()}`;
             const coverImagePath = `public/img/${coverImageName}`;
             const filePath = `src/summaries/${file.name}`;
 
             // Update the image URL in the frontmatter
-            processedAttributes.image = {
+            validation.data.image = {
                 url: `/img/${coverImageName}`,
-                alt: processedAttributes.image?.alt || `Couverture de ${processedAttributes.bookTitle}`
+                alt: validation.data.image?.alt || `Couverture de ${validation.data.bookTitle}`
             };
 
-            const validationData = summaryValidationSchema.parse(processedAttributes);
-            const fileContent = matter.stringify(body, processedAttributes);
+            const fileContent = matter.stringify(validation.content, validation.data);
 
             // Handle local upload if needed
             if (uploadMode === 'local' || uploadMode === 'both') {
@@ -223,70 +121,24 @@ export const POST: APIRoute = async ({request}) => {
             if (uploadMode === 'remote' || uploadMode === 'both') {
                 try {
                     await sendProgress({ type: 'info', message: "Envoi des fichiers vers GitHub...", step: "remote" });
-                    
-                    // Get the current tree SHA
-                    const { data: { sha: baseTree } } = await octokit.rest.git.getTree({
-                        ...payload,
-                        tree_sha: import.meta.env.GITHUB_BRANCH || "main",
-                        recursive: "true"
-                    });
 
-                    // Create blobs for both files
                     const coverImageContent = await coverImage.arrayBuffer();
-                    const { data: { sha: coverImageBlob } } = await octokit.rest.git.createBlob({
-                        ...payload,
-                        content: Buffer.from(coverImageContent).toString('base64'),
-                        encoding: 'base64'
+                    const result = await github.uploadFiles([
+                        {
+                            path: coverImagePath,
+                            content: Buffer.from(coverImageContent)
+                        },
+                        {
+                            path: filePath,
+                            content: fileContent
+                        }
+                    ], isDraft, {
+                        title: validation.data.bookTitle,
+                        contributor: validation.data.contributor,
+                        lastModification: validation.data.lastModification
                     });
 
-                    const { data: { sha: fileBlob } } = await octokit.rest.git.createBlob({
-                        ...payload,
-                        content: Buffer.from(fileContent).toString('base64'),
-                        encoding: 'base64'
-                    });
-
-                    // Create a new tree with both files
-                    const { data: { sha: newTree } } = await octokit.rest.git.createTree({
-                        ...payload,
-                        base_tree: baseTree,
-                        tree: [
-                            {
-                                path: coverImagePath,
-                                mode: '100644',
-                                type: 'blob',
-                                sha: coverImageBlob
-                            },
-                            {
-                                path: filePath,
-                                mode: '100644',
-                                type: 'blob',
-                                sha: fileBlob
-                            }
-                        ]
-                    });
-
-                    // Get the latest commit
-                    const { data: { object: { sha: parentCommit } } } = await octokit.rest.git.getRef({
-                        ...payload,
-                        ref: `heads/${import.meta.env.GITHUB_BRANCH || "main"}`
-                    });
-
-                    // Create a new commit
-                    const { data: { sha: newCommit } } = await octokit.rest.git.createCommit({
-                        ...payload,
-                        message: `[fiche] Ajout d'une nouvelle fiche - ${file.name}`,
-                        tree: newTree,
-                        parents: [parentCommit]
-                    });
-
-                    // Update the reference
-                    await octokit.rest.git.updateRef({
-                        ...payload,
-                        ref: `heads/${import.meta.env.GITHUB_BRANCH || "main"}`,
-                        sha: newCommit
-                    });
-
-                    await sendProgress({ type: 'success', message: "Envoi vers GitHub réussi", step: "remote" });
+                    await sendProgress({ type: 'success', message: result.message, step: "remote" });
                 } catch (error) {
                     console.error('Error uploading to GitHub:', error);
                     await sendProgress({ type: 'error', message: "Erreur lors de l'envoi vers GitHub", step: "remote" });
@@ -297,22 +149,9 @@ export const POST: APIRoute = async ({request}) => {
             }
 
             await sendProgress({ type: 'success', message: "Traitement terminé avec succès", step: "complete" });
-        } catch (e: any) {
-            if (e instanceof z.ZodError) {
-                const errors = e.errors.map((error) => {
-                    return {
-                        field: error.path.join("."),
-                        message: error.message
-                    }
-                });
-
-                await sendProgress({ type: 'error', message: "Échec de la validation", step: "validation" });
-                for (const error of errors) {
-                    await sendProgress({ type: 'error', message: `${error.field}: ${error.message}`, step: "validation" });
-                }
-            } else {
-                await sendProgress({ type: 'error', message: "Une erreur inattendue s'est produite", step: "error" });
-            }
+        } catch (error) {
+            console.error('Unexpected error:', error);
+            await sendProgress({ type: 'error', message: "Une erreur inattendue s'est produite", step: "error" });
         } finally {
             await writer.close();
         }

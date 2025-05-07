@@ -64,6 +64,19 @@ const { contributor = "" } = Astro.props;
         </ul>
     </div>
 
+    <div class="upload-form__field upload-form__draft-option">
+        <label class="checkbox-label">
+            <input
+                type="checkbox"
+                id="isDraft"
+                name="is_draft"
+                value="true"
+            />
+            <span>Sauvegarder comme brouillon</span>
+        </label>
+        <p class="help-text">Les brouillons seront uniquement disponibles dans l'environnement de développement.</p>
+    </div>
+
     <div class="upload-form__submit">
         <button type="button" id="submitButton" class="btn-action with-border">
             <span class="button-text">Envoyer la fiche</span>
@@ -81,6 +94,28 @@ const { contributor = "" } = Astro.props;
         &[data-loading="true"] {
             opacity: 0.7;
             pointer-events: none;
+        }
+    }
+
+    .upload-form__draft-option {
+        margin: 1rem 0;
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+
+        .help-text {
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
         }
     }
 
