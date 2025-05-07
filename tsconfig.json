@@ -18,10 +18,12 @@
     "jsxImportSource": "react",
     "moduleResolution": "node16",
     "module": "node16",
-  },
-  "paths": {
-    "@/*": [
-      "src/*"
-    ]
-  },
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@content/*": ["./src/content/*"],
+      "@styles/*": ["./src/styles/*"],
+    }
+  }
 }

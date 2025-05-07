@@ -1,5 +1,5 @@
 import { Octokit } from "octokit";
-import { SummaryData } from "../../content.config";
+import type { SummaryData } from "@/content.config.js";
 
 type GitHubPayload = {
     owner: string;

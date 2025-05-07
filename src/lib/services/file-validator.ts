@@ -1,6 +1,7 @@
 import matter from 'gray-matter';
 import { z } from "zod";
-import { summaryValidationSchema, SummaryData } from "../../content.config";
+import { summaryValidationSchema } from "@/content.config.js";
+import type { SummaryData } from "@/content.config.js";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_FILE_EXTENSIONS = ['.md', '.mdx'];
