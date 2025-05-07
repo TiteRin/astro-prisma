@@ -1,0 +1,77 @@
+// Upload Progress Styles
+.upload-progress {
+    --success-color: #4caf50;
+    --error-color: #f44336;
+    --background-primary: #f5f5f5;
+    --background-secondary: #ffffff;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+
+    &[data-active="true"] {
+        display: block;
+    }
+
+    &__steps {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    &__step {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+
+        &[data-status="active"] {
+            opacity: 1;
+        }
+
+        &[data-status="completed"] {
+            opacity: 1;
+        }
+
+        &[data-status="error"] {
+            opacity: 1;
+        }
+    }
+
+    .step-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: var(--background-primary);
+        border-radius: 50%;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    .step-content {
+        flex: 1;
+
+        h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .step-description {
+            margin: 0.25rem 0 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+    }
+
+    .upload-progress__step[data-status="completed"] .step-icon {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .upload-progress__step[data-status="error"] .step-icon {
+        background: var(--error-color);
+        color: white;
+    }
+} 

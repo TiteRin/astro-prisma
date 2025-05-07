@@ -1,0 +1,96 @@
+---
+import Layout from "../layouts/Layout.astro";
+import UploadForm from "../components/UploadForm.astro";
+import { Icon } from "astro-icon/components";
+
+// Import simulation files
+const validNote = await import("../assets/simulation/valid-note.md?raw");
+const invalidNote = await import("../assets/simulation/invalid-note.md?raw");
+const validCover = await import("../assets/simulation/valid-cover.jpg?url");
+const invalidCover = await import("../assets/simulation/invalid-cover.jpg?url");
+---
+
+<Layout title="Upload Simulation">
+    <main class="simulation-page">
+        <h1>Upload Simulation</h1>
+        <p class="simulation-intro">
+            This page contains pre-filled forms for testing different upload scenarios.
+            Each form is ready to submit, allowing you to test the upload process and progress tracking.
+        </p>
+
+        <div class="simulation-forms">
+            <section class="simulation-form">
+                <h2>
+                    <Icon name="mdi:check-circle" />
+                    Valid File Test
+                </h2>
+                <p>Tests the upload process with a properly formatted markdown file.</p>
+                <UploadForm 
+                    contributor="Test User"
+                    defaultFile={validNote.default}
+                    defaultImage={validCover.default}
+                    formId="validForm"
+                />
+            </section>
+
+            <section class="simulation-form">
+                <h2>
+                    <Icon name="mdi:alert-circle" />
+                    Invalid File Test
+                </h2>
+                <p>Tests error handling with a malformed markdown file.</p>
+                <UploadForm 
+                    contributor="Test User"
+                    defaultFile={invalidNote.default}
+                    defaultImage={invalidCover.default}
+                    formId="invalidForm"
+                />
+            </section>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    .simulation-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .simulation-intro {
+        margin: 1rem 0 2rem;
+        color: var(--text-secondary);
+    }
+
+    .simulation-forms {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .simulation-form {
+        background: var(--background-secondary);
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .simulation-form h2 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 1rem;
+        color: var(--text-primary);
+    }
+
+    .simulation-form p {
+        margin: 0 0 1.5rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .simulation-forms {
+            grid-template-columns: 1fr;
+        }
+    }
+</style> 

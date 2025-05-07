@@ -1,0 +1,163 @@
+---
+import { Icon } from "astro-icon/components";
+import "../styles/upload-progress.scss";
+
+interface Props {
+    formId?: string;
+}
+
+const { formId = "uploadForm" } = Astro.props;
+---
+<div class="upload-progress" id={`${formId}-progress`}>
+    <div class="upload-progress__steps">
+        <div class="upload-progress__step" data-step="validation">
+            <div class="step-icon">
+                <Icon name="mdi:check-circle" />
+            </div>
+            <div class="step-content">
+                <h3>Validation initiale</h3>
+                <p class="step-description">Vérification des informations de base...</p>
+            </div>
+        </div>
+
+        <div class="upload-progress__step" data-step="analysis">
+            <div class="step-icon">
+                <Icon name="mdi:file-document" />
+            </div>
+            <div class="step-content">
+                <h3>Analyse du fichier</h3>
+                <p class="step-description">Extraction des métadonnées...</p>
+            </div>
+        </div>
+
+        <div class="upload-progress__step" data-step="upload">
+            <div class="step-icon">
+                <Icon name="mdi:github" />
+            </div>
+            <div class="step-content">
+                <h3>Envoi vers GitHub</h3>
+                <p class="step-description">Téléchargement du fichier...</p>
+            </div>
+        </div>
+
+        <div class="upload-progress__step" data-step="build">
+            <div class="step-icon">
+                <Icon name="mdi:rocket-launch" />
+            </div>
+            <div class="step-content">
+                <h3>Construction du site</h3>
+                <p class="step-description">Mise à jour du site...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .upload-progress {
+        display: none;
+        padding: 2rem;
+        background: var(--background-secondary);
+        border-radius: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .upload-progress[data-active="true"] {
+        display: block;
+    }
+
+    .upload-progress__steps {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .upload-progress__step {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+    }
+
+    .upload-progress__step[data-status="active"] {
+        opacity: 1;
+    }
+
+    .upload-progress__step[data-status="completed"] {
+        opacity: 1;
+    }
+
+    .step-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: var(--background-primary);
+        border-radius: 50%;
+        color: var(--text-primary);
+    }
+
+    .step-content {
+        flex: 1;
+    }
+
+    .step-content h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+    }
+
+    .step-description {
+        margin: 0.25rem 0 0;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .upload-progress__step[data-status="completed"] .step-icon {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .upload-progress__step[data-status="error"] .step-icon {
+        background: var(--error-color);
+        color: white;
+    }
+</style>
+
+<script define:vars={{ formId }}>
+    // Progress tracking
+    let currentStep = '';
+    const progressElement = document.getElementById(`${formId}-progress`);
+    const steps = progressElement?.querySelectorAll('.upload-progress__step');
+
+    function updateStepStatus(step, status, message) {
+        const stepElement = progressElement?.querySelector(`[data-step="${step}"]`);
+        if (stepElement) {
+            stepElement.setAttribute('data-status', status);
+            if (message) {
+                const description = stepElement.querySelector('.step-description');
+                if (description) {
+                    description.textContent = message;
+                }
+            }
+        }
+    }
+
+    // Export functions for use in the main form
+    window.uploadProgress = {
+        start: () => {
+            if (progressElement) {
+                progressElement.setAttribute('data-active', 'true');
+            }
+        },
+        reset: () => {
+            if (progressElement) {
+                progressElement.setAttribute('data-active', 'false');
+                steps?.forEach(step => {
+                    step.removeAttribute('data-status');
+                });
+            }
+        }
+    };
+</script> 

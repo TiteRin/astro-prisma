@@ -1,9 +1,10 @@
 ---
-import FicheLayout from "../layouts/FicheLayout.astro";
+import Layout from "../layouts/Layout.astro";
 import UploadForm from "../components/UploadForm.astro";
 ---
 
-<FicheLayout>
-    <h1>Ajouter une nouvelle fiche de lecture</h1>
-    <UploadForm />
-</FicheLayout>
+<Layout title="Upload a new reading note">
+    <main>
+        <UploadForm />
+    </main>
+</Layout>

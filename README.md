@@ -56,7 +56,7 @@ We are creating a new App Toolbar that will:
 - [x] Implement proper ARIA labels and keyboard navigation
 
 ### Enhanced Notes Submission
-**Branch:** `feat/enhanced-submission`
+**Branch:** `feat/notes-upload-progress`
 
 **Summary:**
 We are enhancing the notes submission process with a multi-step validation and progress tracking system. This feature will provide real-time feedback to users during the submission process, making it more transparent and user-friendly.
@@ -88,23 +88,27 @@ We are enhancing the notes submission process with a multi-step validation and p
 
 **Development Features:**
 - Simulation mode for development and testing
-- Mock data for file analysis
-- Configurable delays for testing
-- Error scenario simulation
+  - Dedicated `/simulation-upload` page
+  - Pre-filled forms for valid and invalid scenarios
+  - Test markdown files with proper frontmatter
+  - Cover image support
+- Progress tracking component
+- Real-time validation feedback
+- Toast notifications for status updates
 
 **To-Do List:**
-- [ ] Set up simulation mode
-- [ ] Create progress tracking component
-- [ ] Implement basic validation step
-- [ ] Add file analysis functionality
+- [x] Set up simulation mode
+- [x] Create progress tracking component
+- [x] Implement basic validation step
+- [x] Add file analysis functionality
 - [ ] Integrate GitHub upload verification
 - [ ] Add build status monitoring
 - [ ] Implement error handling
-- [ ] Add responsive styling
-- [ ] Test all scenarios
+- [x] Add responsive styling
+- [x] Test all scenarios
 - [ ] Document the feature
 
-## �� Project Structure
+## Project Structure
 
 Inside of your Astro project, you'll see the following folders and files:
 

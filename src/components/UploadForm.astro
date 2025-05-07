@@ -1,24 +1,29 @@
 ---
 import { Icon } from "astro-icon/components";
+import UploadProgress from "./UploadProgress.astro";
 import "../styles/upload-form.scss";
+import "../types/upload-progress.d.ts";
 
 interface Props {
     contributor?: string;
+    defaultFile?: string;
+    defaultImage?: string;
+    formId?: string;
 }
 
-const { contributor = "" } = Astro.props;
+const { contributor = "", defaultFile = "", defaultImage = "", formId = "uploadForm" } = Astro.props;
 ---
 
-<form class="upload-form" id="uploadForm" enctype="multipart/form-data">
+<form class="upload-form" id={formId} enctype="multipart/form-data">
     <h2 class="upload-form__title">Ajouter une nouvelle fiche de lecture</h2>
 
     <div class="upload-form__field">
-        <label for="contributor">Votre nom</label>
+        <label for={`${formId}-contributor`}>Votre nom</label>
         <input
             type="text"
-            id="contributor"
+            id={`${formId}-contributor`}
             name="contributor"
-            value={contributor || "Nom par défaut"}
+            value={contributor}
             required
             placeholder="Entrez votre nom"
         />
@@ -27,14 +32,14 @@ const { contributor = "" } = Astro.props;
     <div class="upload-form__file-upload">
         <input
             type="file"
-            id="fileInput"
+            id={`${formId}-fileInput`}
             name="new-note"
             accept=".md,.mdx"
             required
         />
-        <label for="fileInput" class="upload-form__file-upload-label">
+        <label for={`${formId}-fileInput`} class="upload-form__file-upload-label">
             <Icon name="mdi:upload" />
-            <span id="fileName">Choisissez un fichier ou glissez-le ici</span>
+            <span id={`${formId}-fileName`}>Choisissez un fichier ou glissez-le ici</span>
             <p>Seuls les fichiers .md et .mdx sont acceptés</p>
         </label>
     </div>
@@ -42,14 +47,14 @@ const { contributor = "" } = Astro.props;
     <div class="upload-form__file-upload">
         <input
             type="file"
-            id="coverImageInput"
+            id={`${formId}-coverImageInput`}
             name="cover-image"
             accept="image/*"
             required
         />
-        <label for="coverImageInput" class="upload-form__file-upload-label">
+        <label for={`${formId}-coverImageInput`} class="upload-form__file-upload-label">
             <Icon name="mdi:image" />
-            <span id="coverImageName">Choisissez une image de couverture</span>
+            <span id={`${formId}-coverImageName`}>Choisissez une image de couverture</span>
             <p>Formats acceptés : JPG, PNG, GIF</p>
         </label>
     </div>
@@ -68,7 +73,7 @@ const { contributor = "" } = Astro.props;
         <label class="checkbox-label">
             <input
                 type="checkbox"
-                id="isDraft"
+                id={`${formId}-isDraft`}
                 name="is_draft"
                 value="true"
             />
@@ -78,7 +83,7 @@ const { contributor = "" } = Astro.props;
     </div>
 
     <div class="upload-form__submit">
-        <button type="button" id="submitButton" class="btn-action with-border">
+        <button type="button" id={`${formId}-submitButton`} class="btn-action with-border">
             <span class="button-text">Envoyer la fiche</span>
             <span class="loading-spinner" hidden>
                 <Icon name="mdi:loading" />
@@ -87,7 +92,9 @@ const { contributor = "" } = Astro.props;
     </div>
 </form>
 
-<div id="toast-container" class="toast-container"></div>
+<UploadProgress formId={formId} />
+
+<div id={`${formId}-toast-container`} class="toast-container"></div>
 
 <style>
     .upload-form {
@@ -231,10 +238,10 @@ const { contributor = "" } = Astro.props;
     }
 </style>
 
-<script>
-    function setLoading(isLoading: boolean): void {
-        const form = document.getElementById('uploadForm') as HTMLFormElement;
-        const submitButton = document.getElementById('submitButton');
+<script define:vars={{ defaultFile, defaultImage, formId }}>
+    function setLoading(isLoading) {
+        const form = document.getElementById(formId);
+        const submitButton = document.getElementById(`${formId}-submitButton`);
         if (form && submitButton) {
             form.setAttribute('data-loading', isLoading.toString());
             submitButton.setAttribute('data-loading', isLoading.toString());
@@ -245,47 +252,69 @@ const { contributor = "" } = Astro.props;
         }
     }
 
-    function showToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success'): void {
-        const container = document.getElementById('toast-container');
+    function showToast(message, type = 'success') {
+        const container = document.getElementById(`${formId}-toast-container`);
         if (!container) return;
 
         const toast = document.createElement('div');
         toast.className = `toast toast--${type}`;
         toast.innerHTML = `
-            <span class="toast-icon">
-                ${type === 'success' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>' : ''}
-                ${type === 'error' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>' : ''}
-                ${type === 'warning' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"/></svg>' : ''}
-                ${type === 'info' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>' : ''}
-            </span>
-            <span class="toast-content">${message}</span>
-            <button class="toast-close" onclick="this.parentElement.remove()">
-                <svg viewBox="0 0 24 24" width="24" height="24" class="icon">
-                    <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
-                </svg>
-            </button>
+            <div class="toast-icon">
+                ${type === 'success' ? '✓' : type === 'error' ? '✕' : type === 'warning' ? '⚠' : 'ℹ'}
+            </div>
+            <div class="toast-content">${message}</div>
+            <button class="toast-close">×</button>
         `;
 
         container.appendChild(toast);
 
-        // Auto-remove success and info toasts after 5 seconds
-        if (type === 'success' || type === 'info') {
-            setTimeout(() => toast.remove(), 5000);
+        const closeButton = toast.querySelector('.toast-close');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => {
+                toast.remove();
+            });
         }
+
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('uploadForm') as HTMLFormElement;
-        const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-        const coverImageInput = document.getElementById('coverImageInput') as HTMLInputElement;
-        const fileName = document.getElementById('fileName');
-        const coverImageName = document.getElementById('coverImageName');
-        const submitButton = document.getElementById('submitButton');
-        const dropZone = document.querySelector('.upload-form__file-upload');
+        const form = document.getElementById(formId);
+        const fileInput = document.getElementById(`${formId}-fileInput`);
+        const coverImageInput = document.getElementById(`${formId}-coverImageInput`);
+        const fileName = document.getElementById(`${formId}-fileName`);
+        const coverImageName = document.getElementById(`${formId}-coverImageName`);
+        const submitButton = document.getElementById(`${formId}-submitButton`);
+        const dropZone = form?.querySelector('.upload-form__file-upload');
 
         if (!form || !fileInput || !coverImageInput || !fileName || !coverImageName || !submitButton || !dropZone) {
             console.error('Required DOM elements not found');
             return;
+        }
+
+        // Set default values if provided
+        if (defaultFile) {
+            const blob = new Blob([defaultFile], { type: 'text/markdown' });
+            const file = new File([blob], 'default-note.md', { type: 'text/markdown' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            fileName.textContent = 'default-note.md';
+        }
+
+        if (defaultImage) {
+            fetch(defaultImage)
+                .then(response => response.blob())
+                .then(blob => {
+                    const file = new File([blob], 'default-cover.jpg', { type: 'image/jpeg' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    coverImageInput.files = dataTransfer.files;
+                    coverImageName.textContent = 'default-cover.jpg';
+                })
+                .catch(error => console.error('Error loading default image:', error));
         }
 
         submitButton.addEventListener('click', async (e) => {
@@ -352,7 +381,7 @@ const { contributor = "" } = Astro.props;
 
         // Add event listeners for file inputs
         fileInput.addEventListener('change', (e) => {
-            const target = e.target as HTMLInputElement;
+            const target = e.target;
             const file = target.files?.[0];
             if (file) {
                 fileName.textContent = file.name;
@@ -360,7 +389,7 @@ const { contributor = "" } = Astro.props;
         });
 
         coverImageInput.addEventListener('change', (e) => {
-            const target = e.target as HTMLInputElement;
+            const target = e.target;
             const file = target.files?.[0];
             if (file) {
                 coverImageName.textContent = file.name;
@@ -372,7 +401,7 @@ const { contributor = "" } = Astro.props;
             dropZone?.addEventListener(eventName, preventDefaults, false);
         });
 
-        function preventDefaults(e: Event): void {
+        function preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
         }
@@ -385,17 +414,17 @@ const { contributor = "" } = Astro.props;
             dropZone?.addEventListener(eventName, unhighlight, false);
         });
 
-        function highlight(): void {
+        function highlight() {
             dropZone?.classList.add('highlight');
         }
 
-        function unhighlight(): void {
+        function unhighlight() {
             dropZone?.classList.remove('highlight');
         }
 
-        dropZone?.addEventListener('drop', handleDrop as EventListener, false);
+        dropZone?.addEventListener('drop', handleDrop, false);
 
-        function handleDrop(e: DragEvent): void {
+        function handleDrop(e) {
             const dt = e.dataTransfer;
             if (!dt) return;
             const files = dt.files;
