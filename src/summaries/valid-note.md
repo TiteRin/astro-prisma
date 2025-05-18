@@ -3,8 +3,9 @@ bookTitle: The Pragmatic Programmer
 bookAuthors:
   - Andrew Hunt
   - David Thomas
+publishedYear: 1999
 contributor: Test User
-lastModification: 2025-05-07T16:37:15.751Z
+lastModification: 2025-05-18T07:13:00.447Z
 tags:
   - programming
   - software development
@@ -12,9 +13,8 @@ tags:
 summary: >-
   A guide to software development best practices that helps developers write
   better code and become more effective programmers.
-publishedYear: 2000
 image:
-  url: /img/default-note.jpg
+  url: /img/valid-note.jpg
   alt: Couverture de The Pragmatic Programmer
 ---
 

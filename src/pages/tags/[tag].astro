@@ -29,7 +29,7 @@ const {tag} = Astro.params;
     <ul>
         {
             filteredReadingNotes.map(readingNote => (
-                    <li key={readingNote.id}>
+                    <li>
                         <a href={`/fiches/${readingNote.id}`}>
                             {readingNote.data.bookTitle} ({readingNote.data.bookAuthors.join(", ")})
                         </a>

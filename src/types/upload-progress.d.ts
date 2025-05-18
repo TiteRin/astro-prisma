@@ -1,10 +1,8 @@
 export interface UploadProgress {
-    start: () => void;
-    reset: () => void;
+    start: (fileName: string) => void;
+    update: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
 declare global {
-    interface Window {
-        uploadProgress: UploadProgress;
-    }
+    var uploadProgress: UploadProgress | undefined;
 } 

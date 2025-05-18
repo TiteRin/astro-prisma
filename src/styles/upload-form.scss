@@ -61,7 +61,17 @@
     }
 
     input[type="file"] {
-      display: none;
+      width: 0.1px;
+      height: 0.1px;
+      opacity: 0;
+      overflow: hidden;
+      position: absolute;
+      z-index: -1;
+
+      &:focus + .upload-form__file-upload-label {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+      }
     }
 
     &-label {
@@ -70,6 +80,7 @@
       align-items: center;
       color: var(--text-color);
       cursor: pointer;
+      width: 100%;
 
       svg {
         width: 2rem;

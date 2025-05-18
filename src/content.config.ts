@@ -6,6 +6,7 @@ import { z, defineCollection } from "astro:content";
 export const summaryValidationSchema = z.object({
     bookTitle: z.string().min(1, "Le titre du livre est requis"),
     bookAuthors: z.array(z.string().min(1, "L'auteur est requis")).min(1, "Au moins un auteur est requis"),
+    publishedYear: z.number().min(1500, "L'année de publication est requise"),
     contributor: z.string().min(1, "Le contributeur est requis"),
     lastModification: z.date(),
     tags: z.array(z.string()),

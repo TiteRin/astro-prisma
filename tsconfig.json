@@ -16,8 +16,10 @@
     ],
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "moduleResolution": "node16",
-    "module": "node16",
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "allowImportingTsExtensions": true,
+    "types": ["@iconify/react"],
     "paths": {
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],

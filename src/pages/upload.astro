@@ -1,10 +1,10 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import UploadForm from "../components/UploadForm.astro";
+import Layout from '../layouts/Layout.astro';
+import UploadForm from '../components/UploadForm';
 ---
 
-<Layout title="Upload a new reading note">
+<Layout title="Upload a new note">
     <main>
-        <UploadForm />
+        <UploadForm client:load />
     </main>
 </Layout>

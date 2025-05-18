@@ -1,0 +1,397 @@
+---
+import { Icon } from "astro-icon/components";
+import UploadProgress from "./UploadProgress.astro";
+import "../styles/upload-form.scss";
+import "../types/upload-progress.d.ts";
+
+interface Props {
+    contributor?: string;
+    defaultFile?: string;
+    defaultImage?: string;
+    formId?: string;
+}
+
+const { contributor = "", defaultFile = "", defaultImage = "", formId = "uploadForm" } = Astro.props;
+---
+
+<div class="upload-container" id={`${formId}-container`}>
+    <form class="upload-form" id={formId} enctype="multipart/form-data" novalidate>
+        <h2 class="upload-form__title">Ajouter une nouvelle fiche de lecture</h2>
+
+        <div class="upload-form__field">
+            <label for={`${formId}-contributor`}>Votre nom</label>
+            <input
+                type="text"
+                id={`${formId}-contributor`}
+                name="contributor"
+                value={contributor}
+                required
+                placeholder="Entrez votre nom"
+            />
+        </div>
+
+        <div class="upload-form__file-upload">
+            <input
+                type="file"
+                id={`${formId}-fileInput`}
+                name="new-note"
+                accept=".md,.mdx"
+                required
+            />
+            <label for={`${formId}-fileInput`} class="upload-form__file-upload-label">
+                <Icon name="mdi:upload" />
+                <span id={`${formId}-fileName`}>Choisissez un fichier ou glissez-le ici</span>
+                <p>Seuls les fichiers .md et .mdx sont acceptés</p>
+            </label>
+        </div>
+
+        <div class="upload-form__file-upload">
+            <input
+                type="file"
+                id={`${formId}-coverImageInput`}
+                name="cover-image"
+                accept="image/*"
+                required
+            />
+            <label for={`${formId}-coverImageInput`} class="upload-form__file-upload-label">
+                <Icon name="mdi:image" />
+                <span id={`${formId}-coverImageName`}>Choisissez une image de couverture</span>
+                <p>Formats acceptés : JPG, PNG, GIF</p>
+            </label>
+        </div>
+
+        <div class="upload-form__info">
+            <h3>Important concernant les images</h3>
+            <p>Pour les images dans le contenu de votre fiche :</p>
+            <ul>
+                <li>Les images doivent être hébergées sur un service externe (comme Imgur, GitHub, etc.)</li>
+                <li>Utilisez des URLs absolues pour vos images</li>
+                <li>Vérifiez que les URLs sont accessibles publiquement</li>
+            </ul>
+        </div>
+
+        <div class="upload-form__field upload-form__draft-option">
+            <label class="checkbox-label">
+                <input
+                    type="checkbox"
+                    id={`${formId}-isDraft`}
+                    name="is_draft"
+                    value="true"
+                />
+                <span>Sauvegarder comme brouillon</span>
+            </label>
+            <p class="help-text">Les brouillons seront uniquement disponibles dans l'environnement de développement.</p>
+        </div>
+
+        <div class="upload-form__submit">
+            <button type="submit" id={`${formId}-submitButton`} class="btn-action with-border">
+                <span class="button-text">Envoyer la fiche</span>
+                <span class="loading-spinner" hidden>
+                    <Icon name="mdi:loading" />
+                </span>
+            </button>
+        </div>
+    </form>
+
+    <UploadProgress formId={formId} />
+</div>
+
+<div id={`${formId}-toast-container`} class="toast-container"></div>
+
+<style>
+    .upload-container {
+        position: relative;
+        max-width: 600px;
+        margin: 2rem auto;
+    }
+
+    .upload-form {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .upload-form[data-hidden="true"] {
+        opacity: 0;
+        transform: translateY(-20px);
+        pointer-events: none;
+        position: absolute;
+        width: 100%;
+    }
+
+    .upload-progress {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .upload-progress[data-active="true"] {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .upload-form__draft-option {
+        margin: 1rem 0;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .help-text {
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+
+    .loading-spinner {
+        display: none;
+        animation: spin 1s linear infinite;
+        margin-left: 0.5rem;
+    }
+
+    .btn-action[data-loading="true"] .loading-spinner {
+        display: inline-flex;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<script define:vars={{ defaultFile, defaultImage, formId }}>
+    function setLoading(isLoading) {
+        const container = document.getElementById(`${formId}-container`);
+        const form = document.getElementById(formId);
+        const submitButton = document.getElementById(`${formId}-submitButton`);
+        const progress = document.getElementById(`${formId}-progress`);
+        
+        if (!container || !form || !submitButton || !progress) return;
+        
+        form.setAttribute('data-hidden', isLoading.toString());
+        submitButton.setAttribute('data-loading', isLoading.toString());
+        progress.setAttribute('data-active', isLoading.toString());
+        
+        const buttonText = submitButton.querySelector('.button-text');
+        if (buttonText) {
+            buttonText.textContent = isLoading ? 'En cours d\'envoi' : 'Envoyer la fiche';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById(formId);
+        const fileInput = document.getElementById(`${formId}-fileInput`);
+        const coverImageInput = document.getElementById(`${formId}-coverImageInput`);
+        const fileName = document.getElementById(`${formId}-fileName`);
+        const coverImageName = document.getElementById(`${formId}-coverImageName`);
+        const submitButton = document.getElementById(`${formId}-submitButton`);
+        const dropZone = form?.querySelector('.upload-form__file-upload');
+
+        if (!form || !fileInput || !coverImageInput || !fileName || !coverImageName || !submitButton || !dropZone) {
+            console.error('Required DOM elements not found');
+            return;
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const file = fileInput.files?.[0];
+            if (!file) {
+                console.error('No file selected');
+                return;
+            }
+
+            console.log('Starting file upload...');
+            setLoading(true);
+            window.uploadProgress?.start(file.name);
+            const formData = new FormData(form);
+            
+            try {
+                console.log('Sending fetch request...');
+                const response = await fetch('/api/submit-note', {
+                    method: 'POST',
+                    body: formData,
+                    redirect: 'manual',
+                    // Add headers to ensure proper handling
+                    headers: {
+                        'Accept': 'text/event-stream',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+
+                console.log('Fetch response received:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries())
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const reader = response.body?.getReader();
+                if (!reader) {
+                    throw new Error('No reader available');
+                }
+
+                console.log('Starting to read response stream...');
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    console.log('Stream read:', { done, valueLength: value?.length });
+                    
+                    if (done) {
+                        console.log('Stream complete');
+                        break;
+                    }
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        
+                        try {
+                            const notification = JSON.parse(line);
+                            console.log('Received notification:', notification);
+                            await delay(2000);
+                            
+                            if (notification.step === 'validation' && notification.type === 'success') {
+                                window.uploadProgress?.update('Le fichier est valide', 'success');
+                                await delay(3000);
+                                continue;
+                            }
+                            
+                            if (notification.step === 'validation' && notification.type === 'error') {
+                                window.uploadProgress?.update(notification.message, 'error');
+                                await delay(3000);
+                                continue;
+                            }
+                            
+                            if (notification.step === 'analysis' && notification.type === 'success') {
+                                const { bookTitle, bookAuthors, wordCount, sections } = notification.data || {};
+                                const authors = bookAuthors?.join(', ') || '';
+                                window.uploadProgress?.update(
+                                    `Analyse terminée : "${bookTitle}" par ${authors} (${wordCount} mots, ${sections} sections)`,
+                                    'success'
+                                );
+                                await delay(4000);
+                                continue;
+                            }
+                            
+                            if (notification.step === 'upload' && notification.type === 'info') {
+                                window.uploadProgress?.update('Envoi du fichier en cours...', 'info');
+                                await delay(3000);
+                                continue;
+                            }
+                            
+                            if (notification.step === 'upload' && notification.type === 'success') {
+                                window.uploadProgress?.update('Fichier envoyé avec succès', 'success');
+                                await delay(3000);
+                                continue;
+                            }
+                            
+                            if (notification.step === 'complete') {
+                                const url = notification.data?.url;
+                                if (url) {
+                                    window.uploadProgress?.update(`Fichier disponible à l'adresse : ${url}`, 'success');
+                                    await delay(5000);
+                                }
+                                setTimeout(() => {
+                                    form.reset();
+                                    fileName.textContent = 'Choisissez un fichier ou glissez-le ici';
+                                    coverImageName.textContent = 'Choisissez une image de couverture';
+                                    setLoading(false);
+                                }, 5000);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing notification:', e);
+                        }
+                    }
+                }
+                console.log('Stream processing complete');
+            } catch (error) {
+                console.error('Error during submission:', error);
+                window.uploadProgress?.update('Une erreur est survenue lors de l\'envoi du fichier', 'error');
+                await delay(5000);
+                setLoading(false);
+            }
+        });
+
+        // File input change handlers
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+                fileName.textContent = file.name;
+            }
+        });
+
+        coverImageInput.addEventListener('change', (e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+                coverImageName.textContent = file.name;
+            }
+        });
+
+        // Drag and drop handling
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone?.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone?.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone?.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropZone?.classList.add('highlight');
+        }
+
+        function unhighlight() {
+            dropZone?.classList.remove('highlight');
+        }
+
+        dropZone?.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            if (!dt) return;
+            const files = dt.files;
+            if (!files || files.length === 0) return;
+            
+            fileInput.files = files;
+            if (fileName) {
+                fileName.textContent = files[0].name;
+            }
+        }
+    });
+</script>
+
+

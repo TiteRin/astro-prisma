@@ -2,6 +2,7 @@
 bookTitle: "The Pragmatic Programmer"
 bookAuthors: ["Andrew Hunt", "David Thomas"]
 summary: "A guide to software development best practices that helps developers write better code and become more effective programmers."
+publishedYear: 1999
 date: "2024-03-20"
 tags: ["programming", "software development", "best practices"]
 ---

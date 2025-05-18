@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import UploadForm from "../components/UploadForm.astro";
+import UploadForm from "../components/UploadForm.tsx";
 import { Icon } from "astro-icon/components";
 
 // Import simulation files
@@ -26,6 +26,7 @@ const invalidCover = await import("../assets/simulation/invalid-cover.jpg?url");
                 </h2>
                 <p>Tests the upload process with a properly formatted markdown file.</p>
                 <UploadForm 
+                    client:load
                     contributor="Test User"
                     defaultFile={validNote.default}
                     defaultImage={validCover.default}
@@ -40,6 +41,7 @@ const invalidCover = await import("../assets/simulation/invalid-cover.jpg?url");
                 </h2>
                 <p>Tests error handling with a malformed markdown file.</p>
                 <UploadForm 
+                    client:load
                     contributor="Test User"
                     defaultFile={invalidNote.default}
                     defaultImage={invalidCover.default}
