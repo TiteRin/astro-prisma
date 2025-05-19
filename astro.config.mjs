@@ -3,7 +3,11 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
 import netlify from '@astrojs/netlify';
-import path from "path";
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // https://astro.build/config
 export default defineConfig({
@@ -23,7 +27,7 @@ export default defineConfig({
     },
     resolve: {
       alias: {
-        '@': path.resolve('./src/'),
+        '@': resolve(__dirname, './src/'),
       },
     },
   }

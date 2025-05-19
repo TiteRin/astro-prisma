@@ -197,31 +197,41 @@ const { contributor = "" } = Astro.props;
 </style>
 
 <script>
+    interface ToastOptions {
+        message: string;
+        type: 'success' | 'error' | 'warning' | 'info';
+    }
+
     function setLoading(isLoading: boolean): void {
         const form = document.getElementById('uploadForm') as HTMLFormElement;
-        const submitButton = document.getElementById('submitButton');
+        const submitButton = document.getElementById('submitButton') as HTMLButtonElement;
         if (form && submitButton) {
             form.setAttribute('data-loading', isLoading.toString());
             submitButton.setAttribute('data-loading', isLoading.toString());
-            const buttonText = submitButton.querySelector('.button-text');
+            const buttonText = submitButton.querySelector('.button-text') as HTMLElement;
             if (buttonText) {
                 buttonText.textContent = isLoading ? 'En cours d\'envoi' : 'Envoyer la fiche';
             }
         }
     }
 
-    function showToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success'): void {
+    function showToast({ message, type = 'success' }: ToastOptions): void {
         const container = document.getElementById('toast-container');
         if (!container) return;
 
         const toast = document.createElement('div');
         toast.className = `toast toast--${type}`;
+        
+        const icons = {
+            success: '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>',
+            error: '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>',
+            warning: '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"/></svg>',
+            info: '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>'
+        };
+
         toast.innerHTML = `
             <span class="toast-icon">
-                ${type === 'success' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>' : ''}
-                ${type === 'error' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>' : ''}
-                ${type === 'warning' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"/></svg>' : ''}
-                ${type === 'info' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>' : ''}
+                ${icons[type]}
             </span>
             <span class="toast-content">${message}</span>
             <button class="toast-close" onclick="this.parentElement.remove()">
