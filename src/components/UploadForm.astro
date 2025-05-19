@@ -248,4 +248,125 @@ const { contributor = "" } = Astro.props;
             setTimeout(() => toast.remove(), 5000);
         }
     }
+
+    // Form submission handler
+    document.getElementById('submitButton')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const form = document.getElementById('uploadForm') as HTMLFormElement;
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        setLoading(true);
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('/api/submit-note', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const reader = response.body?.getReader();
+            if (!reader) {
+                throw new Error('No reader available');
+            }
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const text = new TextDecoder().decode(value);
+                const notifications = text.split('\n').filter(Boolean);
+
+                for (const notification of notifications) {
+                    try {
+                        const { type, message, step } = JSON.parse(notification);
+                        showToast({ type, message });
+
+                        if (step === 'complete') {
+                            form.reset();
+                            document.getElementById('fileName')!.textContent = 'Choisissez un fichier ou glissez-le ici';
+                            document.getElementById('coverImageName')!.textContent = 'Choisissez une image de couverture';
+                        }
+                    } catch (e) {
+                        console.error('Error parsing notification:', e);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast({ 
+                type: 'error', 
+                message: 'Une erreur est survenue lors de l\'envoi. Veuillez réessayer plus tard.' 
+            });
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    // File input change handlers
+    document.getElementById('fileInput')?.addEventListener('change', (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+            document.getElementById('fileName')!.textContent = file.name;
+        }
+    });
+
+    document.getElementById('coverImageInput')?.addEventListener('change', (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+            document.getElementById('coverImageName')!.textContent = file.name;
+        }
+    });
+
+    // Drag and drop handling
+    const dropZone = document.querySelector('.upload-form__file-upload');
+    if (dropZone) {
+        const dropZoneElement = dropZone as HTMLElement;
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZoneElement.addEventListener(eventName, preventDefaults as EventListener, false);
+        });
+
+        function preventDefaults(e: Event) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZoneElement.addEventListener(eventName, highlight as EventListener, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZoneElement.addEventListener(eventName, unhighlight as EventListener, false);
+        });
+
+        function highlight() {
+            dropZoneElement.classList.add('highlight');
+        }
+
+        function unhighlight() {
+            dropZoneElement.classList.remove('highlight');
+        }
+
+        dropZoneElement.addEventListener('drop', handleDrop as EventListener, false);
+
+        function handleDrop(e: DragEvent) {
+            console.log('File dropped');
+            const dt = e.dataTransfer;
+            if (!dt) return;
+
+            const files = dt.files;
+            if (files.length === 0) return;
+
+            const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+            fileInput.files = files;
+            document.getElementById('fileName')!.textContent = files[0].name;
+        }
+    }
 </script>
