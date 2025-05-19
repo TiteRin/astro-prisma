@@ -1,5 +1,5 @@
 ---
-import { Icon } from "astro-icon/components";
+import Icons from './icons/Icons.astro';
 import "../styles/upload-form.scss";
 
 interface Props {
@@ -33,7 +33,7 @@ const { contributor = "" } = Astro.props;
             required
         />
         <label for="fileInput" class="upload-form__file-upload-label">
-            <Icon name="mdi:upload" />
+            <Icons name="upload" />
             <span id="fileName">Choisissez un fichier ou glissez-le ici</span>
             <p>Seuls les fichiers .md et .mdx sont acceptés</p>
         </label>
@@ -48,7 +48,7 @@ const { contributor = "" } = Astro.props;
             required
         />
         <label for="coverImageInput" class="upload-form__file-upload-label">
-            <Icon name="mdi:image" />
+            <Icons name="image" />
             <span id="coverImageName">Choisissez une image de couverture</span>
             <p>Formats acceptés : JPG, PNG, GIF</p>
         </label>
@@ -68,7 +68,7 @@ const { contributor = "" } = Astro.props;
         <button type="button" id="submitButton" class="btn-action with-border">
             <span class="button-text">Envoyer la fiche</span>
             <span class="loading-spinner" hidden>
-                <Icon name="mdi:loading" />
+                <Icons name="loading" />
             </span>
         </button>
     </div>
@@ -238,141 +238,4 @@ const { contributor = "" } = Astro.props;
             setTimeout(() => toast.remove(), 5000);
         }
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('uploadForm') as HTMLFormElement;
-        const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-        const coverImageInput = document.getElementById('coverImageInput') as HTMLInputElement;
-        const fileName = document.getElementById('fileName');
-        const coverImageName = document.getElementById('coverImageName');
-        const submitButton = document.getElementById('submitButton');
-        const dropZone = document.querySelector('.upload-form__file-upload');
-
-        if (!form || !fileInput || !coverImageInput || !fileName || !coverImageName || !submitButton || !dropZone) {
-            console.error('Required DOM elements not found');
-            return;
-        }
-
-        submitButton.addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-            
-            setLoading(true);
-            const formData = new FormData(form);
-            
-            try {
-                const response = await fetch('/api/submit-note', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const reader = response.body?.getReader();
-                if (!reader) {
-                    throw new Error('No reader available');
-                }
-
-                const decoder = new TextDecoder();
-                let buffer = '';
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n');
-                    buffer = lines.pop() || '';
-
-                    for (const line of lines) {
-                        if (!line.trim()) continue;
-                        try {
-                            const notification = JSON.parse(line);
-                            showToast(notification.message, notification.type);
-                            
-                            // If it's a final success message, reset the form
-                            if (notification.type === 'success' && notification.step === 'complete') {
-                                form.reset();
-                                fileName.textContent = 'Choisissez un fichier ou glissez-le ici';
-                                coverImageName.textContent = 'Choisissez une image de couverture';
-                            }
-                        } catch (e) {
-                            console.error('Error parsing notification:', e);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error during submission:', error);
-                showToast('Une erreur est survenue lors de l\'envoi du fichier. Veuillez vérifier votre connexion et réessayer.', 'error');
-            } finally {
-                setLoading(false);
-            }
-        });
-
-        // Add event listeners for file inputs
-        fileInput.addEventListener('change', (e) => {
-            const target = e.target as HTMLInputElement;
-            const file = target.files?.[0];
-            if (file) {
-                fileName.textContent = file.name;
-            }
-        });
-
-        coverImageInput.addEventListener('change', (e) => {
-            const target = e.target as HTMLInputElement;
-            const file = target.files?.[0];
-            if (file) {
-                coverImageName.textContent = file.name;
-            }
-        });
-
-        // Drag and drop handling
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone?.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e: Event): void {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone?.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone?.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight(): void {
-            dropZone?.classList.add('highlight');
-        }
-
-        function unhighlight(): void {
-            dropZone?.classList.remove('highlight');
-        }
-
-        dropZone?.addEventListener('drop', handleDrop as EventListener, false);
-
-        function handleDrop(e: DragEvent): void {
-            const dt = e.dataTransfer;
-            if (!dt) return;
-            const files = dt.files;
-            if (!files || files.length === 0) return;
-            
-            // Update the file input and label
-            fileInput.files = files;
-            if (fileName) {
-                fileName.textContent = files[0].name;
-            }
-        }
-    });
 </script>
-
-

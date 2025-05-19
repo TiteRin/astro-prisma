@@ -1,5 +1,5 @@
 ---
-import { Icon } from "astro-icon/components";
+import Icons from '../../icons/Icons.astro';
 ---
 
 <section class="theme-switcher">
@@ -10,7 +10,7 @@ import { Icon } from "astro-icon/components";
             aria-label="Switch to light theme"
             data-theme="light"
         >
-            <Icon name="iconoir:sun-light" />
+            <Icons name="sun-light" />
         </button>
         
         <button 
@@ -19,7 +19,7 @@ import { Icon } from "astro-icon/components";
             aria-label="Switch to dark theme"
             data-theme="dark"
         >
-            <Icon name="iconoir:half-moon" />
+            <Icons name="half-moon" />
         </button>
     </div>
 
@@ -69,9 +69,8 @@ import { Icon } from "astro-icon/components";
     function updateTheme() {
         const theme = getStoredTheme();
         const contrast = getStoredContrast();
-        const themeValue = contrast ? `${theme}-high-contrast` : theme;
-        
-        document.body.setAttribute('data-theme', themeValue);
+        const themeClass = contrast ? `${theme}-high-contrast` : theme;
+        document.documentElement.setAttribute('data-theme', themeClass);
         
         // Update button states
         document.querySelectorAll('.theme-switcher__button').forEach(button => {

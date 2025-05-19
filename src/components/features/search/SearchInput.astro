@@ -1,7 +1,6 @@
 ---
 import "@/styles/features/search.scss";
-
-import { Icon } from "astro-icon/components";
+import Icons from '../../icons/Icons.astro';
 ---
 <div class="search-wrapper">
     <div class="input-with-icon">
@@ -11,7 +10,7 @@ import { Icon } from "astro-icon/components";
                 aria-label="Rechercher parmi les fiches"
                 id="global-search"
         />
-        <Icon name="iconoir:search" />
+        <Icons name="search" />
     </div>
     <div class="results-wrapper">
         <h1 class="sr-only">Résultat de la recherche</h1>
@@ -39,50 +38,70 @@ import { Icon } from "astro-icon/components";
             excerpt,
             tags
         ) {
+            const li = document.createElement("li");
+            li.className = "result-item";
 
-            return `<li class="result-item">
-                <a href="${url}">
-                ${img && `<img src="${img}" alt="" />`}
-                    <div>
-                        <h2>${title} <span class="author">par ${authors.join(", ")}</span></h2>
-                        <p>
-                            ${excerpt}
-                        </p>
-                        <p class="summary">
-                            ${summary}
-                        </p>
-                        <ul class="tags">
-                            ${
-                tags.map((tag) => `<li class="tag">${tag}</li>`).join('')
+            const link = document.createElement("a");
+            link.href = url;
+            link.className = "result-item__link";
+
+            const content = document.createElement("div");
+            content.className = "result-item__content";
+
+            const header = document.createElement("div");
+            header.className = "result-item__header";
+
+            const titleEl = document.createElement("h2");
+            titleEl.className = "result-item__title";
+            titleEl.textContent = title;
+
+            const authorsEl = document.createElement("p");
+            authorsEl.className = "result-item__authors";
+            authorsEl.textContent = authors;
+
+            header.appendChild(titleEl);
+            header.appendChild(authorsEl);
+
+            const excerptEl = document.createElement("p");
+            excerptEl.className = "result-item__excerpt";
+            excerptEl.textContent = excerpt;
+
+            content.appendChild(header);
+            content.appendChild(excerptEl);
+
+            if (img) {
+                const imgEl = document.createElement("img");
+                imgEl.src = img;
+                imgEl.alt = "";
+                imgEl.className = "result-item__image";
+                link.appendChild(imgEl);
             }
-                        </ul>
-                    </div>
-                </a>
-            </li>`;
+
+            link.appendChild(content);
+            li.appendChild(link);
+
+            return li;
         }
 
-        input.onfocus = async () => {
-            if (!pagefind) {
+        async function initPagefind() {
+            if (pagefind) return;
+
+            try {
                 pagefind = await import("/pagefind/pagefind.js");
-                await pagefind.options({
-                    ranking: {
-                        pageLength: 0.5
-                    }
-                })
-                pagefind.init();
+                await pagefind.init();
+            } catch (e) {
+                console.error("Error initializing Pagefind:", e);
             }
         }
 
-        input.onkeyup = async (e) => {
-
-            const query = e.target.value.trim();
-
-            if (!query || query.length < 3) {
-                resultsList.classList.add("hidden");
-                return;
+        async function handleSearch() {
+            if (!pagefind) {
+                await initPagefind();
             }
 
-            if (!pagefind) {
+            const query = input.value.trim();
+            if (!query) {
+                resultsList.classList.add("hidden");
                 return;
             }
 
@@ -90,44 +109,48 @@ import { Icon } from "astro-icon/components";
             loadingResults.classList.remove("hidden");
             noResult.classList.add("hidden");
 
-
-            const search = await pagefind.debouncedSearch(query, {}, 700);
-
-            if (!search) {
-                loadingResults.classList.add("hidden");
-                noResult.classList.remove("hidden");
-
-                return;
-            }
-
-            const results = await search.results;
-
-            if (results.length === 0) {
-                loadingResults.classList.add("hidden");
-                noResult.classList.remove("hidden");
-
-                return;
-            }
-
-            [...new Set(resultsList.querySelectorAll(".result-item"))].map((item) => item.remove());
-
-            loadingResults.classList.add("hidden");
-            noResult.classList.add("hidden");
-
-            for (const result of results) {
-                const data = await result.data();
-
-                console.log(data, data.meta, data.excerpt);
-                resultsList.innerHTML += createResultItem(
-                    data.url,
-                    data.meta.title,
-                    data.meta.authors.split("$$"),
-                    data.meta.image,
-                    data.meta.summary,
-                    data.excerpt,
-                    data.meta.tags.split("$$")
+            try {
+                const search = await pagefind.search(query);
+                const results = await Promise.all(
+                    search.results.map(async (result) => {
+                        const data = await result.data();
+                        return {
+                            url: result.url,
+                            title: data.meta.title,
+                            authors: data.meta.authors,
+                            img: data.meta.image,
+                            summary: data.meta.description,
+                            excerpt: result.excerpt,
+                            tags: data.meta.tags,
+                        };
+                    })
                 );
+
+                resultsList.innerHTML = "";
+                if (results.length === 0) {
+                    noResult.classList.remove("hidden");
+                } else {
+                    results.forEach((result) => {
+                        const item = createResultItem(
+                            result.url,
+                            result.title,
+                            result.authors,
+                            result.img,
+                            result.summary,
+                            result.excerpt,
+                            result.tags
+                        );
+                        resultsList.appendChild(item);
+                    });
+                }
+            } catch (e) {
+                console.error("Error searching:", e);
+            } finally {
+                loadingResults.classList.add("hidden");
             }
         }
+
+        input.addEventListener("input", handleSearch);
+        input.addEventListener("focus", handleSearch);
     })();
 </script>

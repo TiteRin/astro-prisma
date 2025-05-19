@@ -825,7 +825,7 @@ const RAW_RUNTIME_STATE =
     ]],\
     ["@iconify-json/iconoir", [\
       ["npm:1.2.7", {\
-        "packageLocation": "../../Users/marin/AppData/Local/Yarn/Berry/cache/@iconify-json-iconoir-npm-1.2.7-d0ac008e51-10c0.zip/node_modules/@iconify-json/iconoir/",\
+        "packageLocation": "./.yarn/unplugged/@iconify-json-iconoir-npm-1.2.7-d0ac008e51/node_modules/@iconify-json/iconoir/",\
         "packageDependencies": [\
           ["@iconify-json/iconoir", "npm:1.2.7"],\
           ["@iconify/types", "npm:2.0.0"]\
@@ -835,7 +835,7 @@ const RAW_RUNTIME_STATE =
     ]],\
     ["@iconify-json/mdi", [\
       ["npm:1.2.3", {\
-        "packageLocation": "../../Users/marin/AppData/Local/Yarn/Berry/cache/@iconify-json-mdi-npm-1.2.3-b9350af7f0-10c0.zip/node_modules/@iconify-json/mdi/",\
+        "packageLocation": "./.yarn/unplugged/@iconify-json-mdi-npm-1.2.3-b9350af7f0/node_modules/@iconify-json/mdi/",\
         "packageDependencies": [\
           ["@iconify-json/mdi", "npm:1.2.3"],\
           ["@iconify/types", "npm:2.0.0"]\

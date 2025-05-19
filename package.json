@@ -20,7 +20,6 @@
     "@types/react": "^19.1.1",
     "@types/react-dom": "^19.1.2",
     "astro": "^5",
-    "astro-icon": "^1.1.5",
     "date-fns": "^4.1.0",
     "gray-matter": "^4.0.3",
     "lodash": "^4.17.21",
@@ -31,8 +30,6 @@
     "sass": "^1.86.3"
   },
   "devDependencies": {
-    "@iconify-json/iconoir": "^1.2.7",
-    "@iconify-json/mdi": "^1.2.3",
     "@types/lodash": "^4.17.16",
     "typescript": "^5.8.3"
   },
