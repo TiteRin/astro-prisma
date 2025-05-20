@@ -163,12 +163,36 @@ export const POST: APIRoute = async ({request}) => {
                     
                     // Get the current tree SHA
                     try {
-                        const branchName = import.meta.env.GITHUB_BRANCH || "main";
+                        const branchName = import.meta.env.GITHUB_UPLOAD_BRANCH || "notes/upload-main";
+                        const targetBranch = import.meta.env.GITHUB_TARGET_BRANCH || "main";
                         await sendProgress({ type: 'info', message: `Tentative de récupération de l'arbre Git pour la branche ${branchName}...`, step: "remote" });
+                        
+                        // First, try to get the branch
+                        let branchRef;
+                        try {
+                            const { data: refData } = await octokit.rest.git.getRef({
+                                ...payload,
+                                ref: `heads/${branchName}`
+                            });
+                            branchRef = refData;
+                        } catch (error) {
+                            // If branch doesn't exist, create it from target branch
+                            const { data: targetRef } = await octokit.rest.git.getRef({
+                                ...payload,
+                                ref: `heads/${targetBranch}`
+                            });
+                            
+                            const { data: newRef } = await octokit.rest.git.createRef({
+                                ...payload,
+                                ref: `refs/heads/${branchName}`,
+                                sha: targetRef.object.sha
+                            });
+                            branchRef = newRef;
+                        }
                         
                         const { data: { sha: baseTree } } = await octokit.rest.git.getTree({
                             ...payload,
-                            tree_sha: branchName,
+                            tree_sha: branchRef.object.sha,
                             recursive: "true"
                         });
                         
@@ -208,18 +232,12 @@ export const POST: APIRoute = async ({request}) => {
                             ]
                         });
 
-                        // Get the latest commit
-                        const { data: { object: { sha: parentCommit } } } = await octokit.rest.git.getRef({
-                            ...payload,
-                            ref: `heads/${branchName}`
-                        });
-
                         // Create a new commit
                         const { data: { sha: newCommit } } = await octokit.rest.git.createCommit({
                             ...payload,
                             message: `[fiche] Ajout d'une nouvelle fiche - ${file.name}`,
                             tree: newTree,
-                            parents: [parentCommit]
+                            parents: [branchRef.object.sha]
                         });
 
                         // Update the reference
@@ -230,6 +248,47 @@ export const POST: APIRoute = async ({request}) => {
                         });
 
                         await sendProgress({ type: 'success', message: "Envoi vers GitHub réussi", step: "remote" });
+                        await sendProgress({ type: 'info', message: "Un pull request a été créé automatiquement vers develop", step: "remote" });
+                        
+                        // Create a pull request from notes/upload-develop to develop
+                        try {
+                            const { data: pullRequest } = await octokit.rest.pulls.create({
+                                ...payload,
+                                title: `[fiche] Ajout d'une nouvelle fiche - ${file.name}`,
+                                head: branchName,
+                                base: targetBranch,
+                                body: `Ajout d'une nouvelle fiche de lecture:\n- Fichier: ${file.name}\n- Image: ${coverImageName}`
+                            });
+                            await sendProgress({ type: 'success', message: "Pull request créé avec succès", step: "remote" });
+
+                            // Wait for checks to pass (if any)
+                            await sendProgress({ type: 'info', message: "Attente des vérifications...", step: "remote" });
+                            
+                            // Try to merge the pull request
+                            try {
+                                await octokit.rest.pulls.merge({
+                                    ...payload,
+                                    pull_number: pullRequest.number,
+                                    merge_method: 'squash'
+                                });
+                                await sendProgress({ type: 'success', message: "Pull request fusionné avec succès", step: "remote" });
+                            } catch (mergeError: any) {
+                                console.error('Error merging pull request:', mergeError);
+                                const errorDetails = mergeError.response?.data?.message || 'Unknown error';
+                                await sendProgress({ 
+                                    type: 'warning', 
+                                    message: `La fusion automatique a échoué: ${errorDetails}. Le pull request #${pullRequest.number} a été créé et doit être fusionné manuellement.`, 
+                                    step: "remote" 
+                                });
+                            }
+                        } catch (prError) {
+                            console.error('Error creating pull request:', prError);
+                            await sendProgress({ 
+                                type: 'warning', 
+                                message: "Les fichiers ont été envoyés mais la création du pull request a échoué. Veuillez créer manuellement un pull request de notes/upload-develop vers develop.", 
+                                step: "remote" 
+                            });
+                        }
                     } catch (gitError: any) {
                         console.error('GitHub API Error:', gitError);
                         const errorDetails = gitError.response?.data?.message || 'Unknown error';
