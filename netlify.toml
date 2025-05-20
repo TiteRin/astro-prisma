@@ -4,4 +4,3 @@
 
 [build.environment]
   YARN_ENABLE_IMMUTABLE_INSTALLS = "true"
-  NODE_VERSION = "18" 
