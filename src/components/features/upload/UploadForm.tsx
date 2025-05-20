@@ -16,75 +16,131 @@ import StatusMessage from "./StatusMessage";
 import ContributorField from "./ContributorField";
 import CoverUpload from "./CoverUpload";
 import FileUpload from "./FileUpload";
-import { UploadStatus } from "./types";
+import { FormState } from "./types";
+
+// État initial du formulaire
+const initialFormState: FormState = {
+    contributor: "",
+    cover: {
+        file: null,
+        preview: null,
+        validation: { isValid: true }
+    },
+    document: {
+        file: null,
+        preview: null,
+        metadata: null,
+        id: null,
+        validation: { isValid: true }
+    },
+    status: { isUploading: false }
+};
 
 // Composant principal
 export default function UploadForm() {
-    const [contributor, setContributor] = useState<string>("");
-    const [coverFile, setCoverFile] = useState<File | null>(null);
-    const [documentFile, setDocumentFile] = useState<File | null>(null);
-    const [coverPreview, setCoverPreview] = useState<string | null>(null);
-    const [fileValidation, setFileValidation] = useState<Record<string, { isValid: boolean, message?: string }>>({
-        cover: { isValid: true },
-        file: { isValid: true }
-    });
-    const [uploadStatus, setUploadStatus] = useState<UploadStatus>({ isUploading: false });
-    const [fileId, setFileId] = useState<string | null>(null);
-    const [fileMetadata, setFileMetadata] = useState<FilePreview | null>(null);
+    const [formState, setFormState] = useState<FormState>(initialFormState);
     const formRef = useRef<HTMLFormElement>(null);
+
+    // Mise à jour du contributeur
+    const handleContributorChange = (contributor: string) => {
+        setFormState(prev => ({
+            ...prev,
+            contributor
+        }));
+    };
+
+    // Mise à jour du statut
+    const updateStatus = (status: typeof formState.status) => {
+        setFormState(prev => ({
+            ...prev,
+            status
+        }));
+    };
 
     // Gestion du changement de fichier de couverture
     const handleCoverChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
-        setCoverFile(file);
         
         if (!file) {
-            setCoverPreview(null);
-            setFileValidation(prev => ({ ...prev, cover: { isValid: true } }));
+            // Réinitialiser l'état de couverture
+            setFormState(prev => ({
+                ...prev,
+                cover: {
+                    ...prev.cover,
+                    file: null,
+                    preview: null,
+                    validation: { isValid: true }
+                }
+            }));
             return;
         }
 
+        // Mise à jour du fichier
+        setFormState(prev => ({
+            ...prev,
+            cover: {
+                ...prev.cover,
+                file
+            }
+        }));
+
         // Validation du fichier
         const validationResult = validateImage(file);
+        const validation = {
+            isValid: validationResult.isValid,
+            message: validationResult.errors[0]?.message
+        };
         
         // Mise à jour de l'état de validation
-        setFileValidation(prev => ({ 
-            ...prev, 
-            cover: { 
-                isValid: validationResult.isValid, 
-                message: validationResult.errors[0]?.message 
-            } 
+        setFormState(prev => ({
+            ...prev,
+            cover: {
+                ...prev.cover,
+                validation
+            }
         }));
         
         if (!validationResult.isValid) {
-            setCoverPreview(null);
-            setUploadStatus({
-                isUploading: false,
-                message: validationResult.errors[0]?.message || "L'image n'est pas valide",
-                type: 'error'
-            });
+            setFormState(prev => ({
+                ...prev,
+                cover: {
+                    ...prev.cover,
+                    preview: null
+                },
+                status: {
+                    isUploading: false,
+                    message: validationResult.errors[0]?.message || "L'image n'est pas valide",
+                    type: 'error'
+                }
+            }));
             return;
         }
         
         try {
             // Création de l'aperçu
-            const previewUrl = await createImagePreview(file);
-            setCoverPreview(previewUrl);
+            const preview = await createImagePreview(file);
             
-            // Notification de succès
-            setUploadStatus({
-                isUploading: false,
-                message: "Image valide",
-                type: 'success'
-            });
+            // Mise à jour de l'état avec le nouvel aperçu
+            setFormState(prev => ({
+                ...prev,
+                cover: {
+                    ...prev.cover,
+                    preview
+                },
+                status: {
+                    isUploading: false,
+                    message: "Image valide",
+                    type: 'success'
+                }
+            }));
             
             // Effacer le message après 3 secondes
             setTimeout(() => {
-                setUploadStatus({ isUploading: false });
+                updateStatus({ isUploading: false });
             }, 3000);
         } catch (error) {
             console.error("Error creating preview:", error);
-            setUploadStatus({
+            updateStatus({
                 isUploading: false,
                 message: "Erreur lors de la création de l'aperçu",
                 type: 'error'
@@ -100,19 +156,30 @@ export default function UploadForm() {
             return;
         }
 
-        setDocumentFile(file);
-        setFileId(null);
-        setFileMetadata(null);  
+        // Mise à jour initiale du fichier
+        setFormState(prev => ({
+            ...prev,
+            document: {
+                ...prev.document,
+                file,
+                id: null,
+                metadata: null
+            }
+        }));
 
         const validationResult = validateMarkdownFile(file);
+        const validation = {
+            isValid: validationResult.isValid,
+            message: validationResult.errors[0]?.message
+        };
 
         if (!validationResult.isValid) {
-            setFileValidation(prev => ({ 
-                ...prev, 
-                file: { 
-                    isValid: false, 
-                    message: validationResult.errors[0]?.message 
-                } 
+            setFormState(prev => ({
+                ...prev,
+                document: {
+                    ...prev.document,
+                    validation
+                }
             }));
             return;
         }
@@ -124,44 +191,50 @@ export default function UploadForm() {
                 throw new Error("Erreur lors de l'upload du fichier");
             }
 
-            const preview = await createFilePreview(file, result.frontmatter);
-            setFileMetadata(preview);
-            setFileId(result.id);
+            const metadata = await createFilePreview(file, result.frontmatter);
             
-            // Notification de succès
-            setUploadStatus({
-                isUploading: false,
-                message: "Fichier valide",
-                type: 'success'
-            });            
+            // Mise à jour avec les métadonnées et l'ID
+            setFormState(prev => ({
+                ...prev,
+                document: {
+                    ...prev.document,
+                    id: result.id,
+                    metadata,
+                    validation
+                },
+                status: {
+                    isUploading: false,
+                    message: "Fichier valide",
+                    type: 'success'
+                }
+            }));
         }
         catch (error) {
-            setUploadStatus({
+            updateStatus({
                 isUploading: false,
                 message: `Erreur lors de l'upload: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
                 type: 'error'
-            });
-        }
-        finally {
-            setUploadStatus({
-                isUploading: false,
-                message: "Fichier valide",
-                type: 'success'
             });
         }
     };
 
     // Réinitialisation du champ de fichier
     const handleResetFile = () => {
-        setFileMetadata(null);
-        setFileId(null);
-        setDocumentFile(null);
-        setFileValidation(prev => ({ ...prev, file: { isValid: true } }));
+        setFormState(prev => ({
+            ...prev,
+            document: {
+                ...prev.document,
+                file: null,
+                id: null,
+                metadata: null,
+                validation: { isValid: true }
+            }
+        }));
     };
 
     // Gestion des messages de progression
     const handleUploadProgress = (progress: UploadProgress) => {
-        setUploadStatus({
+        updateStatus({
             isUploading: progress.step !== 'complete' && progress.step !== 'error',
             message: progress.message,
             type: progress.type
@@ -171,12 +244,7 @@ export default function UploadForm() {
         if (progress.step === 'complete' && progress.type === 'success') {
             setTimeout(() => {
                 formRef.current?.reset();
-                setCoverFile(null);
-                setDocumentFile(null);
-                setCoverPreview(null);
-                setFileMetadata(null);
-                setContributor("");
-                setUploadStatus({ isUploading: false });
+                setFormState(initialFormState);
             }, 3000);
         }
     };
@@ -184,10 +252,11 @@ export default function UploadForm() {
     // Soumission du formulaire
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        const { contributor, cover, document } = formState;
         
         // Vérification que tous les champs sont valides
         if (!contributor.trim()) {
-            setUploadStatus({
+            updateStatus({
                 isUploading: false,
                 message: "Veuillez entrer votre nom",
                 type: 'error'
@@ -195,26 +264,26 @@ export default function UploadForm() {
             return;
         }
         
-        if (!coverFile || !fileValidation.cover.isValid) {
-            setUploadStatus({
+        if (!cover.file || !cover.validation.isValid) {
+            updateStatus({
                 isUploading: false,
-                message: fileValidation.cover.message || "L'image de couverture n'est pas valide",
+                message: cover.validation.message || "L'image de couverture n'est pas valide",
                 type: 'error'
             });
             return;
         }
         
-        if (!documentFile || !fileValidation.file.isValid) {
-            setUploadStatus({
+        if (!document.file || !document.validation.isValid) {
+            updateStatus({
                 isUploading: false,
-                message: fileValidation.file.message || "Le fichier n'est pas valide",
+                message: document.validation.message || "Le fichier n'est pas valide",
                 type: 'error'
             });
             return;
         }
         
         // Si tout est valide, soumettre le formulaire
-        setUploadStatus({
+        updateStatus({
             isUploading: true,
             message: "Envoi en cours...",
             type: 'info'
@@ -224,21 +293,23 @@ export default function UploadForm() {
             // Créer un FormData pour envoyer les fichiers
             const formData = new FormData();
             formData.append('contributor', contributor);
-            formData.append('cover-image', coverFile);
-            formData.append('new-note', documentFile);
+            formData.append('cover-image', cover.file);
+            formData.append('new-note', document.file);
             
             // Soumettre le formulaire via notre service
             await submitUploadForm(formData, handleUploadProgress);
             
         } catch (error) {
             console.error("Error submitting form:", error);
-            setUploadStatus({
+            updateStatus({
                 isUploading: false,
                 message: `Erreur lors de l'envoi: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
                 type: 'error'
             });
         }
     };
+
+    const { contributor, cover, document, status } = formState;
 
     return (
         <form 
@@ -250,30 +321,30 @@ export default function UploadForm() {
         >
             <h2 className="upload-form__title" id="upload-form-title">Ajouter une nouvelle fiche de lecture</h2>
 
-            <StatusMessage message={uploadStatus.message} type={uploadStatus.type} />
+            <StatusMessage message={status.message} type={status.type} />
 
             <ContributorField 
                 value={contributor}
-                onChange={setContributor}
+                onChange={handleContributorChange}
             />
             
             <div className="upload-form__flex-wrapper">
                 <CoverUpload 
-                    coverPreview={coverPreview}
-                    isValid={fileValidation.cover.isValid}
-                    validationMessage={fileValidation.cover.message}
+                    coverPreview={cover.preview}
+                    isValid={cover.validation.isValid}
+                    validationMessage={cover.validation.message}
                     onChange={handleCoverChange}
-                    disabled={uploadStatus.isUploading}
+                    disabled={status.isUploading}
                 />
 
                 <FileUpload 
-                    fileMetadata={fileMetadata}
-                    fileId={fileId}
-                    isValid={fileValidation.file.isValid}
-                    validationMessage={fileValidation.file.message}
+                    fileMetadata={document.metadata || null}
+                    fileId={document.id || null}
+                    isValid={document.validation.isValid}
+                    validationMessage={document.validation.message}
                     onChange={handleFileChange}
                     onReset={handleResetFile}
-                    disabled={uploadStatus.isUploading}
+                    disabled={status.isUploading}
                 />
             </div>
 
@@ -281,10 +352,10 @@ export default function UploadForm() {
                 <button 
                     type="submit" 
                     className="btn-action with-border"
-                    disabled={uploadStatus.isUploading}
-                    aria-busy={uploadStatus.isUploading}
+                    disabled={status.isUploading}
+                    aria-busy={status.isUploading}
                 >
-                    {uploadStatus.isUploading ? 'Envoi en cours...' : 'Ajouter'}
+                    {status.isUploading ? 'Envoi en cours...' : 'Ajouter'}
                 </button>
             </div>
         </form>
