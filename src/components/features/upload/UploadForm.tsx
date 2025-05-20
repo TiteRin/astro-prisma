@@ -1,4 +1,5 @@
 import { useState, useRef, ChangeEvent, FormEvent } from "react";
+import clsx from "clsx";
 import "../../../styles/features/upload/index.scss";
 import { 
     validateImage, 
@@ -8,7 +9,8 @@ import {
     submitUploadForm,
     FileValidationResult as ValidationResult,
     FilePreview,
-    UploadProgress
+    UploadProgress,
+    silentUploadFile
 } from "../../../utils/uploadService";
 
 interface UploadStatus {
@@ -27,6 +29,7 @@ export default function UploadForm() {
         file: { isValid: true }
     });
     const [uploadStatus, setUploadStatus] = useState<UploadStatus>({ isUploading: false });
+    const [fileId, setFileId] = useState<string | null>(null);
     const [fileMetadata, setFileMetadata] = useState<FilePreview | null>(null);
     const formRef = useRef<HTMLFormElement>(null);
 
@@ -99,58 +102,53 @@ export default function UploadForm() {
     // Gestion du changement de fichier document
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
-        setDocumentFile(file);
         
-        if (file) {
-            // Validation du fichier
-            const validationResult = validateMarkdownFile(file);
-            
-            // Mise à jour de l'état de validation
-            setFileValidation(prev => ({ 
-                ...prev, 
-                file: { 
-                    isValid: validationResult.isValid, 
-                    message: validationResult.errors[0]?.message 
-                } 
-            }));
-            
-            if (validationResult.isValid) {
-                try {
-                    // Affichage des métadonnées
-                    const preview = await createFilePreview(file);
-                    setFileMetadata(preview);
-                    
-                    // Notification de succès
-                    setUploadStatus({
-                        isUploading: false,
-                        message: "Fichier valide",
-                        type: 'success'
-                    });
-                    
-                    // Effacer le message après 3 secondes
-                    setTimeout(() => {
-                        setUploadStatus({ isUploading: false });
-                    }, 3000);
-                } catch (error) {
-                    console.error("Error creating file preview:", error);
-                    setUploadStatus({
-                        isUploading: false,
-                        message: "Erreur lors de la création des métadonnées",
-                        type: 'error'
-                    });
-                }
-            } else {
-                // Notification d'erreur
-                setUploadStatus({
-                    isUploading: false,
-                    message: validationResult.errors[0]?.message || "Le fichier n'est pas valide",
-                    type: 'error'
-                });
-                setFileMetadata(null);
+        if (!file) {
+            return;
+        }
+
+        setDocumentFile(file);
+        setFileId(null);
+        setFileMetadata(null);  
+
+        const validationResult = validateMarkdownFile(file);
+
+        if (!validationResult.isValid) {
+            setFileValidation(prev => ({ ...prev, file: { isValid: false, message: validationResult.errors[0]?.message } }));
+            return;
+        }
+
+        try {
+            const result = await silentUploadFile(file);
+
+            if (!result.success || !result.id) {
+                throw new Error("Erreur lors de l'upload du fichier");
             }
-        } else {
-            setFileMetadata(null);
-            setFileValidation(prev => ({ ...prev, file: { isValid: true } }));
+
+            const preview = await createFilePreview(file, result.frontmatter);
+            setFileMetadata(preview);
+            setFileId(result.id);
+            
+            // Notification de succès
+            setUploadStatus({
+                isUploading: false,
+                message: "Fichier valide",
+                type: 'success'
+            });            
+        }
+        catch (error) {
+          setUploadStatus({
+            isUploading: false,
+            message: `Erreur lors de l'upload: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+            type: 'error'
+          });
+        }
+        finally {
+            setUploadStatus({
+                isUploading: false,
+                message: "Fichier valide",
+                type: 'success'
+            });
         }
     };
 
@@ -294,6 +292,8 @@ export default function UploadForm() {
                         required
                         accept=".md,.mdx"
                         onChange={handleFileChange}
+                        disabled={uploadStatus.isUploading}
+                        className={clsx({'hidden': fileId})}
                     />
                     {!fileValidation.file.isValid && (
                         <div className="upload-form__validation-error">
@@ -304,14 +304,19 @@ export default function UploadForm() {
                     {/* Affichage des métadonnées du fichier */}
                     {fileMetadata && fileValidation.file.isValid && (
                         <div className="upload-form__file-preview">
-                            <h4>Métadonnées du fichier</h4>
                             <ul>
-                                <li><strong>Nom:</strong> {fileMetadata.name}</li>
-                                <li><strong>Type:</strong> {fileMetadata.type}</li>
-                                <li><strong>Taille:</strong> {Math.round(fileMetadata.size / 1024)} Ko</li>
+                                <li><strong>Titre:</strong> {fileMetadata.title}</li>
+                                <li><strong>Auteurs:</strong> {fileMetadata.authors?.join(', ') || '-'}</li>
+                                <li><strong>Tags:</strong> {fileMetadata.tags?.join(', ') || '-'}</li>
+                                <li><strong>Description:</strong> {fileMetadata.description || '-'}</li>
                             </ul>
+                            <button type="button" className="btn-action" onClick={() => setFileMetadata(null)}>
+                                Changer de fichier
+                            </button>
                         </div>
                     )}
+
+                    <input type="hidden" name="file-id" value={fileId || ''} />   
                 </div>
             </div>
 

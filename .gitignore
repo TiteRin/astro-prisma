@@ -34,3 +34,5 @@ yarn.lock
 
 # Netlify
 .netlify
+
+temp-uploads/*

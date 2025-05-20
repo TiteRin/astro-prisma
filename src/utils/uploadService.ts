@@ -20,9 +20,19 @@ export interface UploadProgress {
 // Types pour la prévisualisation des fichiers
 export interface FilePreview {
     name: string;
-    type: string;
-    url: string;
     size: number;
+    title?: string;
+    authors?: string[];
+    tags?: string[];
+    description?: string;
+}
+
+// Interface pour le résultat de l'upload silencieux
+export interface SilentUploadResult {
+    success: boolean;
+    id?: string;
+    frontmatter?: Record<string, any>;
+    errors?: string[];
 }
 
 // Schéma de validation pour les images
@@ -117,16 +127,20 @@ export function validateMarkdownFile(file: File): FileValidationResult {
 /**
  * Crée une prévisualisation du fichier
  * @param file Fichier à prévisualiser
+ * @param metadata Métadonnées optionnelles extraites du frontmatter
  * @returns Promesse avec la prévisualisation
  */
-export function createFilePreview(file: File): Promise<FilePreview> {
+export function createFilePreview(file: File, metadata?: Record<string, any>): Promise<FilePreview> {
     return new Promise((resolve, reject) => {
         try {
             const preview: FilePreview = {
                 name: file.name,
-                type: file.type,
                 size: file.size,
-                url: URL.createObjectURL(file)
+                // Utiliser les métadonnées si disponibles, sinon définir comme undefined
+                title: metadata?.title || metadata?.bookTitle,
+                authors: metadata?.authors || metadata?.bookAuthors,
+                tags: metadata?.tags,
+                description: metadata?.summary || metadata?.description
             };
             resolve(preview);
         } catch (error) {
@@ -155,6 +169,56 @@ export function createImagePreview(file: File): Promise<string> {
         };
         reader.readAsDataURL(file);
     });
+}
+
+/**
+ * Envoie silencieusement un fichier vers le serveur et récupère les métadonnées du frontmatter
+ * @param file Fichier à envoyer
+ * @returns Promesse avec le résultat de l'upload
+ */
+export async function silentUploadFile(file: File): Promise<SilentUploadResult> {
+    try {
+        // Créer un objet FormData avec le fichier
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Envoyer le fichier à l'API d'upload temporaire
+        const response = await fetch('/api/upload-temp', {
+            method: 'POST',
+            body: formData
+        });
+
+        // Récupérer les données de la réponse
+        const result = await response.json() as SilentUploadResult;
+        
+        return result;
+    } catch (error) {
+        console.error('Erreur lors de l\'upload silencieux:', error);
+        return {
+            success: false,
+            errors: [error instanceof Error ? error.message : 'Erreur inconnue']
+        };
+    }
+}
+
+/**
+ * Récupère les informations d'un fichier temporaire par son ID
+ * @param fileId ID du fichier temporaire
+ * @returns Promesse avec le résultat
+ */
+export async function getTempFileInfo(fileId: string): Promise<SilentUploadResult> {
+    try {
+        const response = await fetch(`/api/upload-temp?id=${fileId}`);
+        const result = await response.json() as SilentUploadResult;
+        
+        return result;
+    } catch (error) {
+        console.error('Erreur lors de la récupération des informations du fichier:', error);
+        return {
+            success: false,
+            errors: [error instanceof Error ? error.message : 'Erreur inconnue']
+        };
+    }
 }
 
 /**
