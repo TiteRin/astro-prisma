@@ -53,7 +53,7 @@ import Icons from '../../icons/Icons.astro';
 
             const titleEl = document.createElement("h2");
             titleEl.className = "result-item__title";
-            titleEl.textContent = title;
+            titleEl.innerHTML = title;
 
             const authorsEl = document.createElement("p");
             authorsEl.className = "result-item__authors";
@@ -64,7 +64,26 @@ import Icons from '../../icons/Icons.astro';
 
             const excerptEl = document.createElement("p");
             excerptEl.className = "result-item__excerpt";
-            excerptEl.textContent = excerpt;
+            excerptEl.innerHTML = summary;
+
+            /*
+            if (tags && tags.length > 0) {
+                const tagsEl = document.createElement("div");
+                tagsEl.className = "result-item__tags";
+                const tagsList = document.createElement("ul");
+                tagsList.className = "tags";
+                
+                tags.forEach(tag => {
+                    const tagEl = document.createElement("li");
+                    tagEl.className = "tag";
+                    tagEl.textContent = tag;
+                    tagsList.appendChild(tagEl);
+                });
+                
+                tagsEl.appendChild(tagsList);
+                content.appendChild(tagsEl);
+            }
+            */
 
             content.appendChild(header);
             content.appendChild(excerptEl);
@@ -88,7 +107,16 @@ import Icons from '../../icons/Icons.astro';
 
             try {
                 pagefind = await import("/pagefind/pagefind.js");
-                await pagefind.init();
+                await pagefind.init({
+                    highlight: true,
+                    showImages: true,
+                    showExcerpts: true,
+                    excerptLength: 200,
+                    highlightOptions: {
+                        prefix: '<mark class="highlight">',
+                        suffix: '</mark>'
+                    }
+                });
             } catch (e) {
                 console.error("Error initializing Pagefind:", e);
             }
@@ -111,26 +139,47 @@ import Icons from '../../icons/Icons.astro';
 
             try {
                 const search = await pagefind.search(query);
+                console.log('Search results:', search);
+
                 const results = await Promise.all(
                     search.results.map(async (result) => {
                         const data = await result.data();
+                        console.log('Raw result data:', result);
+                        console.log('Processed data:', data);
+
+                        const url = data.raw_url || result.url || data.url;
+                        if (!url) {
+                            console.warn('No URL found for result:', result);
+                        }
+
+                        const meta = data.meta || {};
+                        console.log('Meta data:', meta);
+
+                        const tags = meta.tags ? meta.tags.split('$$') : [];
+
                         return {
-                            url: result.url,
-                            title: data.meta.title,
-                            authors: data.meta.authors,
-                            img: data.meta.image,
-                            summary: data.meta.description,
-                            excerpt: result.excerpt,
-                            tags: data.meta.tags,
+                            url: url,
+                            title: meta.title || data.title || 'Sans titre',
+                            authors: meta.authors || '',
+                            img: meta.image || '',
+                            summary: meta.summary || '',
+                            excerpt: result.excerpt || '',
+                            tags: tags,
                         };
                     })
                 );
+
+                console.log('Processed results:', results);
 
                 resultsList.innerHTML = "";
                 if (results.length === 0) {
                     noResult.classList.remove("hidden");
                 } else {
                     results.forEach((result) => {
+                        if (!result.url) {
+                            console.warn('Skipping result with no URL:', result);
+                            return;
+                        }
                         const item = createResultItem(
                             result.url,
                             result.title,
@@ -145,6 +194,7 @@ import Icons from '../../icons/Icons.astro';
                 }
             } catch (e) {
                 console.error("Error searching:", e);
+                console.error("Error details:", e.stack);
             } finally {
                 loadingResults.classList.add("hidden");
             }

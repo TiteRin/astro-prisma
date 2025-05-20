@@ -3,11 +3,30 @@ const path = require('path');
 
 // Define source and destination directories
 const sourceDir = path.join(__dirname, '..', 'dist', 'pagefind');
-const destDir = path.join(__dirname, '..', 'dist', 'pagefind');
+const destDir = path.join(__dirname, '..', 'public', 'pagefind');
+
+// Function to clean directory
+function cleanDirectory(dir) {
+    if (fs.existsSync(dir)) {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+            const filePath = path.join(dir, file);
+            if (fs.statSync(filePath).isDirectory()) {
+                cleanDirectory(filePath);
+                fs.rmdirSync(filePath);
+            } else {
+                fs.unlinkSync(filePath);
+            }
+        }
+    }
+}
 
 // Ensure the destination directory exists
 if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
+} else {
+    // Clean the destination directory before copying
+    cleanDirectory(destDir);
 }
 
 // Function to copy a file
