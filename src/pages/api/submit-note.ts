@@ -5,6 +5,7 @@ import {summaryValidationSchema} from "../../content.config.js";
 import { z } from "zod";
 import fs from 'fs/promises';
 import path from 'path';
+import { extractImageUrls, validateImageUrls } from "../../utils/imageValidation";
 
 export const prerender = false;
 
@@ -25,70 +26,6 @@ async function saveFileLocally(filePath: string, content: Buffer | string) {
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     // Write the file
     await fs.writeFile(filePath, content);
-}
-
-// Function to extract image URLs from markdown content
-function extractImageUrls(content: string): string[] {
-    // Match both markdown image syntax ![alt](url) and HTML img tags
-    const imageRegex = /!\[.*?\]\((.*?)\)|<img[^>]+src="([^">]+)"/g;
-    const urls: string[] = [];
-    let match;
-
-    while ((match = imageRegex.exec(content)) !== null) {
-        // match[1] is for markdown syntax, match[2] is for HTML img tags
-        const url = match[1] || match[2];
-        if (url) {
-            urls.push(url);
-        }
-    }
-
-    return urls;
-}
-
-// Function to validate image URLs
-async function validateImageUrls(urls: string[]): Promise<{ valid: boolean; errors: string[] }> {
-    const errors: string[] = [];
-    
-    // Parse domain lists from environment variables
-    const allowedDomains = import.meta.env.ALLOWED_IMAGE_DOMAINS?.split(',').filter(Boolean) || [];
-    const blockedDomains = import.meta.env.BLOCKED_IMAGE_DOMAINS?.split(',').filter(Boolean) || [];
-
-    for (const url of urls) {
-        // Check if URL is absolute
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-            errors.push(`L'image "${url}" doit utiliser une URL absolue (commençant par http:// ou https://)`);
-            continue;
-        }
-
-        try {
-            const urlObj = new URL(url);
-            
-            // Check blocked domains first
-            if (blockedDomains.length > 0 && blockedDomains.some((domain: string) => urlObj.hostname.includes(domain))) {
-                errors.push(`Le domaine de l'image "${url}" est bloqué.`);
-                continue;
-            }
-
-            // Check allowed domains if specified
-            if (allowedDomains.length > 0 && !allowedDomains.some((domain: string) => urlObj.hostname.includes(domain))) {
-                errors.push(`Le domaine de l'image "${url}" n'est pas dans la liste des domaines autorisés.`);
-                continue;
-            }
-
-            // Try to fetch the image to verify it exists and is accessible
-            const response = await fetch(url, { method: 'HEAD' });
-            if (!response.ok) {
-                errors.push(`L'image "${url}" n'est pas accessible (code ${response.status})`);
-            }
-        } catch (error) {
-            errors.push(`Impossible de vérifier l'accessibilité de l'image "${url}"`);
-        }
-    }
-
-    return {
-        valid: errors.length === 0,
-        errors
-    };
 }
 
 export const GET: APIRoute = async ({request}) => {

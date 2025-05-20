@@ -156,7 +156,7 @@ export default function UploadForm() {
             return;
         }
 
-        // Mise à jour initiale du fichier
+        // Mise à jour initiale du fichier et indication du chargement
         setFormState(prev => ({
             ...prev,
             document: {
@@ -164,57 +164,96 @@ export default function UploadForm() {
                 file,
                 id: null,
                 metadata: null
+            },
+            status: {
+                isUploading: true,
+                message: "Validation du fichier en cours...",
+                type: 'info'
             }
         }));
 
+        // Première validation basique du format de fichier
         const validationResult = validateMarkdownFile(file);
-        const validation = {
-            isValid: validationResult.isValid,
-            message: validationResult.errors[0]?.message
-        };
-
+        
         if (!validationResult.isValid) {
             setFormState(prev => ({
                 ...prev,
                 document: {
                     ...prev.document,
-                    validation
+                    validation: {
+                        isValid: false,
+                        message: validationResult.errors[0]?.message
+                    }
+                },
+                status: {
+                    isUploading: false,
+                    message: validationResult.errors[0]?.message || "Le fichier markdown n'est pas valide",
+                    type: 'error'
                 }
             }));
             return;
         }
 
         try {
+            // Upload silencieux pour validation complète sur le serveur
             const result = await silentUploadFile(file);
 
-            if (!result.success || !result.id) {
-                throw new Error("Erreur lors de l'upload du fichier");
+            if (!result.success) {
+                // Si nous avons des erreurs spécifiques du serveur
+                if (result.errors && result.errors.length > 0) {
+                    throw new Error(result.errors[0]);
+                } else {
+                    throw new Error("Erreur lors de la validation du fichier");
+                }
             }
 
+            if (!result.id) {
+                throw new Error("L'ID du fichier est manquant après validation");
+            }
+
+            // Création de l'aperçu avec les métadonnées
             const metadata = await createFilePreview(file, result.frontmatter);
             
-            // Mise à jour avec les métadonnées et l'ID
+            // Fichier valide, mise à jour avec les métadonnées et l'ID
             setFormState(prev => ({
                 ...prev,
                 document: {
                     ...prev.document,
                     id: result.id,
                     metadata,
-                    validation
+                    validation: {
+                        isValid: true
+                    }
                 },
                 status: {
                     isUploading: false,
-                    message: "Fichier valide",
+                    message: "Fichier validé avec succès",
                     type: 'success'
                 }
             }));
+
+            // Effacer le message après 3 secondes
+            setTimeout(() => {
+                updateStatus({ isUploading: false });
+            }, 3000);
         }
         catch (error) {
-            updateStatus({
-                isUploading: false,
-                message: `Erreur lors de l'upload: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
-                type: 'error'
-            });
+            console.error("Error validating markdown file:", error);
+            setFormState(prev => ({
+                ...prev,
+                document: {
+                    ...prev.document,
+                    validation: {
+                        isValid: false,
+                        message: error instanceof Error ? error.message : "Erreur inconnue"
+                    }
+                },
+                status: {
+                    isUploading: false,
+                    message: `Erreur lors de la validation: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+                    type: 'error'
+                }
+            }));
         }
     };
 
@@ -254,7 +293,7 @@ export default function UploadForm() {
         e.preventDefault();
         const { contributor, cover, document } = formState;
         
-        // Vérification que tous les champs sont valides
+        // Vérification que tous les champs sont renseignés et valides
         if (!contributor.trim()) {
             updateStatus({
                 isUploading: false,
@@ -273,10 +312,11 @@ export default function UploadForm() {
             return;
         }
         
-        if (!document.file || !document.validation.isValid) {
+        // Pour le document, on vérifie simplement qu'il a été validé avec succès
+        if (!document.file || !document.validation.isValid || !document.id) {
             updateStatus({
                 isUploading: false,
-                message: document.validation.message || "Le fichier n'est pas valide",
+                message: document.validation.message || "Le fichier n'est pas valide ou n'a pas été validé",
                 type: 'error'
             });
             return;
@@ -295,6 +335,7 @@ export default function UploadForm() {
             formData.append('contributor', contributor);
             formData.append('cover-image', cover.file);
             formData.append('new-note', document.file);
+            formData.append('file-id', document.id); // On envoie aussi l'ID du fichier validé
             
             // Soumettre le formulaire via notre service
             await submitUploadForm(formData, handleUploadProgress);

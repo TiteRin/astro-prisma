@@ -3,8 +3,9 @@ import matter from 'gray-matter';
 import { randomUUID } from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
-import { summaryValidationSchema } from "../../content.config.js";
+import { summaryValidationSchema } from "../../content.config";
 import { z } from "zod";
+import { extractImageUrls, validateMarkdownImageAlt, validateImageUrls } from "../../utils/imageValidation";
 
 export const prerender = false;
 
@@ -14,6 +15,8 @@ interface UploadResponse {
   id?: string;
   frontmatter?: Record<string, any>;
   errors?: string[];
+  frontmatterErrors?: string[];
+  imageErrors?: string[];
 }
 
 // Créer le dossier temporaire s'il n'existe pas
@@ -26,14 +29,13 @@ async function ensureTempDir(tempDir: string): Promise<void> {
   }
 }
 
-// Schéma de validation basique pour le frontmatter
-const frontmatterSchema = z.object({
-  bookTitle: z.string().optional(),
-  bookAuthors: z.array(z.string()).optional(),
-  publishedYear: z.number().optional(),
-  tags: z.array(z.string()).optional(),
-  summary: z.string().optional()
-}).partial();
+// Schéma de validation intermédiaire pour le frontmatter (plus permissif que le schéma final)
+const uploadFrontmatterSchema = summaryValidationSchema.partial()
+  .extend({
+    // Champs obligatoires même lors de l'upload
+    bookTitle: z.string().min(1, "Le titre du livre est requis"),
+    summary: z.string().min(10, "Le résumé doit contenir au moins 10 caractères"),
+  });
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -79,33 +81,72 @@ export const POST: APIRoute = async ({ request }) => {
     // Analyser le frontmatter
     const { data: frontmatter, content } = matter(fileContent);
     
-    // Valider le frontmatter de base (validation légère)
+    // Résultat final de la validation
+    const response: UploadResponse = {
+      success: true,
+      id: fileId,
+      frontmatter,
+      frontmatterErrors: [],
+      imageErrors: []
+    };
+
+    // Valider le frontmatter avec le schéma intermédiaire
     try {
-      frontmatterSchema.parse(frontmatter);
+      uploadFrontmatterSchema.parse(frontmatter);
     } catch (err) {
       if (err instanceof z.ZodError) {
-        const errors = err.errors.map(e => `${e.path.join('.')}: ${e.message}`);
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            errors: ["Frontmatter invalide", ...errors] 
-          } as UploadResponse),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
+        response.frontmatterErrors = err.errors.map(e => `${e.path.join('.')}: ${e.message}`);
+        response.success = false;
+      }
+    }
+    
+    // Extraire et valider les URLs d'images dans le contenu markdown
+    const imageUrls = extractImageUrls(content);
+    
+    // Validation du texte alternatif des images
+    const altValidation = await validateMarkdownImageAlt(content);
+    if (!altValidation.valid) {
+      response.imageErrors = [...(response.imageErrors || []), ...altValidation.errors];
+      response.success = false;
+    }
+    
+    // Validation des URLs d'images (domaines et accessibilité)
+    if (imageUrls.length > 0) {
+      const urlValidation = await validateImageUrls(imageUrls);
+      if (!urlValidation.valid) {
+        response.imageErrors = [...(response.imageErrors || []), ...urlValidation.errors];
+        response.success = false;
       }
     }
 
-    // Sauvegarder le fichier dans le dossier temporaire
+    // Sauvegarder le fichier dans le dossier temporaire même s'il y a des erreurs
+    // pour permettre de le récupérer ultérieurement
     await fs.writeFile(tempFilePath, fileContent);
 
-    // Renvoyer une réponse avec l'ID et les métadonnées du frontmatter
+    // Si la validation a échoué, indiquer les erreurs
+    if (!response.success) {
+      // Regrouper toutes les erreurs
+      const allErrors: string[] = [];
+      if (response.frontmatterErrors && response.frontmatterErrors.length > 0) {
+        allErrors.push("Problèmes dans les métadonnées:");
+        allErrors.push(...response.frontmatterErrors);
+      }
+      
+      if (response.imageErrors && response.imageErrors.length > 0) {
+        allErrors.push("Problèmes avec les images:");
+        allErrors.push(...response.imageErrors);
+      }
+      
+      response.errors = allErrors;
+    }
+
+    // Renvoyer la réponse
     return new Response(
-      JSON.stringify({
-        success: true,
-        id: fileId,
-        frontmatter
-      } as UploadResponse),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify(response),
+      { 
+        status: response.success ? 200 : 400, 
+        headers: { 'Content-Type': 'application/json' } 
+      }
     );
 
   } catch (error) {

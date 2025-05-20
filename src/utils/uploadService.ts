@@ -33,6 +33,8 @@ export interface SilentUploadResult {
     id?: string;
     frontmatter?: Record<string, any>;
     errors?: string[];
+    frontmatterErrors?: string[];
+    imageErrors?: string[];
 }
 
 // Schéma de validation pour les images
