@@ -162,68 +162,85 @@ export const POST: APIRoute = async ({request}) => {
                     await sendProgress({ type: 'info', message: "Envoi des fichiers vers GitHub...", step: "remote" });
                     
                     // Get the current tree SHA
-                    const { data: { sha: baseTree } } = await octokit.rest.git.getTree({
-                        ...payload,
-                        tree_sha: import.meta.env.GITHUB_BRANCH || "main",
-                        recursive: "true"
-                    });
+                    try {
+                        const branchName = import.meta.env.GITHUB_BRANCH || "main";
+                        await sendProgress({ type: 'info', message: `Tentative de récupération de l'arbre Git pour la branche ${branchName}...`, step: "remote" });
+                        
+                        const { data: { sha: baseTree } } = await octokit.rest.git.getTree({
+                            ...payload,
+                            tree_sha: branchName,
+                            recursive: "true"
+                        });
+                        
+                        await sendProgress({ type: 'success', message: `Arbre Git récupéré avec succès (SHA: ${baseTree.substring(0, 7)})`, step: "remote" });
+                        
+                        // Create blobs for both files
+                        const coverImageContent = await coverImage.arrayBuffer();
+                        const { data: { sha: coverImageBlob } } = await octokit.rest.git.createBlob({
+                            ...payload,
+                            content: Buffer.from(coverImageContent).toString('base64'),
+                            encoding: 'base64'
+                        });
 
-                    // Create blobs for both files
-                    const coverImageContent = await coverImage.arrayBuffer();
-                    const { data: { sha: coverImageBlob } } = await octokit.rest.git.createBlob({
-                        ...payload,
-                        content: Buffer.from(coverImageContent).toString('base64'),
-                        encoding: 'base64'
-                    });
+                        const { data: { sha: fileBlob } } = await octokit.rest.git.createBlob({
+                            ...payload,
+                            content: Buffer.from(fileContent).toString('base64'),
+                            encoding: 'base64'
+                        });
 
-                    const { data: { sha: fileBlob } } = await octokit.rest.git.createBlob({
-                        ...payload,
-                        content: Buffer.from(fileContent).toString('base64'),
-                        encoding: 'base64'
-                    });
+                        // Create a new tree with both files
+                        const { data: { sha: newTree } } = await octokit.rest.git.createTree({
+                            ...payload,
+                            base_tree: baseTree,
+                            tree: [
+                                {
+                                    path: coverImagePath,
+                                    mode: '100644',
+                                    type: 'blob',
+                                    sha: coverImageBlob
+                                },
+                                {
+                                    path: filePath,
+                                    mode: '100644',
+                                    type: 'blob',
+                                    sha: fileBlob
+                                }
+                            ]
+                        });
 
-                    // Create a new tree with both files
-                    const { data: { sha: newTree } } = await octokit.rest.git.createTree({
-                        ...payload,
-                        base_tree: baseTree,
-                        tree: [
-                            {
-                                path: coverImagePath,
-                                mode: '100644',
-                                type: 'blob',
-                                sha: coverImageBlob
-                            },
-                            {
-                                path: filePath,
-                                mode: '100644',
-                                type: 'blob',
-                                sha: fileBlob
-                            }
-                        ]
-                    });
+                        // Get the latest commit
+                        const { data: { object: { sha: parentCommit } } } = await octokit.rest.git.getRef({
+                            ...payload,
+                            ref: `heads/${branchName}`
+                        });
 
-                    // Get the latest commit
-                    const { data: { object: { sha: parentCommit } } } = await octokit.rest.git.getRef({
-                        ...payload,
-                        ref: `heads/${import.meta.env.GITHUB_BRANCH || "main"}`
-                    });
+                        // Create a new commit
+                        const { data: { sha: newCommit } } = await octokit.rest.git.createCommit({
+                            ...payload,
+                            message: `[fiche] Ajout d'une nouvelle fiche - ${file.name}`,
+                            tree: newTree,
+                            parents: [parentCommit]
+                        });
 
-                    // Create a new commit
-                    const { data: { sha: newCommit } } = await octokit.rest.git.createCommit({
-                        ...payload,
-                        message: `[fiche] Ajout d'une nouvelle fiche - ${file.name}`,
-                        tree: newTree,
-                        parents: [parentCommit]
-                    });
+                        // Update the reference
+                        await octokit.rest.git.updateRef({
+                            ...payload,
+                            ref: `heads/${branchName}`,
+                            sha: newCommit
+                        });
 
-                    // Update the reference
-                    await octokit.rest.git.updateRef({
-                        ...payload,
-                        ref: `heads/${import.meta.env.GITHUB_BRANCH || "main"}`,
-                        sha: newCommit
-                    });
-
-                    await sendProgress({ type: 'success', message: "Envoi vers GitHub réussi", step: "remote" });
+                        await sendProgress({ type: 'success', message: "Envoi vers GitHub réussi", step: "remote" });
+                    } catch (gitError: any) {
+                        console.error('GitHub API Error:', gitError);
+                        const errorDetails = gitError.response?.data?.message || 'Unknown error';
+                        const errorStatus = gitError.status || gitError.response?.status || 'Unknown status';
+                        await sendProgress({ 
+                            type: 'error', 
+                            message: `Erreur GitHub: ${errorStatus} - ${errorDetails}. Vérifiez que le dépôt, la branche et les permissions sont corrects.`, 
+                            step: "remote" 
+                        });
+                        throw gitError;
+                    }
                 } catch (error) {
                     console.error('Error uploading to GitHub:', error);
                     await sendProgress({ type: 'error', message: "Erreur lors de l'envoi vers GitHub", step: "remote" });
