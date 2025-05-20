@@ -6,6 +6,38 @@ Le but de ce projet est de pouvoir mettre à disposition des fiches de lectures 
 
 ## Features in Progress
 
+### Intégration OVH
+**Branch:** `feat/ovh-integration`
+
+**Summary:**
+Nous mettons en place un système d'upload de fiches de lecture sur un serveur OVH :
+- Upload sécurisé via SFTP
+- Validation des fichiers
+- Reconstruction automatique via Netlify
+- Stockage des fichiers sur le serveur OVH
+
+**Étapes d'implémentation:**
+1. Configuration du serveur OVH :
+   - [ ] Créer un dossier dédié pour les fiches
+   - [ ] Configurer les permissions appropriées
+   - [ ] Mettre en place un utilisateur SFTP dédié
+
+2. API d'upload :
+   - [ ] Créer une route API sécurisée
+   - [ ] Implémenter l'authentification
+   - [ ] Configurer l'upload SFTP
+   - [ ] Mettre en place la validation des fichiers
+
+3. Intégration Netlify :
+   - [ ] Configurer le webhook de reconstruction
+   - [ ] Tester le processus complet
+
+**To-Do List:**
+- [ ] Configuration initiale du serveur OVH
+- [ ] Création de l'API d'upload
+- [ ] Mise en place de l'authentification
+- [ ] Tests d'intégration
+
 ### App Toolbar
 **Branch:** `feat/app-toolbar`
 
