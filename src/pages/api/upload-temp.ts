@@ -1,8 +1,6 @@
 import type { APIRoute } from "astro";
 import matter from 'gray-matter';
 import { randomUUID } from 'crypto';
-import fs from 'fs/promises';
-import path from 'path';
 import { summaryValidationSchema } from "../../content.config";
 import { z } from "zod";
 import { extractImageUrls, validateMarkdownImageAlt, validateImageUrls } from "../../utils/imageValidation";
@@ -19,16 +17,6 @@ interface UploadResponse {
   imageErrors?: string[];
 }
 
-// Créer le dossier temporaire s'il n'existe pas
-async function ensureTempDir(tempDir: string): Promise<void> {
-  try {
-    await fs.mkdir(tempDir, { recursive: true });
-  } catch (error) {
-    console.error("Erreur lors de la création du dossier temporaire:", error);
-    throw error;
-  }
-}
-
 // Schéma de validation intermédiaire pour le frontmatter (plus permissif que le schéma final)
 const uploadFrontmatterSchema = summaryValidationSchema.partial()
   .extend({
@@ -37,12 +25,11 @@ const uploadFrontmatterSchema = summaryValidationSchema.partial()
     summary: z.string().min(10, "Le résumé doit contenir au moins 10 caractères"),
   });
 
+// Store for temporary files in memory
+const tempFiles = new Map<string, string>();
+
 export const POST: APIRoute = async ({ request }) => {
   try {
-    // Configurer le dossier temporaire
-    const tempDir = path.join(process.cwd(), 'temp-uploads');
-    await ensureTempDir(tempDir);
-
     // Récupérer le fichier de la requête
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -59,7 +46,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Vérifier l'extension du fichier
     const validExtensions = ['.md', '.mdx'];
-    const fileExtension = path.extname(file.name).toLowerCase();
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
     
     if (!validExtensions.includes(fileExtension)) {
       return new Response(
@@ -73,7 +60,6 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Générer un ID unique pour ce téléchargement
     const fileId = randomUUID();
-    const tempFilePath = path.join(tempDir, `${fileId}${fileExtension}`);
 
     // Lire le contenu du fichier
     const fileContent = await file.text();
@@ -119,13 +105,12 @@ export const POST: APIRoute = async ({ request }) => {
       }
     }
 
-    // Sauvegarder le fichier dans le dossier temporaire même s'il y a des erreurs
-    // pour permettre de le récupérer ultérieurement
-    await fs.writeFile(tempFilePath, fileContent);
+    // Store the file content in memory
+    tempFiles.set(fileId, fileContent);
 
-    // Si la validation a échoué, indiquer les erreurs
+    // If validation failed, indicate errors
     if (!response.success) {
-      // Regrouper toutes les erreurs
+      // Regroup all errors
       const allErrors: string[] = [];
       if (response.frontmatterErrors && response.frontmatterErrors.length > 0) {
         allErrors.push("Problèmes dans les métadonnées:");
@@ -140,7 +125,7 @@ export const POST: APIRoute = async ({ request }) => {
       response.errors = allErrors;
     }
 
-    // Renvoyer la réponse
+    // Return the response
     return new Response(
       JSON.stringify(response),
       { 
@@ -177,13 +162,10 @@ export const GET: APIRoute = async ({ request }) => {
       );
     }
 
-    const tempDir = path.join(process.cwd(), 'temp-uploads');
+    // Get the file content from memory
+    const fileContent = tempFiles.get(fileId);
     
-    // Chercher le fichier avec cet ID (peut être .md ou .mdx)
-    const files = await fs.readdir(tempDir);
-    const targetFile = files.find(f => f.startsWith(fileId));
-    
-    if (!targetFile) {
+    if (!fileContent) {
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -193,11 +175,7 @@ export const GET: APIRoute = async ({ request }) => {
       );
     }
     
-    // Lire le contenu du fichier
-    const filePath = path.join(tempDir, targetFile);
-    const fileContent = await fs.readFile(filePath, 'utf-8');
-    
-    // Extraire le frontmatter
+    // Extract the frontmatter
     const { data: frontmatter } = matter(fileContent);
     
     return new Response(
