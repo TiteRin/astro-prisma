@@ -1,5 +1,4 @@
-import { useState, useRef, ChangeEvent, FormEvent } from "react";
-import clsx from "clsx";
+import React, { useState, useRef, ChangeEvent, FormEvent } from "react";
 import "../../../styles/features/upload/index.scss";
 import { 
     validateImage, 
@@ -7,18 +6,19 @@ import {
     createImagePreview, 
     createFilePreview,
     submitUploadForm,
-    FileValidationResult as ValidationResult,
-    FilePreview,
     UploadProgress,
-    silentUploadFile
+    silentUploadFile,
+    FilePreview
 } from "../../../utils/uploadService";
 
-interface UploadStatus {
-    isUploading: boolean;
-    message?: string;
-    type?: 'success' | 'error' | 'info' | 'warning';
-}
+// Import des composants
+import StatusMessage from "./StatusMessage";
+import ContributorField from "./ContributorField";
+import CoverUpload from "./CoverUpload";
+import FileUpload from "./FileUpload";
+import { UploadStatus } from "./types";
 
+// Composant principal
 export default function UploadForm() {
     const [contributor, setContributor] = useState<string>("");
     const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -33,69 +33,62 @@ export default function UploadForm() {
     const [fileMetadata, setFileMetadata] = useState<FilePreview | null>(null);
     const formRef = useRef<HTMLFormElement>(null);
 
-    /**
-     * TODO:
-     * - Validate and upload files on the server at change
-     * - Show preview of the cover 
-     * - Show metadata of the file
-     */
-
     // Gestion du changement de fichier de couverture
     const handleCoverChange = async (e: ChangeEvent<HTMLInputElement>) => {
-
         const file = e.target.files?.[0] || null;
         setCoverFile(file);
         
-        if (file) {
-            // Validation du fichier
-            const validationResult = validateImage(file);
-            
-            // Mise à jour de l'état de validation
-            setFileValidation(prev => ({ 
-                ...prev, 
-                cover: { 
-                    isValid: validationResult.isValid, 
-                    message: validationResult.errors[0]?.message 
-                } 
-            }));
-            
-            if (validationResult.isValid) {
-                try {
-                    // Création de l'aperçu
-                    const previewUrl = await createImagePreview(file);
-                    setCoverPreview(previewUrl);
-                    
-                    // Notification de succès
-                    setUploadStatus({
-                        isUploading: false,
-                        message: "Image valide",
-                        type: 'success'
-                    });
-                    
-                    // Effacer le message après 3 secondes
-                    setTimeout(() => {
-                        setUploadStatus({ isUploading: false });
-                    }, 3000);
-                } catch (error) {
-                    console.error("Error creating preview:", error);
-                    setUploadStatus({
-                        isUploading: false,
-                        message: "Erreur lors de la création de l'aperçu",
-                        type: 'error'
-                    });
-                }
-            } else {
-                // Notification d'erreur
-                setUploadStatus({
-                    isUploading: false,
-                    message: validationResult.errors[0]?.message || "L'image n'est pas valide",
-                    type: 'error'
-                });
-                setCoverPreview(null);
-            }
-        } else {
+        if (!file) {
             setCoverPreview(null);
             setFileValidation(prev => ({ ...prev, cover: { isValid: true } }));
+            return;
+        }
+
+        // Validation du fichier
+        const validationResult = validateImage(file);
+        
+        // Mise à jour de l'état de validation
+        setFileValidation(prev => ({ 
+            ...prev, 
+            cover: { 
+                isValid: validationResult.isValid, 
+                message: validationResult.errors[0]?.message 
+            } 
+        }));
+        
+        if (!validationResult.isValid) {
+            setCoverPreview(null);
+            setUploadStatus({
+                isUploading: false,
+                message: validationResult.errors[0]?.message || "L'image n'est pas valide",
+                type: 'error'
+            });
+            return;
+        }
+        
+        try {
+            // Création de l'aperçu
+            const previewUrl = await createImagePreview(file);
+            setCoverPreview(previewUrl);
+            
+            // Notification de succès
+            setUploadStatus({
+                isUploading: false,
+                message: "Image valide",
+                type: 'success'
+            });
+            
+            // Effacer le message après 3 secondes
+            setTimeout(() => {
+                setUploadStatus({ isUploading: false });
+            }, 3000);
+        } catch (error) {
+            console.error("Error creating preview:", error);
+            setUploadStatus({
+                isUploading: false,
+                message: "Erreur lors de la création de l'aperçu",
+                type: 'error'
+            });
         }
     };
 
@@ -114,7 +107,13 @@ export default function UploadForm() {
         const validationResult = validateMarkdownFile(file);
 
         if (!validationResult.isValid) {
-            setFileValidation(prev => ({ ...prev, file: { isValid: false, message: validationResult.errors[0]?.message } }));
+            setFileValidation(prev => ({ 
+                ...prev, 
+                file: { 
+                    isValid: false, 
+                    message: validationResult.errors[0]?.message 
+                } 
+            }));
             return;
         }
 
@@ -137,11 +136,11 @@ export default function UploadForm() {
             });            
         }
         catch (error) {
-          setUploadStatus({
-            isUploading: false,
-            message: `Erreur lors de l'upload: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
-            type: 'error'
-          });
+            setUploadStatus({
+                isUploading: false,
+                message: `Erreur lors de l'upload: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+                type: 'error'
+            });
         }
         finally {
             setUploadStatus({
@@ -150,6 +149,14 @@ export default function UploadForm() {
                 type: 'success'
             });
         }
+    };
+
+    // Réinitialisation du champ de fichier
+    const handleResetFile = () => {
+        setFileMetadata(null);
+        setFileId(null);
+        setDocumentFile(null);
+        setFileValidation(prev => ({ ...prev, file: { isValid: true } }));
     };
 
     // Gestion des messages de progression
@@ -234,90 +241,40 @@ export default function UploadForm() {
     };
 
     return (
-        <form className="upload-form" id="uploadForm" ref={formRef} onSubmit={handleSubmit}>
-            <h2 className="upload-form__title">Ajouter une nouvelle fiche de lecture</h2>
+        <form 
+            className="upload-form" 
+            id="uploadForm" 
+            ref={formRef} 
+            onSubmit={handleSubmit}
+            aria-labelledby="upload-form-title"
+        >
+            <h2 className="upload-form__title" id="upload-form-title">Ajouter une nouvelle fiche de lecture</h2>
 
-            {/* Message d'état */}
-            {uploadStatus.message && (
-                <div className={`upload-form__status upload-form__status--${uploadStatus.type}`}>
-                    {uploadStatus.message}
-                </div>
-            )}
+            <StatusMessage message={uploadStatus.message} type={uploadStatus.type} />
 
-            <div className="upload-form__field">
-                <label htmlFor="contributor">Votre nom</label>
-                <input 
-                    type="text" 
-                    id="contributor" 
-                    name="contributor" 
-                    required 
-                    placeholder="Entrez votre nom" 
-                    value={contributor}
-                    onChange={(e) => setContributor(e.target.value)}
-                />
-            </div>
+            <ContributorField 
+                value={contributor}
+                onChange={setContributor}
+            />
             
             <div className="upload-form__flex-wrapper">
-                <div className="upload-form__cover-upload upload-form__field">
-                    <label htmlFor="cover">Couverture</label>
-                    <label htmlFor="cover" className={fileValidation.cover.isValid ? '' : 'invalid'}>
-                        <img 
-                            src={coverPreview || "https://placehold.co/200x300"} 
-                            alt="Ajouter une couverture" 
-                            aria-label="Ajouter une couverture"
-                        />
-                        {!fileValidation.cover.isValid && (
-                            <div className="upload-form__validation-error">
-                                {fileValidation.cover.message}
-                            </div>
-                        )}
-                    </label>
-                    <input 
-                        type="file" 
-                        id="cover" 
-                        name="cover-image" 
-                        required 
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handleCoverChange}
-                    />
-                </div>
+                <CoverUpload 
+                    coverPreview={coverPreview}
+                    isValid={fileValidation.cover.isValid}
+                    validationMessage={fileValidation.cover.message}
+                    onChange={handleCoverChange}
+                    disabled={uploadStatus.isUploading}
+                />
 
-                <div className="upload-form__file-upload upload-form__field">
-                    <label htmlFor="file">Fichier</label>
-                    <input 
-                        type="file" 
-                        id="file" 
-                        name="new-note" 
-                        required
-                        accept=".md,.mdx"
-                        onChange={handleFileChange}
-                        disabled={uploadStatus.isUploading}
-                        className={clsx({'hidden': fileId})}
-                    />
-                    {!fileValidation.file.isValid && (
-                        <div className="upload-form__validation-error">
-                            {fileValidation.file.message}
-                        </div>
-                    )}
-                    
-                    {/* Affichage des métadonnées du fichier */}
-                    {fileMetadata && fileValidation.file.isValid && (
-                        <div className="upload-form__file-preview">
-                            <ul>
-                                <li><strong>Titre:</strong> {fileMetadata.title}</li>
-                                <li><strong>Auteurs:</strong> {fileMetadata.authors?.join(', ') || '-'}</li>
-                                <li><strong>Tags:</strong> {fileMetadata.tags?.join(', ') || '-'}</li>
-                                <li><strong>Description:</strong> {fileMetadata.description || '-'}</li>
-                            </ul>
-                            <button type="button" className="btn-action" onClick={() => setFileMetadata(null)}>
-                                Changer de fichier
-                            </button>
-                        </div>
-                    )}
-
-                    <input type="hidden" name="file-id" value={fileId || ''} />   
-                </div>
+                <FileUpload 
+                    fileMetadata={fileMetadata}
+                    fileId={fileId}
+                    isValid={fileValidation.file.isValid}
+                    validationMessage={fileValidation.file.message}
+                    onChange={handleFileChange}
+                    onReset={handleResetFile}
+                    disabled={uploadStatus.isUploading}
+                />
             </div>
 
             <div className="upload-form__submit">
@@ -325,6 +282,7 @@ export default function UploadForm() {
                     type="submit" 
                     className="btn-action with-border"
                     disabled={uploadStatus.isUploading}
+                    aria-busy={uploadStatus.isUploading}
                 >
                     {uploadStatus.isUploading ? 'Envoi en cours...' : 'Ajouter'}
                 </button>
