@@ -154,7 +154,7 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        errors: ["Erreur lors du traitement du fichier"] 
+        errors: ["Erreur lors du traitement du fichier", error] 
       } as UploadResponse),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
