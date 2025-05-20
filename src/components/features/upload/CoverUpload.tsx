@@ -10,7 +10,7 @@ export interface CoverUploadProps {
 }
 
 const CoverUpload = ({ coverPreview, isValid, validationMessage, onChange, disabled }: CoverUploadProps) => (
-    <FormField id="cover" label="Couverture" className="upload-form__cover-upload">
+    <FormField id="cover" label="Couverture" className="upload-form__cover-upload" required={true} >
         <label htmlFor="cover" className={isValid ? '' : 'invalid'}>
             <img 
                 src={coverPreview || "https://placehold.co/200x300"} 

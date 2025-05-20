@@ -19,6 +19,10 @@
 
         label {
             font-weight: 600;
+
+            .required-indicator {
+                color: var(--color-error, #f44336);
+            }
         }
 
         &.invalid {

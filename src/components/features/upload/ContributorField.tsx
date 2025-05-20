@@ -7,7 +7,7 @@ export interface ContributorFieldProps {
 }
 
 const ContributorField = ({ value, onChange }: ContributorFieldProps) => (
-    <FormField id="contributor" label="Votre nom">
+    <FormField id="contributor" label="Votre nom" required={true}>
         <input 
             type="text" 
             id="contributor" 

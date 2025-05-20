@@ -22,7 +22,7 @@ const FileUpload = ({
     onReset,
     disabled 
 }: FileUploadProps) => (
-    <FormField id="file" label="Fichier" className="upload-form__file-upload">
+    <FormField id="file" label="Fichier" className="upload-form__file-upload" required={true}>
         <input 
             type="file" 
             id="file" 
