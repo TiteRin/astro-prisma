@@ -1,5 +1,5 @@
 ---
-import { Icon } from "astro-icon/components";
+import Icons from '../icons/Icons.astro';
 import "../../styles/layout/app-toolbar.scss";
 import "../../styles/features/accessibility/zoom-controls.scss";
 import "../../styles/features/accessibility/theme-switcher.scss";
@@ -23,7 +23,7 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
         aria-controls="accessibility-menu"
         aria-haspopup="true"
     >
-        <Icon name="iconoir:accessibility" aria-hidden="true" />
+        <Icons name="accessibility" aria-hidden="true" />
     </button>
 
     <div 
@@ -44,7 +44,7 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
             aria-label="Menu utilisateur"
             aria-haspopup="true"
         >
-            <Icon name="iconoir:user" aria-hidden="true" />
+            <Icons name="user" aria-hidden="true" />
         </button>
     </div>
 </header>
@@ -58,7 +58,7 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
         // Handle menu toggle
         menuToggle.addEventListener('click', () => {
             const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
-            menuToggle.setAttribute('aria-expanded', String(!isExpanded));
+            menuToggle.setAttribute('aria-expanded', (!isExpanded).toString());
             accessibilityMenu.hidden = isExpanded;
         });
 

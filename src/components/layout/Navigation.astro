@@ -1,28 +1,28 @@
 ---
-import {Icon} from 'astro-icon/components';
+import Icons from '../icons/Icons.astro';
 import "../../styles/theme.scss";
 ---
 
 <div class="navigation-wrapper">    
     <span class="mobile-only">
         <button class:list={["btn-action", "action-expand"]}>
-            <Icon name="iconoir:fast-arrow-down"
+            <Icons name="fast-arrow-down"
                     aria-label="Ouvrir le menu" size={32}/>
         </button>
         <button class:list={["btn-action", "action-collapse"]}>
-            <Icon name="iconoir:fast-arrow-up"
+            <Icons name="fast-arrow-up"
                     aria-label="Fermer le menu" size={32}/>
         </button>
     </span>
     <span class="desktop-only">
         <button class:list={["btn-action", "action-collapse"]}>
-            <Icon name="iconoir:fast-arrow-left"
+            <Icons name="fast-arrow-left"
                     aria-label="Réduire la navigation" size={32}/>
         </button>
     </span>
     <div class="desktop-only">
         <button class:list={["btn-action", "action-expand"]}>
-            <Icon name="iconoir:fast-arrow-right"
+            <Icons name="fast-arrow-right"
                   aria-label="Agrandir la navigation" size={32}/>
         </button>
     </div>
@@ -31,25 +31,25 @@ import "../../styles/theme.scss";
     <ul>
         <li>
             <a href="/">
-                <Icon name="iconoir:home"/>
+                <Icons name="home"/>
                 Accueil
             </a>
         </li>
         <li>
             <a href="/tags">
-                <Icon name="iconoir:label"/>
+                <Icons name="label"/>
                 Index par tag
             </a>
         </li>
         <li>
             <a href="/contributors">
-                <Icon name="iconoir:user"/>
+                <Icons name="user"/>
                 Index par contributeur·ice
             </a>
         </li>
         <li>
             <a href="/upload">
-                <Icon name="iconoir:upload"/>
+                <Icons name="upload"/>
                 Ajouter une fiche de lecture
             </a>
         </li>

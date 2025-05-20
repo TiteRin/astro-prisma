@@ -1,5 +1,5 @@
 ---
-import { Icon } from "astro-icon/components";
+import Icons from './icons/Icons.astro';
 import "../styles/upload-form.scss";
 
 interface Props {
@@ -33,7 +33,7 @@ const { contributor = "" } = Astro.props;
             required
         />
         <label for="fileInput" class="upload-form__file-upload-label">
-            <Icon name="mdi:upload" />
+            <Icons name="upload" />
             <span id="fileName">Choisissez un fichier ou glissez-le ici</span>
             <p>Seuls les fichiers .md et .mdx sont acceptés</p>
         </label>
@@ -48,7 +48,7 @@ const { contributor = "" } = Astro.props;
             required
         />
         <label for="coverImageInput" class="upload-form__file-upload-label">
-            <Icon name="mdi:image" />
+            <Icons name="image" />
             <span id="coverImageName">Choisissez une image de couverture</span>
             <p>Formats acceptés : JPG, PNG, GIF</p>
         </label>
@@ -68,7 +68,7 @@ const { contributor = "" } = Astro.props;
         <button type="button" id="submitButton" class="btn-action with-border">
             <span class="button-text">Envoyer la fiche</span>
             <span class="loading-spinner" hidden>
-                <Icon name="mdi:loading" />
+                <Icons name="loading" />
             </span>
         </button>
     </div>
@@ -197,31 +197,41 @@ const { contributor = "" } = Astro.props;
 </style>
 
 <script>
+    interface ToastOptions {
+        message: string;
+        type: 'success' | 'error' | 'warning' | 'info';
+    }
+
     function setLoading(isLoading: boolean): void {
         const form = document.getElementById('uploadForm') as HTMLFormElement;
-        const submitButton = document.getElementById('submitButton');
+        const submitButton = document.getElementById('submitButton') as HTMLButtonElement;
         if (form && submitButton) {
             form.setAttribute('data-loading', isLoading.toString());
             submitButton.setAttribute('data-loading', isLoading.toString());
-            const buttonText = submitButton.querySelector('.button-text');
+            const buttonText = submitButton.querySelector('.button-text') as HTMLElement;
             if (buttonText) {
                 buttonText.textContent = isLoading ? 'En cours d\'envoi' : 'Envoyer la fiche';
             }
         }
     }
 
-    function showToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success'): void {
+    function showToast({ message, type = 'success' }: ToastOptions): void {
         const container = document.getElementById('toast-container');
         if (!container) return;
 
         const toast = document.createElement('div');
         toast.className = `toast toast--${type}`;
+        
+        const icons = {
+            success: '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>',
+            error: '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>',
+            warning: '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"/></svg>',
+            info: '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>'
+        };
+
         toast.innerHTML = `
             <span class="toast-icon">
-                ${type === 'success' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>' : ''}
-                ${type === 'error' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>' : ''}
-                ${type === 'warning' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"/></svg>' : ''}
-                ${type === 'info' ? '<svg viewBox="0 0 24 24" width="24" height="24" class="icon"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>' : ''}
+                ${icons[type]}
             </span>
             <span class="toast-content">${message}</span>
             <button class="toast-close" onclick="this.parentElement.remove()">
@@ -239,140 +249,124 @@ const { contributor = "" } = Astro.props;
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    // Form submission handler
+    document.getElementById('submitButton')?.addEventListener('click', async (e) => {
+        e.preventDefault();
         const form = document.getElementById('uploadForm') as HTMLFormElement;
-        const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-        const coverImageInput = document.getElementById('coverImageInput') as HTMLInputElement;
-        const fileName = document.getElementById('fileName');
-        const coverImageName = document.getElementById('coverImageName');
-        const submitButton = document.getElementById('submitButton');
-        const dropZone = document.querySelector('.upload-form__file-upload');
-
-        if (!form || !fileInput || !coverImageInput || !fileName || !coverImageName || !submitButton || !dropZone) {
-            console.error('Required DOM elements not found');
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
             return;
         }
 
-        submitButton.addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
+        setLoading(true);
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('/api/submit-note', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            setLoading(true);
-            const formData = new FormData(form);
-            
-            try {
-                const response = await fetch('/api/submit-note', {
-                    method: 'POST',
-                    body: formData
-                });
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+            const reader = response.body?.getReader();
+            if (!reader) {
+                throw new Error('No reader available');
+            }
 
-                const reader = response.body?.getReader();
-                if (!reader) {
-                    throw new Error('No reader available');
-                }
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
 
-                const decoder = new TextDecoder();
-                let buffer = '';
+                const text = new TextDecoder().decode(value);
+                const notifications = text.split('\n').filter(Boolean);
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
+                for (const notification of notifications) {
+                    try {
+                        const { type, message, step } = JSON.parse(notification);
+                        showToast({ type, message });
 
-                    buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n');
-                    buffer = lines.pop() || '';
-
-                    for (const line of lines) {
-                        if (!line.trim()) continue;
-                        try {
-                            const notification = JSON.parse(line);
-                            showToast(notification.message, notification.type);
-                            
-                            // If it's a final success message, reset the form
-                            if (notification.type === 'success' && notification.step === 'complete') {
-                                form.reset();
-                                fileName.textContent = 'Choisissez un fichier ou glissez-le ici';
-                                coverImageName.textContent = 'Choisissez une image de couverture';
-                            }
-                        } catch (e) {
-                            console.error('Error parsing notification:', e);
+                        if (step === 'complete') {
+                            form.reset();
+                            document.getElementById('fileName')!.textContent = 'Choisissez un fichier ou glissez-le ici';
+                            document.getElementById('coverImageName')!.textContent = 'Choisissez une image de couverture';
                         }
+                    } catch (e) {
+                        console.error('Error parsing notification:', e);
                     }
                 }
-            } catch (error) {
-                console.error('Error during submission:', error);
-                showToast('Une erreur est survenue lors de l\'envoi du fichier. Veuillez vérifier votre connexion et réessayer.', 'error');
-            } finally {
-                setLoading(false);
             }
-        });
+        } catch (error) {
+            console.error('Error:', error);
+            showToast({ 
+                type: 'error', 
+                message: 'Une erreur est survenue lors de l\'envoi. Veuillez réessayer plus tard.' 
+            });
+        } finally {
+            setLoading(false);
+        }
+    });
 
-        // Add event listeners for file inputs
-        fileInput.addEventListener('change', (e) => {
-            const target = e.target as HTMLInputElement;
-            const file = target.files?.[0];
-            if (file) {
-                fileName.textContent = file.name;
-            }
-        });
+    // File input change handlers
+    document.getElementById('fileInput')?.addEventListener('change', (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+            document.getElementById('fileName')!.textContent = file.name;
+        }
+    });
 
-        coverImageInput.addEventListener('change', (e) => {
-            const target = e.target as HTMLInputElement;
-            const file = target.files?.[0];
-            if (file) {
-                coverImageName.textContent = file.name;
-            }
-        });
+    document.getElementById('coverImageInput')?.addEventListener('change', (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+            document.getElementById('coverImageName')!.textContent = file.name;
+        }
+    });
 
-        // Drag and drop handling
+    // Drag and drop handling
+    const dropZone = document.querySelector('.upload-form__file-upload');
+    if (dropZone) {
+        const dropZoneElement = dropZone as HTMLElement;
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone?.addEventListener(eventName, preventDefaults, false);
+            dropZoneElement.addEventListener(eventName, preventDefaults as EventListener, false);
         });
 
-        function preventDefaults(e: Event): void {
+        function preventDefaults(e: Event) {
             e.preventDefault();
             e.stopPropagation();
         }
 
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone?.addEventListener(eventName, highlight, false);
+            dropZoneElement.addEventListener(eventName, highlight as EventListener, false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
-            dropZone?.addEventListener(eventName, unhighlight, false);
+            dropZoneElement.addEventListener(eventName, unhighlight as EventListener, false);
         });
 
-        function highlight(): void {
-            dropZone?.classList.add('highlight');
+        function highlight() {
+            dropZoneElement.classList.add('highlight');
         }
 
-        function unhighlight(): void {
-            dropZone?.classList.remove('highlight');
+        function unhighlight() {
+            dropZoneElement.classList.remove('highlight');
         }
 
-        dropZone?.addEventListener('drop', handleDrop as EventListener, false);
+        dropZoneElement.addEventListener('drop', handleDrop as EventListener, false);
 
-        function handleDrop(e: DragEvent): void {
+        function handleDrop(e: DragEvent) {
+            console.log('File dropped');
             const dt = e.dataTransfer;
             if (!dt) return;
+
             const files = dt.files;
-            if (!files || files.length === 0) return;
-            
-            // Update the file input and label
+            if (files.length === 0) return;
+
+            const fileInput = document.getElementById('fileInput') as HTMLInputElement;
             fileInput.files = files;
-            if (fileName) {
-                fileName.textContent = files[0].name;
-            }
+            document.getElementById('fileName')!.textContent = files[0].name;
         }
-    });
+    }
 </script>
-
-

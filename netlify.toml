@@ -1,0 +1,6 @@
+[build]
+  command = "yarn build && yarn pagefind"
+  publish = "dist"
+
+[build.environment]
+  YARN_ENABLE_IMMUTABLE_INSTALLS = "true"

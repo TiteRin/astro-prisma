@@ -28,9 +28,11 @@ pnpm-debug.log*
 .cursor
 
 # lock files
-yarn.lock
+# yarn.lock
 
 /public/pagefind/**
 
 # Netlify
 .netlify
+
+temp-uploads/*.mdx

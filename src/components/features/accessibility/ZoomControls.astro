@@ -1,5 +1,5 @@
 ---
-import { Icon } from "astro-icon/components";
+import Icons from '../../icons/Icons.astro';
 ---
 
 <section class="zoom-controls">
@@ -9,7 +9,7 @@ import { Icon } from "astro-icon/components";
             onclick="handleZoom('out')"
             aria-label="Zoom out"
         >
-            <Icon name="iconoir:zoom-out" />
+            <Icons name="zoom-out" />
         </button>
 
         <span class="zoom-controls__value">
@@ -21,7 +21,7 @@ import { Icon } from "astro-icon/components";
             onclick="handleZoom('in')"
             aria-label="Zoom in"
         >
-            <Icon name="iconoir:zoom-in" />
+            <Icons name="zoom-in" />
         </button>
     </div>
 </section>
