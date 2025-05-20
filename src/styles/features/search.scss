@@ -46,9 +46,12 @@
       align-items: start;
       gap: var(--spacing-sm);
       padding: 0;
+      max-height: 80vh;
+      overflow-y: auto;
 
       li {
         padding: var(--spacing-md);
+        width: 100%;
       }
 
       li.result-item {
@@ -63,6 +66,7 @@
           gap: var(--spacing-sm);
           text-decoration: none;
           color: var(--color-text);
+          width: 100%;
 
           &:hover {
             color: var(--color-primary);
@@ -71,42 +75,59 @@
 
         img {
           max-width: 75px;
+          height: auto;
+          object-fit: cover;
+          border-radius: var(--border-radius-sm);
+        }
+
+        .result-item__content {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .result-item__header {
+          margin-bottom: var(--spacing-xs);
         }
 
         h2 {
           margin-top: 0;
           font-size: var(--font-size-base);
           font-weight: var(--font-weight-medium);
-
-          span.author {
-            font-size: var(--font-size-sm);
-          }
+          color: var(--color-primary);
         }
 
-        .summary {
-          font-size: var(--font-size-sm);
-          border: 1px solid var(--color-border);
-          padding: var(--spacing-xs);
-          border-radius: var(--border-radius-sm);
-          background-color: var(--color-background-alt);
+        .result-item__authors {
+          font-size: var(--font-size-small);
+          color: var(--color-text-muted);
+          margin: 0;
         }
 
-        .tags {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: wrap;
-          gap: var(--spacing-sm);
-          padding: 0;
-          list-style: none;
-
-          .tag {
-            font-size: var(--font-size-sm);
-            padding: var(--spacing-xs) var(--spacing-sm);
-            border-radius: var(--border-radius-sm);
-            background-color: var(--color-background-alt);
-            color: var(--color-text-alt);
-          }
+        .result-item__excerpt {
+          font-size: var(--font-size-small);
+          margin: var(--spacing-xs) 0 0;
+          color: var(--color-text);
         }
+
+        :global(.pagefind-ui__message) {
+          color: var(--color-text);
+        }
+
+        :global(.pagefind-ui__highlight) {
+          background-color: var(--color-primary-light);
+          color: var(--color-primary-dark);
+          padding: 0 2px;
+          border-radius: 2px;
+        }
+      }
+
+      li.loading {
+        color: var(--color-text-muted);
+        font-style: italic;
+      }
+
+      li.no-result {
+        color: var(--color-text-muted);
+        font-style: italic;
       }
     }
   }
