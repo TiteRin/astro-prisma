@@ -31,5 +31,13 @@ import "../styles/global.scss";
 		width: 100%;
 		min-height: calc(100vh - var(--app-toolbar-height));
 		transition: font-size 0.2s ease;
+
+		display: flex;
+		flex-direction: column;
+
+		> * {
+			flex: 1;
+			box-sizing: border-box;
+		}
 	}
 </style>
