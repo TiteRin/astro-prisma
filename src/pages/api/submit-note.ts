@@ -5,6 +5,7 @@ import {summaryValidationSchema} from "../../content.config.js";
 import { z } from "zod";
 import fs from 'fs/promises';
 import path from 'path';
+import { extractImageUrls, validateImageUrls } from "../../utils/imageValidation";
 
 export const prerender = false;
 
@@ -25,70 +26,6 @@ async function saveFileLocally(filePath: string, content: Buffer | string) {
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     // Write the file
     await fs.writeFile(filePath, content);
-}
-
-// Function to extract image URLs from markdown content
-function extractImageUrls(content: string): string[] {
-    // Match both markdown image syntax ![alt](url) and HTML img tags
-    const imageRegex = /!\[.*?\]\((.*?)\)|<img[^>]+src="([^">]+)"/g;
-    const urls: string[] = [];
-    let match;
-
-    while ((match = imageRegex.exec(content)) !== null) {
-        // match[1] is for markdown syntax, match[2] is for HTML img tags
-        const url = match[1] || match[2];
-        if (url) {
-            urls.push(url);
-        }
-    }
-
-    return urls;
-}
-
-// Function to validate image URLs
-async function validateImageUrls(urls: string[]): Promise<{ valid: boolean; errors: string[] }> {
-    const errors: string[] = [];
-    
-    // Parse domain lists from environment variables
-    const allowedDomains = import.meta.env.ALLOWED_IMAGE_DOMAINS?.split(',').filter(Boolean) || [];
-    const blockedDomains = import.meta.env.BLOCKED_IMAGE_DOMAINS?.split(',').filter(Boolean) || [];
-
-    for (const url of urls) {
-        // Check if URL is absolute
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-            errors.push(`L'image "${url}" doit utiliser une URL absolue (commençant par http:// ou https://)`);
-            continue;
-        }
-
-        try {
-            const urlObj = new URL(url);
-            
-            // Check blocked domains first
-            if (blockedDomains.length > 0 && blockedDomains.some((domain: string) => urlObj.hostname.includes(domain))) {
-                errors.push(`Le domaine de l'image "${url}" est bloqué.`);
-                continue;
-            }
-
-            // Check allowed domains if specified
-            if (allowedDomains.length > 0 && !allowedDomains.some((domain: string) => urlObj.hostname.includes(domain))) {
-                errors.push(`Le domaine de l'image "${url}" n'est pas dans la liste des domaines autorisés.`);
-                continue;
-            }
-
-            // Try to fetch the image to verify it exists and is accessible
-            const response = await fetch(url, { method: 'HEAD' });
-            if (!response.ok) {
-                errors.push(`L'image "${url}" n'est pas accessible (code ${response.status})`);
-            }
-        } catch (error) {
-            errors.push(`Impossible de vérifier l'accessibilité de l'image "${url}"`);
-        }
-    }
-
-    return {
-        valid: errors.length === 0,
-        errors
-    };
 }
 
 export const GET: APIRoute = async ({request}) => {
@@ -225,68 +162,85 @@ export const POST: APIRoute = async ({request}) => {
                     await sendProgress({ type: 'info', message: "Envoi des fichiers vers GitHub...", step: "remote" });
                     
                     // Get the current tree SHA
-                    const { data: { sha: baseTree } } = await octokit.rest.git.getTree({
-                        ...payload,
-                        tree_sha: import.meta.env.GITHUB_BRANCH || "main",
-                        recursive: "true"
-                    });
+                    try {
+                        const branchName = import.meta.env.GITHUB_BRANCH || "main";
+                        await sendProgress({ type: 'info', message: `Tentative de récupération de l'arbre Git pour la branche ${branchName}...`, step: "remote" });
+                        
+                        const { data: { sha: baseTree } } = await octokit.rest.git.getTree({
+                            ...payload,
+                            tree_sha: branchName,
+                            recursive: "true"
+                        });
+                        
+                        await sendProgress({ type: 'success', message: `Arbre Git récupéré avec succès (SHA: ${baseTree.substring(0, 7)})`, step: "remote" });
+                        
+                        // Create blobs for both files
+                        const coverImageContent = await coverImage.arrayBuffer();
+                        const { data: { sha: coverImageBlob } } = await octokit.rest.git.createBlob({
+                            ...payload,
+                            content: Buffer.from(coverImageContent).toString('base64'),
+                            encoding: 'base64'
+                        });
 
-                    // Create blobs for both files
-                    const coverImageContent = await coverImage.arrayBuffer();
-                    const { data: { sha: coverImageBlob } } = await octokit.rest.git.createBlob({
-                        ...payload,
-                        content: Buffer.from(coverImageContent).toString('base64'),
-                        encoding: 'base64'
-                    });
+                        const { data: { sha: fileBlob } } = await octokit.rest.git.createBlob({
+                            ...payload,
+                            content: Buffer.from(fileContent).toString('base64'),
+                            encoding: 'base64'
+                        });
 
-                    const { data: { sha: fileBlob } } = await octokit.rest.git.createBlob({
-                        ...payload,
-                        content: Buffer.from(fileContent).toString('base64'),
-                        encoding: 'base64'
-                    });
+                        // Create a new tree with both files
+                        const { data: { sha: newTree } } = await octokit.rest.git.createTree({
+                            ...payload,
+                            base_tree: baseTree,
+                            tree: [
+                                {
+                                    path: coverImagePath,
+                                    mode: '100644',
+                                    type: 'blob',
+                                    sha: coverImageBlob
+                                },
+                                {
+                                    path: filePath,
+                                    mode: '100644',
+                                    type: 'blob',
+                                    sha: fileBlob
+                                }
+                            ]
+                        });
 
-                    // Create a new tree with both files
-                    const { data: { sha: newTree } } = await octokit.rest.git.createTree({
-                        ...payload,
-                        base_tree: baseTree,
-                        tree: [
-                            {
-                                path: coverImagePath,
-                                mode: '100644',
-                                type: 'blob',
-                                sha: coverImageBlob
-                            },
-                            {
-                                path: filePath,
-                                mode: '100644',
-                                type: 'blob',
-                                sha: fileBlob
-                            }
-                        ]
-                    });
+                        // Get the latest commit
+                        const { data: { object: { sha: parentCommit } } } = await octokit.rest.git.getRef({
+                            ...payload,
+                            ref: `heads/${branchName}`
+                        });
 
-                    // Get the latest commit
-                    const { data: { object: { sha: parentCommit } } } = await octokit.rest.git.getRef({
-                        ...payload,
-                        ref: `heads/${import.meta.env.GITHUB_BRANCH || "main"}`
-                    });
+                        // Create a new commit
+                        const { data: { sha: newCommit } } = await octokit.rest.git.createCommit({
+                            ...payload,
+                            message: `[fiche] Ajout d'une nouvelle fiche - ${file.name}`,
+                            tree: newTree,
+                            parents: [parentCommit]
+                        });
 
-                    // Create a new commit
-                    const { data: { sha: newCommit } } = await octokit.rest.git.createCommit({
-                        ...payload,
-                        message: `[fiche] Ajout d'une nouvelle fiche - ${file.name}`,
-                        tree: newTree,
-                        parents: [parentCommit]
-                    });
+                        // Update the reference
+                        await octokit.rest.git.updateRef({
+                            ...payload,
+                            ref: `heads/${branchName}`,
+                            sha: newCommit
+                        });
 
-                    // Update the reference
-                    await octokit.rest.git.updateRef({
-                        ...payload,
-                        ref: `heads/${import.meta.env.GITHUB_BRANCH || "main"}`,
-                        sha: newCommit
-                    });
-
-                    await sendProgress({ type: 'success', message: "Envoi vers GitHub réussi", step: "remote" });
+                        await sendProgress({ type: 'success', message: "Envoi vers GitHub réussi", step: "remote" });
+                    } catch (gitError: any) {
+                        console.error('GitHub API Error:', gitError);
+                        const errorDetails = gitError.response?.data?.message || 'Unknown error';
+                        const errorStatus = gitError.status || gitError.response?.status || 'Unknown status';
+                        await sendProgress({ 
+                            type: 'error', 
+                            message: `Erreur GitHub: ${errorStatus} - ${errorDetails}. Vérifiez que le dépôt, la branche et les permissions sont corrects.`, 
+                            step: "remote" 
+                        });
+                        throw gitError;
+                    }
                 } catch (error) {
                     console.error('Error uploading to GitHub:', error);
                     await sendProgress({ type: 'error', message: "Erreur lors de l'envoi vers GitHub", step: "remote" });
