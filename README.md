@@ -18,9 +18,9 @@ Nous mettons en place un système d'upload de fiches de lecture sur un serveur O
 
 **Étapes d'implémentation:**
 1. Configuration du serveur OVH :
-   - [ ] Créer un dossier dédié pour les fiches
-   - [ ] Configurer les permissions appropriées
-   - [ ] Mettre en place un utilisateur SFTP dédié
+   - [x] Créer un dossier dédié pour les fiches
+   - [-] Configurer les permissions appropriées
+   - [-] Mettre en place un utilisateur SFTP dédié
 
 2. API d'upload :
    - [ ] Créer une route API sécurisée
@@ -33,59 +33,10 @@ Nous mettons en place un système d'upload de fiches de lecture sur un serveur O
    - [ ] Tester le processus complet
 
 **To-Do List:**
-- [ ] Configuration initiale du serveur OVH
+- [x] Configuration initiale du serveur OVH
 - [ ] Création de l'API d'upload
 - [ ] Mise en place de l'authentification
 - [ ] Tests d'intégration
-
-### App Toolbar
-**Branch:** `feat/app-toolbar`
-
-**Summary:**
-We are creating a new App Toolbar that will:
-- Be positioned at the top of the app
-- Not be visible on print
-- Include accessibility options (font and font-size controls) from the current AccessibilityWidget
-- Add a User Avatar placeholder on the right end
-- Add the app name as a link to the home page
-- Be mobile-friendly and collapse on scroll
-- Maintain current accessibility features (font selection, zoom, localStorage persistence)
-- Include proper ARIA labels and keyboard navigation
-
-**Implementation Guidance:**
-1. Component Structure:
-   - Create new AppToolbar.astro component
-   - Move accessibility features from Widget.astro
-   - Add app name/logo section
-   - Add user avatar section
-
-2. Accessibility Features Migration:
-   - Move font selection functionality
-   - Move zoom controls
-   - Maintain localStorage persistence
-   - Add reset functionality
-
-3. Responsive Design:
-   - Implement mobile-friendly layout
-   - Add scroll-based collapse behavior
-   - Ensure proper spacing and alignment
-
-4. User Interface:
-   - Add app name/logo with home link
-   - Add placeholder user avatar
-   - Style all elements consistently
-
-5. Accessibility:
-   - Add proper ARIA labels
-   - Ensure keyboard navigation
-   - Maintain screen reader compatibility
-
-**To-Do List:**
-- [x] Create new AppToolbar.astro component
-- [x] Move accessibility features from Widget.astro
-- [x] Implement responsive design with mobile support
-- [x] Add app name/logo with home link
-- [x] Implement proper ARIA labels and keyboard navigation
 
 ## 🚀 Project Structure
 
@@ -106,34 +57,107 @@ Inside of your Astro project, you'll see the following folders and files:
 To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
 
 ## .env file
-Copy / Paste the .env.example and rename it .env
-Fill the key with your own Github information
-Use a fine grain token with these permissions : 
-- Read access to metadata
-- Read and write access to code and pull request
-See [the documentation](https://docs.github.com/fr/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens) for more information
+Pour le développement local, copiez `.env.example` et renommez-le en `.env`.
+Remplissez les informations suivantes :
 
-## This branch
-- [x] Authentify with Octokit
-- [x] Commit a file on github
-- [x] Filter files on *.md and *.mdx files only
-- [ ] Validate file
+```
+# SFTP Configuration
+SFTP_HOST=votre-host.example.com
+SFTP_PORT=22
+SFTP_USERNAME=votre-nom-utilisateur
+SFTP_PASSWORD=votre-mot-de-passe
+# Ou clé SSH (recommandé)
+SFTP_PRIVATE_KEY_PATH=/chemin/vers/votre/cle_privee
+
+# Environnement et chemin
+ENVIRONMENT=development
+SFTP_BASE_PATH=/prisma
+
+# Webhook Netlify (optionnel pour le développement local)
+NETLIFY_BUILD_HOOK=https://api.netlify.com/build_hooks/votre-id-de-build-hook
+
+# Image Domain Configuration
+# Liste de domaines autorisés pour les images (vide = autoriser tous)
+ALLOWED_IMAGE_DOMAINS=imgur.com,github.com,githubusercontent.com
+# Liste de domaines bloqués pour les images (vide = ne bloquer aucun)
+BLOCKED_IMAGE_DOMAINS=
+```
+
+## Configuration SFTP
+
+### Structure des dossiers sur le serveur SFTP
+Nous recommandons la structure suivante sur votre serveur SFTP pour gérer les différents environnements :
+
+```
+/prisma
+  /production    # Fiches de lecture pour l'environnement de production
+  /staging       # Fiches de lecture pour l'environnement de préproduction
+  /development   # Fiches de lecture pour l'environnement de développement
+```
+
+### Configuration des variables d'environnement
+
+**Option 1 : Pour le déploiement sur Netlify**
+
+Nous utilisons les variables d'environnement de Netlify pour configurer l'accès SFTP en production :
+
+1. Connectez-vous à votre compte Netlify
+2. Sélectionnez votre projet
+3. Allez dans **Site settings** > **Build & deploy** > **Environment**
+4. Ajoutez les variables suivantes :
+
+```
+# SFTP Configuration
+SFTP_HOST
+SFTP_PORT
+SFTP_USERNAME
+SFTP_PASSWORD (ou utiliser SFTP_PRIVATE_KEY pour plus de sécurité)
+
+# Environnement et chemin
+ENVIRONMENT (development, staging ou production)
+SFTP_BASE_PATH (/prisma)
+
+# Build hook
+NETLIFY_BUILD_HOOK
+```
+
+**Option 2 : Pour le développement local**
+
+Utilisez le fichier `.env` comme décrit plus haut dans la section "`.env file`".
+
+Ces variables seront utilisées par l'application pour se connecter au serveur SFTP et stocker les fiches de lecture dans l'environnement approprié.
+
+### Configuration du Build Hook Netlify
+
+Pour obtenir un build hook Netlify :
+1. Connectez-vous à votre compte Netlify
+2. Sélectionnez votre projet
+3. Allez dans **Site settings** > **Build & deploy** > **Build hooks**
+4. Cliquez sur **Add build hook**
+5. Donnez un nom à votre hook (ex: "SFTP Upload Trigger")
+6. Sélectionnez la branche à reconstruire
+7. Ajoutez l'URL générée comme variable d'environnement `NETLIFY_BUILD_HOOK` dans vos paramètres Netlify
+
+### Sécurité et bonnes pratiques
+
+- Utilisez les variables d'environnement de Netlify pour stocker ces informations sensibles
+- Préférez l'authentification par clé SSH plutôt que par mot de passe
+- Créez un utilisateur SFTP dédié avec des permissions limitées au dossier des fiches
+- Pour les environnements de développement local, utilisez un fichier `.env` (non commité dans git)
 
 ## 🧞 Commands
 
-All commands are run from the root of the project, from a terminal:
+Toutes les commandes sont exécutées depuis la racine du projet, dans un terminal :
 
-| Command                  | Action                                                                           |
-|:-------------------------|:---------------------------------------------------------------------------------|
-| `yarn install`           | Installs dependencies                                                            |
-| `yarn dev:astro`         | Starts local dev server at `localhost:4321`                                      |
-| `yarn dev`               | Copy pagefind index into /public and starts local dev server at `localhost:4321` |
-| `yarn copy:pagefind:dev` | Copy pagefind index into /public                                                 |
-| `yarn build:astro`       | Build your production site to `./dist/`                                          |
-| `yarn build:pagefind`    | Build the pagefind index                                                         |
-| `yarn build`             | Build the pagefind index and your production site to `./dist/`                   |
-| `yarn preview`           | Preview your build locally, before deploying                                     |
-| `yarn astro ...`         | Run CLI commands like `astro add`, `astro check`                                 |
-| `yarn astro -- --help`   | Get help using the Astro CLI                                                     |
+| Commande                 | Action                                                                          |
+|:-------------------------|:--------------------------------------------------------------------------------|
+| `yarn install`           | Installe les dépendances                                                        |
+| `yarn dev`         | Démarre le serveur de développement local sur `localhost:4321`                  |
+| `yarn copy-pagefind` | Copie uniquement l'index pagefind dans `/public` pour le test en local                               |
+| `yarn build`       | Construit votre site pour la production dans `./dist/`                          |
+| `yarn pagefind`    | Construit l'index pagefind                                                      |
+| `yarn preview`           | Prévisualisez localement votre build, avant déploiement                         |
+| `yarn astro ...`         | Exécutez les commandes CLI comme `astro add`, `astro check`                     |
+| `yarn astro -- --help`   | Obtenez de l'aide sur l'utilisation de l'interface CLI d'Astro                  |
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/34286945-ff9a-4d18-9c66-0042e5269beb/deploy-status)](https://app.netlify.com/sites/astro-prisma-102442/deploys)
