@@ -974,7 +974,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@netlify/functions@npm:^3.1.5":
+"@netlify/functions@npm:^3.1.5, @netlify/functions@npm:^3.1.8":
   version: 3.1.8
   resolution: "@netlify/functions@npm:3.1.8"
   dependencies:
@@ -1940,7 +1940,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^22.15.19":
+"@types/node@npm:*":
   version: 22.15.19
   resolution: "@types/node@npm:22.15.19"
   dependencies:
@@ -1955,6 +1955,15 @@ __metadata:
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10c0/a119321c90787fca6d0ae929e55a964602123690b4674bb0ef2dc2fb78b25cc7ae4804aa6d4014d1055fd245ba8286c66080765304740978047cc706f19ed934
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^22.15.21":
+  version: 22.15.21
+  resolution: "@types/node@npm:22.15.21"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10c0/f092bbccda2131c2b2c8f720338080aa0ef1d928f5f1062c03954a4f7dafa7ee3ed29bc3e51bd4e2584473b3d943c637a2b39ad7174898970818270187cf10c1
   languageName: node
   linkType: hard
 
@@ -2458,7 +2467,8 @@ __metadata:
     "@astrojs/ts-plugin": "npm:^1.10.4"
     "@auth0/auth0-spa-js": "npm:^2.1.3"
     "@mdx-js/react": "npm:^3.1.0"
-    "@types/node": "npm:^22.15.19"
+    "@netlify/functions": "npm:^3.1.8"
+    "@types/node": "npm:^22.15.21"
     "@types/react": "npm:^19.1.4"
     "@types/react-dom": "npm:^19.1.5"
     "@types/ssh2-sftp-client": "npm:^9.0.4"
@@ -2466,6 +2476,7 @@ __metadata:
     clsx: "npm:^2.1.1"
     date-fns: "npm:^4.1.0"
     gray-matter: "npm:^4.0.3"
+    jose: "npm:^6.0.11"
     octokit: "npm:^4.1.3"
     pagefind: "npm:^1.3.0"
     react: "npm:^19.1.0"
@@ -4971,6 +4982,13 @@ __metadata:
     "@pkgjs/parseargs":
       optional: true
   checksum: 10c0/6acc10d139eaefdbe04d2f679e6191b3abf073f111edf10b1de5302c97ec93fffeb2fdd8681ed17f16268aa9dd4f8c588ed9d1d3bffbbfa6e8bf897cbb3149b9
+  languageName: node
+  linkType: hard
+
+"jose@npm:^6.0.11":
+  version: 6.0.11
+  resolution: "jose@npm:6.0.11"
+  checksum: 10c0/d290be4532174e7a53730b7fb84c74327531172bd403b196c592b312b73eedb7489949837bfe831fdbd280799bfc5ba778bc807495a73eda08ae6c49414f405a
   languageName: node
   linkType: hard
 
