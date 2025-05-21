@@ -23,7 +23,7 @@ export const verifyAuth0Token = async <
   }
 
   const AUTH0_ISSUER = process.env.AUTH0_ISSUER;
-  const AUTH0_AUDIENCE = process.env.PUBLIC_AUTH0_AUDIENCE;
+  const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE;
 
   const JWKS = createRemoteJWKSet(
     new URL(".well-known/jwks.json", AUTH0_ISSUER),

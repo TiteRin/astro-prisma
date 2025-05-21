@@ -10,7 +10,7 @@ export async function getAuth0Client(): Promise<Auth0Client> {
     domain: import.meta.env.PUBLIC_AUTH0_DOMAIN,
     clientId: import.meta.env.PUBLIC_AUTH0_CLIENT_ID,
     authorizationParams: {
-      audience: import.meta.env.PUBLIC_AUTH0_AUDIENCE,
+      audience: import.meta.env.AUTH0_AUDIENCE,
       redirect_uri: `${window.location.origin}${window.location.pathname}`,
       scope: 'openid profile email'
     }
