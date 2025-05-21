@@ -23,13 +23,13 @@ Nous mettons en place un système d'upload de fiches de lecture sur un serveur O
    - [-] Mettre en place un utilisateur SFTP dédié
 
 2. API d'upload :
-   - [ ] Créer une route API sécurisée
+   - [x] Créer une route API sécurisée
    - [ ] Implémenter l'authentification
-   - [ ] Configurer l'upload SFTP
+   - [x] Configurer l'upload SFTP
    - [ ] Mettre en place la validation des fichiers
 
 3. Intégration Netlify :
-   - [ ] Configurer le webhook de reconstruction
+   - [x] Configurer le webhook de reconstruction
    - [ ] Tester le processus complet
 
 **To-Do List:**
