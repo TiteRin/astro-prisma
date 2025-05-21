@@ -1,6 +1,6 @@
 /**
  * Utilitaires de validation d'images pour les APIs
- * Utilisés à la fois dans upload-temp.ts et submit-note.ts
+ * Utilisés à la fois dans upload-temp.ts et create-note.ts
  */
 
 /**

@@ -24,6 +24,7 @@ class SFTPClient {
   private config: SFTPConfig;
   private environment: string;
   private basePath: string;
+  private coverImagesPath: string;
 
   constructor() {
     this.client = new Client();
@@ -39,7 +40,8 @@ class SFTPClient {
     
     // Environnement (production, staging, development)
     this.environment = import.meta.env.ENVIRONMENT || 'development';
-    this.basePath = import.meta.env.SFTP_BASE_PATH || '/prisma';
+    this.basePath = import.meta.env.SFTP_FICHES_PATH || '~/prisma';
+    this.coverImagesPath = import.meta.env.SFTP_COVER_IMAGES_PATH || '~/www/img';
   }
   
   /**
@@ -100,7 +102,38 @@ class SFTPClient {
       return false;
     }
   }
-  
+
+  async uploadCoverImage(
+    coverImage: File,
+    fileName: string
+  ): Promise<SFTPUploadResult> {
+
+    return this.uploadBuffer(
+      Buffer.from(await coverImage.arrayBuffer()), 
+      this.coverImagesPath, 
+      fileName
+    );
+  }
+
+  async uploadNote(
+    content: string,
+    fileName: string,
+    directory: string = ''
+  ): Promise<SFTPUploadResult> {
+
+    // Construire le chemin complet sur le serveur
+    const envPath = path.posix.join(this.basePath, this.environment);
+    const remotePath = directory 
+      ? path.posix.join(envPath, directory) 
+      : envPath;
+
+    return this.uploadBuffer(
+      Buffer.from(content), 
+      remotePath, 
+      fileName
+    );
+  }
+
   /**
    * Téléverse un fichier sur le serveur SFTP
    * @param localFilePath Chemin local vers le fichier à téléverser
@@ -109,20 +142,20 @@ class SFTPClient {
    */
   async uploadFile(
     localFilePath: string, 
+    remotePath: string,
     fileName: string, 
-    directory: string = ''
   ): Promise<SFTPUploadResult> {
     try {
-      // Construire le chemin complet sur le serveur
-      const envPath = path.posix.join(this.basePath, this.environment);
-      const remotePath = directory 
-        ? path.posix.join(envPath, directory) 
-        : envPath;
-      
+            
       // S'assurer que le répertoire cible existe
       const dirExists = await this.ensureDirectory(remotePath);
       if (!dirExists) {
         throw new Error(`Impossible de créer le répertoire ${remotePath}`);
+      }
+
+      // S’assurer que le fichier local existe
+      if (!fs.existsSync(localFilePath)) {
+        throw new Error(`Le fichier local ${localFilePath} n'existe pas`);
       }
       
       // Chemin complet vers le fichier
@@ -151,16 +184,11 @@ class SFTPClient {
    * @param directory Sous-dossier optionnel (à partir du chemin de l'environnement)
    */
   async uploadBuffer(
-    buffer: Buffer, 
+    buffer: Buffer,
+    remotePath: string, 
     fileName: string, 
-    directory: string = ''
   ): Promise<SFTPUploadResult> {
     try {
-      // Construire le chemin complet sur le serveur
-      const envPath = path.posix.join(this.basePath, this.environment);
-      const remotePath = directory 
-        ? path.posix.join(envPath, directory) 
-        : envPath;
       
       // S'assurer que le répertoire cible existe
       const dirExists = await this.ensureDirectory(remotePath);
