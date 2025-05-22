@@ -4,6 +4,8 @@ import path from 'path';
 import matter from 'gray-matter';
 import { kebabCase } from '../utils/functions';
 
+import { createMarkdownProcessor, parseFrontmatter } from "@astrojs/markdown-remark";
+
 /**
  * Options pour le loader Markdown SFTP
  */
@@ -37,10 +39,11 @@ export function markdownSftpLoader(options: MarkdownSftpLoaderOptions): Loader {
 
   return {
     name: 'markdown-sftp-loader',
-    load: async ({ store, logger, parseData, generateDigest }) => {
+    load: async ({ config, store, logger, parseData, generateDigest }) => {
       logger.info(`Loading Markdown from SFTP: ${connection.host}:${connection.port}${remotePath}`);
       
       const sftp = new Client();
+      const processor = await createMarkdownProcessor(config.markdown);
       
       try {
         // Connexion au serveur SFTP
@@ -69,17 +72,14 @@ export function markdownSftpLoader(options: MarkdownSftpLoaderOptions): Loader {
             // Récupérer le contenu du fichier
             const content = await sftp.get(remoteFilePath);
             const markdownContent = content.toString();
-            
-            // Utiliser gray-matter pour extraire le frontmatter et le contenu
-            const { data: frontmatter, content: body } = matter(markdownContent);
-            
+
+            const parsedFrontmatter = parseFrontmatter(markdownContent);
+            const frontmatter = parsedFrontmatter.frontmatter;
+            const rendered = await processor.render(parsedFrontmatter.content ?? "");
+
+                        
             // Déterminer l'ID du fichier à partir du titre du livre si disponible
-            let id;
-            if (frontmatter.bookTitle) {
-              id = kebabCase(frontmatter.bookTitle);
-            } else {
-              id = generateId(file.name);
-            }
+            const id = generateId(frontmatter.bookTitle ?? file.name);
             
             // Analyser les données
             const data = await parseData({
@@ -89,17 +89,17 @@ export function markdownSftpLoader(options: MarkdownSftpLoaderOptions): Loader {
             
             // Générer un digest pour la détection des changements
             const digest = generateDigest(markdownContent);
-            
+
             // Stocker l'entrée
             store.set({
               id,
               data,
-              body,
               filePath: `src/content/remoteSummaries/${file.name}`,
               digest,
               rendered: {
-                html: '', // Astro s'occupera du rendu du Markdown
+                html: rendered.code,
                 metadata: {
+                  headings: rendered.metadata.headings,
                   frontmatter: frontmatter as Record<string, unknown>,
                 },
               },
@@ -122,8 +122,8 @@ export function markdownSftpLoader(options: MarkdownSftpLoaderOptions): Loader {
 }
 
 /**
- * Génère un ID à partir du chemin de fichier en supprimant l'extension
+ * Génère un slug à partir du nom du fichier
  */
-function defaultGenerateId(filePath: string): string {
-  return path.basename(filePath, path.extname(filePath)).toLowerCase();
+function defaultGenerateId(name: string): string {
+  return kebabCase(name);
 } 

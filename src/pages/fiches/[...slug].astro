@@ -12,6 +12,9 @@ export async function getStaticPaths() {
 }
 
 const {fiche} = Astro.props;
+
+console.log(fiche);
+
 const {Content} = await render(fiche);
 ---
 <FicheLayout pageTitle={fiche.data.bookTitle}>
