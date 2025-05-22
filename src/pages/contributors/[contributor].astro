@@ -1,11 +1,12 @@
 ---
 import FicheLayout from "../../layouts/FicheLayout.astro";
 import {getCollection} from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import {pluralize} from "../../utils/functions";
 
 export async function getStaticPaths() {
 
-    const allReadingNotes = await getCollection("summaries");
+    const allReadingNotes:CollectionEntry<"readingNotes">[] = await getCollection("readingNotes");
     const uniqueAuthors = [...new Set(allReadingNotes.map(readingNote => readingNote.data.contributor).flat())];
 
     return uniqueAuthors.map((contributor) => {

@@ -34,8 +34,8 @@ Nous mettons en place un système d'upload de fiches de lecture sur un serveur O
 
 **To-Do List:**
 - [x] Configuration initiale du serveur OVH
-- [ ] Création de l'API d'upload
-- [ ] Mise en place de l'authentification
+- [x] Création de l'API d'upload
+- [-] Mise en place de l'authentification
 - [ ] Tests d'intégration
 
 ## 🚀 Project Structure

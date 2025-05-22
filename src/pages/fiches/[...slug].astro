@@ -4,7 +4,7 @@ import FicheLayout from "../../layouts/FicheLayout.astro";
 import {format} from "date-fns";
 
 export async function getStaticPaths() {
-    const fiches = await getCollection('summaries');
+    const fiches = await getCollection('readingNotes');
     return fiches.map(fiche => ({
         params: {slug: fiche.id},
         props: {fiche}

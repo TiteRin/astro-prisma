@@ -1,10 +1,10 @@
 ---
 import FicheLayout from "../../layouts/FicheLayout.astro";
-import {getCollection} from "astro:content";
-import {pluralize} from "../../utils/functions";
+import {getCollection} from "astro:content";    
+import type { CollectionEntry } from "astro:content";
 
-const allSummaries = await getCollection("summaries");
-const uniqueContributors = [...new Set(allSummaries.map(summary => summary.data.contributor))];
+const allReadingNotes = await getCollection("readingNotes");
+const uniqueContributors = [...new Set(allReadingNotes.map(readingNote => readingNote.data.contributor))];
 const title = `Tous·tes les contributeur·ices`;
 ---
 <FicheLayout pageTitle={title}>
@@ -19,7 +19,7 @@ const title = `Tous·tes les contributeur·ices`;
                             <a href=`/contributors/${contributor}`>
                                 {contributor}
                                 ({
-                                allSummaries.filter(summary => summary.data.contributor === contributor).length
+                                allReadingNotes.filter(readingNote => readingNote.data.contributor === contributor).length
                                 })
                             </a>
                         </li>

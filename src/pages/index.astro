@@ -1,9 +1,9 @@
 ---
 import {getCollection} from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import FicheLayout from "../layouts/FicheLayout.astro";
 
-// const allFiches = await getCollection("summaries");
-const allFiches = await getCollection("remoteSummaries");
+const allFiches:CollectionEntry<"readingNotes">[] = await getCollection("readingNotes");
 
 // console.log(allFiches);
 // console.log(allRemoteFiches);

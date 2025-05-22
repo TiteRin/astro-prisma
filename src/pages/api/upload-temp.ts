@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import matter from 'gray-matter';
 import { randomUUID } from 'crypto';
-import { summaryValidationSchema } from "../../content.config";
+import { readingNoteValidationSchema } from "../../content.config";
 import { z } from "zod";
 import { extractImageUrls, validateMarkdownImageAlt, validateImageUrls } from "../../utils/imageValidation";
 
@@ -18,7 +18,7 @@ interface UploadResponse {
 }
 
 // Schéma de validation intermédiaire pour le frontmatter (plus permissif que le schéma final)
-const uploadFrontmatterSchema = summaryValidationSchema.partial()
+const uploadFrontmatterSchema = readingNoteValidationSchema.partial()
   .extend({
     // Champs obligatoires même lors de l'upload
     bookTitle: z.string().min(1, "Le titre du livre est requis"),

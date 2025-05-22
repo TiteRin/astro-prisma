@@ -7,7 +7,7 @@ import { z, defineCollection } from "astro:content";
 
 
 // Define a `loader` and `schema` for each collection
-export const summaryValidationSchema = z.object({
+export const readingNoteValidationSchema = z.object({
     bookTitle: z.string(),
     bookAuthors: z.array(z.string()),
     publishedYear: z.number(),
@@ -22,7 +22,7 @@ export const summaryValidationSchema = z.object({
 });
 
 const remotePath = path.join(import.meta.env.SFTP_FICHES_PATH || "", import.meta.env.ENVIRONMENT || "");
-const remoteSummaries = defineCollection({
+const readingNotes = defineCollection({
     loader: markdownSftpLoader({
         connection: {
             host: import.meta.env.SFTP_HOST || "example.com",
@@ -32,12 +32,12 @@ const remoteSummaries = defineCollection({
         },
         remotePath: remotePath
     }),
-    schema: summaryValidationSchema
+    schema: readingNoteValidationSchema
 });
 
-const summaries = defineCollection({
-    loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/summaries" }),
-    schema: summaryValidationSchema
-});
+// const summaries = defineCollection({
+//     loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/summaries" }),
+//     schema: summaryValidationSchema
+// });
 // Export a single `collections` object to register your collection(s)
-export const collections = { summaries, remoteSummaries };
+export const collections = { readingNotes };

@@ -5,7 +5,7 @@ import { APIRoute } from "astro";
 import matter from "gray-matter";
 import path from "path";
 import { sftpClient } from "@/utils/sftpClient";
-import { summaryValidationSchema } from "@/content.config";
+import { readingNoteValidationSchema } from "@/content.config";
 import { randomUUID } from "crypto";
 import { triggerNetlifyBuild } from "@/utils/netlifyTrigger";
 
@@ -117,7 +117,7 @@ export const POST: APIRoute = async ({ request }) => {
                 alt: processedAttributes.image?.alt || `Couverture de ${processedAttributes.bookTitle}`
             };
 
-            const validationData = summaryValidationSchema.parse(processedAttributes);
+            const validationData = readingNoteValidationSchema.parse(processedAttributes);
             const fileContent = matter.stringify(body, processedAttributes);
 
             await sendProgress({ type: 'info', message: "Envoi de la fiche de lecture en cours...", step: "envoi" });

@@ -5,7 +5,7 @@ import {pluralize} from "../../utils/functions";
 
 export async function getStaticPaths() {
 
-    const allReadingNotes = await getCollection("summaries");
+    const allReadingNotes = await getCollection("readingNotes");
     const uniqueTags = [...new Set(allReadingNotes.map(readingNote => readingNote.data.tags).flat())];
 
     return uniqueTags.map((tag) => {
@@ -29,7 +29,7 @@ const {tag} = Astro.params;
     <ul>
         {
             filteredReadingNotes.map(readingNote => (
-                    <li key={readingNote.id}>
+                    <li>
                         <a href={`/fiches/${readingNote.id}`}>
                             {readingNote.data.bookTitle} ({readingNote.data.bookAuthors.join(", ")})
                         </a>
