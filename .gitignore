@@ -36,3 +36,5 @@ pnpm-debug.log*
 .netlify
 
 temp-uploads/*.mdx
+
+.yarn/install-state.gz

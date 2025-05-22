@@ -30,5 +30,12 @@ export default defineConfig({
         '@': resolve(__dirname, './src/'),
       },
     },
+    envPrefix: [
+      'PUBLIC_', 
+      'VITE_',
+      'SFTP_',
+      'ENVIRONMENT',
+      'COVER_IMAGE_URL'
+    ],
   }
 });

@@ -1,10 +1,10 @@
 ---
 import FicheLayout from "../../layouts/FicheLayout.astro";
 import {getCollection} from "astro:content";
-import {pluralize} from "../../utils/functions";
+import type { CollectionEntry } from "astro:content";
 
-const allSummaries = await getCollection("summaries");
-const uniqueTags = [...new Set(allSummaries.map(summary => summary.data.tags).flat())];
+const allReadingNotes:CollectionEntry<"readingNotes">[] = await getCollection("readingNotes");
+const uniqueTags = [...new Set(allReadingNotes.map(readingNote => readingNote.data.tags).flat())];
 const title = `Tous les tags`
 ---
 <FicheLayout pageTitle={title}>
@@ -19,7 +19,7 @@ const title = `Tous les tags`
                         <a href=`/tags/${tag}`>
                             {tag}
                             ({
-                                allSummaries.filter(summary => summary.data.tags.includes(tag)).length
+                                allReadingNotes.filter(readingNote => readingNote.data.tags.includes(tag)).length
                             })
                         </a>
                     </li>

@@ -1,5 +1,3 @@
-import { z } from "astro:content";
-
 // Types pour la validation des fichiers
 export interface FileValidationError {
     field: string;
@@ -224,7 +222,8 @@ export async function getTempFileInfo(fileId: string): Promise<SilentUploadResul
 }
 
 /**
- * Envoie le formulaire d'upload
+ * Envoie les données du formulaires pour créer une nouvelle note
+ * 
  * @param formData Données du formulaire
  * @param onProgress Callback pour les notifications de progression
  * @returns Promesse avec le résultat de l'upload
@@ -241,11 +240,12 @@ export async function submitUploadForm(
             step: 'start'
         });
 
-        // Appel à l'API
-        const response = await fetch('/api/submit-note', {
-            method: 'POST',
-            body: formData
-        });
+        const response = await fetch('/api/create-note', 
+            {
+                method: 'POST',
+                body: formData
+            }
+        )
 
         if (!response.ok) {
             throw new Error(`Erreur HTTP: ${response.status}`);
