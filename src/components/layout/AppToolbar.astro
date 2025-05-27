@@ -1,23 +1,23 @@
 ---
 import Icons from '../icons/Icons.astro';
-import "../../styles/layout/app-toolbar.scss";
-import "../../styles/features/accessibility/zoom-controls.scss";
-import "../../styles/features/accessibility/theme-switcher.scss";
+
 import FontSelector from "../features/accessibility/FontSelector.astro";
 import ZoomControls from "../features/accessibility/ZoomControls.astro";
 import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
 ---
 
-<header class="app-toolbar" role="banner">
-    <div class="app-toolbar__brand">
-        <a href="/" class="app-toolbar__home-link" aria-label="Retour à l'accueil">
-            <h1 class="app-toolbar__app-name">Prisma</h1>
-            <span class="app-toolbar__app-subtitle">Pôle recherche</span>
+<header class="app-toolbar sticky top-0 z-50 flex items-center gap-2 bg-base-200 border-b border-base-300 p-2" role="banner">
+    <div class="app-toolbar__brand flex items-center min-w-0 flex-grow">
+        <a href="/" 
+            class="app-toolbar__home-link flex flex-col items-baseline gap-1 min-w-0 text-primary font-medium outline-none rounded-sm text-decoration-none focus-visible:outline-primary-content" 
+            aria-label="Retour à l'accueil">
+            <h1 class="app-toolbar__app-name m-0 text-xl font-bold">Prisma</h1>
+            <span class="app-toolbar__app-subtitle m-0 text-sm font-normal text-neutral">Pôle recherche</span>
         </a>
     </div>
 
     <button 
-        class="app-toolbar__menu-toggle" 
+        class="app-toolbar__menu-toggle btn btn-circle btn-outline md:hidden" 
         aria-label="Menu d'accessibilité" 
         aria-expanded="false" 
         aria-controls="accessibility-menu"
@@ -28,10 +28,9 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
 
     <div 
         id="accessibility-menu" 
-        class="app-toolbar__accessibility" 
+        class="app-toolbar__accessibility hidden absolute top-full left-0 w-full md:w-auto md:relative md:flex gap-4 flex-col md:flex-row items-center bg-base-200 border-b border-base-300 p-2" 
         role="menu"
         aria-label="Options d'accessibilité"
-        hidden
     >
         <FontSelector />
         <ZoomControls />
@@ -40,7 +39,7 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
 
     <div class="app-toolbar__user">
         <button 
-            class="app-toolbar__avatar" 
+            class="app-toolbar__avatar avatar btn btn-circle btn-outline" 
             aria-label="Menu utilisateur"
             aria-haspopup="true"
         >
@@ -52,14 +51,13 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
 <script>
     const menuToggle = document.querySelector<HTMLButtonElement>('.app-toolbar__menu-toggle');
     const accessibilityMenu = document.querySelector<HTMLDivElement>('#accessibility-menu');
-    const toolbar = document.querySelector<HTMLElement>('.app-toolbar');
 
     if (menuToggle && accessibilityMenu) {
         // Handle menu toggle
         menuToggle.addEventListener('click', () => {
             const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
             menuToggle.setAttribute('aria-expanded', (!isExpanded).toString());
-            accessibilityMenu.hidden = isExpanded;
+            accessibilityMenu.classList.toggle('hidden', !isExpanded);
         });
 
         // Handle keyboard navigation
@@ -71,16 +69,16 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
         });
 
         // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            const target = e.target as Node;
-            if (menuToggle && accessibilityMenu && 
-                !menuToggle.contains(target) && 
-                !accessibilityMenu.contains(target) && 
-                !accessibilityMenu.hidden) {
-                menuToggle.setAttribute('aria-expanded', 'false');
-                accessibilityMenu.hidden = true;
-            }
-        });
+        // document.addEventListener('click', (e) => {
+        //     const target = e.target as Node;
+        //     if (menuToggle && accessibilityMenu && 
+        //         !menuToggle.contains(target) && 
+        //         !accessibilityMenu.contains(target) && 
+        //         !accessibilityMenu.hidden) {
+        //         menuToggle.setAttribute('aria-expanded', 'false');
+        //         accessibilityMenu.hidden = true;
+        //     }
+        // });
 
         // Close menu on escape key
         document.addEventListener('keydown', (e) => {

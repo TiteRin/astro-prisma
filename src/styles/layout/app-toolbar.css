@@ -1,0 +1,267 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   App Toolbar Component
+   ========================================================================== */
+
+/* Base styles
+   ========================================================================== */
+
+/* Brand section
+   ========================================================================== */
+
+
+/* Menu toggle button
+   ========================================================================== */
+.app-toolbar__menu-toggle {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+
+  /* Visual */
+  background: none;
+  border: none;
+  padding: --spacing(2);
+  cursor: pointer;
+  border-radius: var(--rounded-full);
+  outline: none;
+
+  /* Animation */
+  transition: background-color var(--transition-fast);
+}
+
+.app-toolbar__menu-toggle:hover {
+  background-color: hsl(var(--b2));
+}
+
+.app-toolbar__menu-toggle:focus-visible {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
+}
+
+.app-toolbar__menu-toggle svg {
+  width: var(--font-size-xl);
+  height: var(--font-size-xl);
+}
+
+.app-toolbar__menu-toggle[aria-expanded="true"] {
+  background-color: hsl(var(--b2));
+}
+
+/* Accessibility menu
+   ========================================================================== */
+.app-toolbar__accessibility {
+  /* Layout */
+  position: absolute;
+  top: 100%;
+  right: 0;
+  flex-direction: column;
+  gap: --spacing(2);
+  width: 100%;
+
+  /* Visual */
+  background-color: hsl(var(--b1));
+  border: 1px solid hsl(var(--b3));
+  border-top: none;
+  padding: --spacing(2);
+  box-shadow: var(--shadow-md);
+
+  /* State */
+  display: none;
+}
+
+.app-toolbar__accessibility:not([hidden]) {
+  display: flex;
+}
+
+/* Accessibility controls
+   ========================================================================== */
+.app-toolbar__accessibility .font-selector,
+.app-toolbar__accessibility .zoom-controls,
+.app-toolbar__accessibility .theme-switcher {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: --spacing(1);
+  width: 100%;
+
+  /* Visual */
+  padding: --spacing(1);
+  border-radius: var(--rounded-sm);
+  background-color: hsl(var(--b2));
+}
+
+.app-toolbar__accessibility button {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: --spacing(8);
+  height: --spacing(8);
+  padding: --spacing(1);
+
+  /* Visual */
+  background: none;
+  border: none;
+  border-radius: var(--rounded-sm);
+  cursor: pointer;
+  outline: none;
+
+  /* Animation */
+  transition: background-color var(--transition-fast);
+}
+
+.app-toolbar__accessibility button:hover {
+  background-color: hsl(var(--b2));
+}
+
+.app-toolbar__accessibility button:focus-visible {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
+}
+
+.app-toolbar__accessibility button svg {
+  width: var(--font-size-lg);
+  height: var(--font-size-lg);
+}
+
+.app-toolbar__accessibility select {
+  /* Layout */
+  min-width: 0;
+  flex: 1;
+  padding: --spacing(1);
+
+  /* Visual */
+  font-size: var(--font-size-sm);
+  border: 1px solid hsl(var(--b3));
+  border-radius: var(--rounded-sm);
+  background-color: hsl(var(--b1));
+  outline: none;
+
+  /* Animation */
+  transition: border-color var(--transition-fast);
+}
+
+.app-toolbar__accessibility select:focus-visible {
+  border-color: hsl(var(--p));
+}
+
+/* User section
+   ========================================================================== */
+.app-toolbar__user {
+  display: flex;
+  align-items: center;
+}
+
+.app-toolbar__avatar {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: --spacing(2);
+
+  /* Visual */
+  background: none;
+  border: none;
+  border-radius: var(--rounded-full);
+  cursor: pointer;
+  outline: none;
+
+  /* Animation */
+  transition: background-color var(--transition-fast);
+}
+
+.app-toolbar__avatar:hover {
+  background-color: hsl(var(--b2));
+}
+
+.app-toolbar__avatar:focus-visible {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
+}
+
+.app-toolbar__avatar svg {
+  width: var(--font-size-xl);
+  height: var(--font-size-xl);
+}
+
+/* Media Queries
+   ========================================================================== */
+@media (min-width: 768px) {
+  /* Base */
+  .app-toolbar {
+    padding: --spacing(2) --spacing(4);
+    gap: --spacing(4);
+  }
+
+  /* Brand */
+  .app-toolbar__home-link {
+    display: block;
+  }
+
+  .app-toolbar__app-name {
+    font-size: var(--font-size-lg);
+    margin-bottom: --spacing(1);
+  }
+
+  .app-toolbar__app-subtitle {
+    display: block;
+    white-space: normal;
+  }
+
+  /* Menu toggle */
+  .app-toolbar__menu-toggle {
+    display: none;
+  }
+
+  /* Accessibility menu */
+  .app-toolbar__accessibility {
+    /* Reset mobile styles */
+    position: static;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: none;
+    padding: 0;
+    width: auto;
+    box-shadow: none;
+    background: none;
+    gap: --spacing(4);
+  }
+
+  /* Accessibility controls */
+  .app-toolbar__accessibility .font-selector,
+  .app-toolbar__accessibility .zoom-controls,
+  .app-toolbar__accessibility .theme-switcher {
+    background: none;
+    padding: 0;
+    width: auto;
+    justify-content: flex-start;
+  }
+
+  .app-toolbar__accessibility button {
+    padding: --spacing(2);
+    min-width: --spacing(10);
+    height: --spacing(10);
+  }
+
+  .app-toolbar__accessibility button svg {
+    width: var(--font-size-xl);
+    height: var(--font-size-xl);
+  }
+
+  .app-toolbar__accessibility select {
+    padding: --spacing(2);
+    font-size: var(--font-size-base);
+    min-width: --spacing(32);
+  }
+}
+
+@media print {
+  .app-toolbar {
+    display: none;
+  }
+} 

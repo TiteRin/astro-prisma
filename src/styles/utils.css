@@ -18,3 +18,15 @@
     display: none;
   }
 }
+
+.print-hidden {
+  @media print {
+      display: none;
+  }
+}
+
+/* Focus styles */
+.focus-ring {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
