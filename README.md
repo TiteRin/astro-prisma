@@ -145,3 +145,55 @@ Toutes les commandes sont exécutées depuis la racine du projet, dans un termin
 | `yarn astro -- --help`   | Obtenez de l'aide sur l'utilisation de l'interface CLI d'Astro                  |
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/34286945-ff9a-4d18-9c66-0042e5269beb/deploy-status)](https://app.netlify.com/sites/astro-prisma-102442/deploys)
+
+## 🔐 Authentication
+
+### Overview
+The application uses Auth0 for user authentication. This feature allows users to:
+- Log in to access the reading sheet creation functionality
+- View and modify their profile information
+- Log out securely
+
+### Features
+- **Login**: Users can log in using Auth0's authentication system
+- **Profile Management**: Access to profile information through a dropdown menu
+- **Logout**: Secure logout functionality
+- **Access Control**: Only authenticated users can create reading sheets
+
+### Implementation Steps
+1. **Auth0 Setup**
+   - Create an Auth0 application
+   - Configure allowed callback URLs
+   - Set up application credentials
+
+2. **Frontend Integration**
+   - Add Auth0 SDK to the project
+   - Implement login/logout functionality
+   - Create user profile dropdown menu
+   - Add authentication state management
+
+3. **Backend Integration**
+   - Set up Auth0 middleware
+   - Implement protected routes
+   - Add user session management
+
+4. **Environment Configuration**
+   Add the following variables to your `.env` file:
+   ```
+   AUTH0_SECRET='use [openssl rand -hex 32] to generate a 32 bytes value'
+   AUTH0_BASE_URL='http://localhost:4321'
+   AUTH0_ISSUER_BASE_URL='https://YOUR_AUTH0_DOMAIN'
+   AUTH0_CLIENT_ID='YOUR_AUTH0_CLIENT_ID'
+   AUTH0_CLIENT_SECRET='YOUR_AUTH0_CLIENT_SECRET'
+   ```
+
+5. **UI Components**
+   - Add login button for unauthenticated users
+   - Create user avatar dropdown menu
+   - Implement profile management interface
+
+### Security Considerations
+- All authentication is handled through Auth0's secure infrastructure
+- No local user management or registration
+- Session management is handled by Auth0
+- Protected routes ensure only authenticated users can create content
