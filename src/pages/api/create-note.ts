@@ -7,10 +7,9 @@ import path from "path";
 import { sftpClient } from "@/utils/sftpClient";
 import { readingNoteValidationSchema } from "@/content.config";
 import { randomUUID } from "crypto";
-import { triggerNetlifyBuild } from "@/utils/netlifyTrigger";
+import { triggerAndTrackNetlifyBuild } from "@/utils/netlifyTrigger";
 
 export const prerender = false;
-
 
 // Notification de progression
 interface ProgressNotification {
@@ -134,8 +133,34 @@ export const POST: APIRoute = async ({ request }) => {
             }
 
             await sendProgress({ type: 'info', message: "Déclenchement du build en cours...", step: "build" });
-            const buildResult = await triggerNetlifyBuild();
-            await sendProgress({ type: buildResult.success ? 'success' : 'error', message: buildResult.message, step: "build" });
+            
+            // Construire le message personnalisé pour Netlify
+            const customMessage = `Ajout de la fiche "${processedAttributes.bookTitle}" par ${processedAttributes.contributor}`;
+            
+            // Utiliser la nouvelle fonction pour suivre le déploiement avec message personnalisé
+            const buildResult = await triggerAndTrackNetlifyBuild(async (update) => {
+                // Transformer les mises à jour de progression en notifications
+                let type: 'info' | 'success' | 'error' = 'info';
+                
+                if (update.status === 'ready') {
+                    type = 'success';
+                } else if (update.status === 'error') {
+                    type = 'error';
+                }
+                
+                await sendProgress({ 
+                    type, 
+                    message: update.message, 
+                    step: "build" 
+                });
+            }, customMessage);
+            
+            // Notification finale de l'état du build
+            await sendProgress({ 
+                type: buildResult.success ? 'success' : 'error', 
+                message: buildResult.message + (buildResult.deployUrl ? ` (URL: ${buildResult.deployUrl})` : ''), 
+                step: "build" 
+            });
             
         } catch (error) {
             console.error('Erreur lors de la création de la fiche de lecture:', error);

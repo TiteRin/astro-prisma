@@ -16,6 +16,8 @@ import StatusMessage from "./StatusMessage";
 import ContributorField from "./ContributorField";
 import CoverUpload from "./CoverUpload";
 import FileUpload from "./FileUpload";
+import UploadProgressModal from "./UploadProgressModal";
+import { useUploadProgress } from "./useUploadProgress";
 import { FormState } from "./types";
 
 // État initial du formulaire
@@ -40,6 +42,9 @@ const initialFormState: FormState = {
 export default function UploadForm() {
     const [formState, setFormState] = useState<FormState>(initialFormState);
     const formRef = useRef<HTMLFormElement>(null);
+    
+    // Hook pour gérer la progression de l'upload
+    const uploadProgress = useUploadProgress();
 
     // Mise à jour du contributeur
     const handleContributorChange = (contributor: string) => {
@@ -322,12 +327,8 @@ export default function UploadForm() {
             return;
         }
         
-        // Si tout est valide, soumettre le formulaire
-        updateStatus({
-            isUploading: true,
-            message: "Envoi en cours...",
-            type: 'info'
-        });
+        // Ouvrir le modal de progression
+        uploadProgress.openModal();
         
         try {
             // Créer un FormData pour envoyer les fichiers
@@ -335,18 +336,78 @@ export default function UploadForm() {
             formData.append('contributor', contributor);
             formData.append('cover-image', cover.file);
             formData.append('new-note', document.file);
-            formData.append('file-id', document.id); // On envoie aussi l'ID du fichier validé
+            formData.append('file-id', document.id);
             
-            // Soumettre le formulaire via notre service
-            await submitUploadForm(formData, handleUploadProgress);
+            // Soumettre le formulaire via notre service avec gestion de progression
+            await submitUploadForm(formData, (progress: UploadProgress) => {
+                console.log('Progress received:', progress); // Debug
+                
+                switch (progress.step) {
+                    case 'validation':
+                        if (progress.type === 'info' && progress.message.includes('en cours')) {
+                            uploadProgress.startValidation();
+                        } else if (progress.type === 'success') {
+                            uploadProgress.completeValidation();
+                        } else if (progress.type === 'error') {
+                            uploadProgress.setStepError('validation', progress.message);
+                        }
+                        break;
+                        
+                    case 'envoi':
+                        if (progress.type === 'info') {
+                            // Démarrer l'envoi si ce n'est pas déjà fait
+                            if (!uploadProgress.steps.find(s => s.id === 'envoi' && s.status === 'progress')) {
+                                uploadProgress.startEnvoi();
+                            }
+                            // Mettre à jour le message spécifique (couverture ou fiche)
+                            uploadProgress.updateStep('envoi', 'progress', progress.message);
+                        } else if (progress.type === 'success') {
+                            // Si c'est le dernier message de succès pour l'envoi, marquer comme terminé
+                            if (progress.message.includes('fiche de lecture')) {
+                                uploadProgress.completeEnvoi();
+                            } else {
+                                // Sinon, juste mettre à jour le message
+                                uploadProgress.updateStep('envoi', 'progress', progress.message);
+                            }
+                        } else if (progress.type === 'error') {
+                            uploadProgress.setStepError('envoi', progress.message);
+                        }
+                        break;
+                        
+                    case 'build':
+                        if (progress.type === 'info' && progress.message.includes('Déclenchement')) {
+                            uploadProgress.startBuild();
+                        } else if (progress.type === 'info') {
+                            // Mise à jour du message de build en cours
+                            uploadProgress.updateBuildProgress(progress.message);
+                        } else if (progress.type === 'success') {
+                            // Extraire l'ID de la fiche depuis la réponse si possible
+                            const ficheId = document.id || 'nouvelle-fiche';
+                            // Utiliser le titre du livre depuis les métadonnées si disponible
+                            const ficheTitle = document.metadata?.title || 'Nouvelle fiche';
+                            uploadProgress.completeBuild(ficheId, window.location.origin);
+                            
+                            // Reset du formulaire après succès
+                            setTimeout(() => {
+                                formRef.current?.reset();
+                                setFormState(initialFormState);
+                            }, 2000);
+                        } else if (progress.type === 'error') {
+                            uploadProgress.setStepError('build', progress.message);
+                        }
+                        break;
+                        
+                    default:
+                        console.warn('Unknown progress step:', progress.step);
+                        if (progress.type === 'error') {
+                            uploadProgress.setStepError('validation', progress.message);
+                        }
+                }
+            });
             
         } catch (error) {
             console.error("Error submitting form:", error);
-            updateStatus({
-                isUploading: false,
-                message: `Erreur lors de l'envoi: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
-                type: 'error'
-            });
+            uploadProgress.setStepError('validation', `Erreur lors de l'envoi: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
         }
     };
 
@@ -360,7 +421,9 @@ export default function UploadForm() {
             onSubmit={handleSubmit}
             aria-labelledby="upload-form-title"
         >
-            <h2 className="upload-form__title" id="upload-form-title">Ajouter une nouvelle fiche de lecture</h2>
+            <p>
+                Après envoi, la fiche de lecture sera disponible après quelques minutes. 
+            </p>
 
             <StatusMessage message={status.message} type={status.type} />
 
@@ -399,6 +462,17 @@ export default function UploadForm() {
                     {status.isUploading ? 'Envoi en cours...' : 'Ajouter'}
                 </button>
             </div>
+
+            {/* Modal de progression de l'upload */}
+            <UploadProgressModal
+                isOpen={uploadProgress.isOpen}
+                onClose={uploadProgress.closeModal}
+                canClose={uploadProgress.canClose}
+                steps={uploadProgress.steps}
+                currentStep={uploadProgress.currentStep}
+                finalUrl={uploadProgress.finalUrl}
+                ficheId={uploadProgress.ficheId}
+            />
         </form>
     );
 }

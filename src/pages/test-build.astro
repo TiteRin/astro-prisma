@@ -1,0 +1,513 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Test de suivi de build Netlify">
+    <main class="test-build-page">
+        <div class="container">
+            <h1>Test de suivi de build Netlify</h1>
+            <p>Cette page permet de tester la fonctionnalité de suivi en temps réel des déploiements Netlify.</p>
+            
+            <!-- Section de vérification de la configuration -->
+            <div class="config-check-section">
+                <h2>Vérification de la configuration</h2>
+                <button id="check-config-btn" class="btn btn-info">
+                    Vérifier la configuration
+                </button>
+                
+                <div id="config-results" class="config-results hidden">
+                    <h3>Résultats de la vérification</h3>
+                    <div id="config-status" class="config-status"></div>
+                </div>
+            </div>
+
+            <!-- Section de test de build -->
+            <div class="test-section">
+                <h2>Test de déploiement</h2>
+                <button id="trigger-build-btn" class="btn btn-primary" disabled>
+                    Déclencher un build de test
+                </button>
+                <p class="test-info">
+                    <small>⚠️ Vérifiez d'abord la configuration ci-dessus avant de lancer un test.</small>
+                </p>
+                
+                <div id="build-status" class="build-status hidden">
+                    <h3>État du déploiement</h3>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                        <span id="progress-text">0%</span>
+                    </div>
+                    <div id="status-messages" class="status-messages"></div>
+                    <div id="deploy-url" class="deploy-url hidden"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .test-build-page {
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            color: #495057;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .config-check-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .test-section {
+            margin-top: 2rem;
+        }
+
+        .test-info {
+            margin-top: 0.5rem;
+            color: #6c757d;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+        }
+
+        .btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .config-results {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .config-status {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .config-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .config-item.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .config-item.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .config-item.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .config-item .icon {
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        .config-summary {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .config-summary.ready {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .config-summary.not-ready {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .build-status {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #28a745;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        #progress-text {
+            font-weight: bold;
+            min-width: 40px;
+        }
+
+        .status-messages {
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .status-message {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .status-message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.progress {
+            background-color: #cce5ff;
+            color: #004085;
+            border: 1px solid #99d3ff;
+            position: relative;
+        }
+
+        .status-message.progress .dots {
+            display: inline-block;
+            width: 20px;
+        }
+
+        .status-message.progress .dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        .deploy-url {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+        }
+
+        .deploy-url a {
+            color: #155724;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .deploy-url a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkConfigBtn = document.getElementById('check-config-btn') as HTMLButtonElement;
+            const configResults = document.getElementById('config-results') as HTMLElement;
+            const configStatus = document.getElementById('config-status') as HTMLElement;
+            const triggerBtn = document.getElementById('trigger-build-btn') as HTMLButtonElement;
+            const buildStatus = document.getElementById('build-status') as HTMLElement;
+            const progressFill = document.getElementById('progress-fill') as HTMLElement;
+            const progressText = document.getElementById('progress-text') as HTMLElement;
+            const statusMessages = document.getElementById('status-messages') as HTMLElement;
+            const deployUrl = document.getElementById('deploy-url') as HTMLElement;
+
+            // Vérification de la configuration
+            checkConfigBtn?.addEventListener('click', async function() {
+                checkConfigBtn.disabled = true;
+                checkConfigBtn.textContent = 'Vérification en cours...';
+                configResults?.classList.remove('hidden');
+                
+                if (configStatus) {
+                    configStatus.innerHTML = '<div class="config-item info"><span class="icon">⏳</span>Vérification en cours...</div>';
+                }
+
+                try {
+                    const response = await fetch('/api/test-build-trigger', {
+                        method: 'GET'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    displayConfigResults(data);
+                    
+                    // Activer le bouton de test si la configuration est prête
+                    if (data.ready && triggerBtn) {
+                        triggerBtn.disabled = false;
+                    }
+
+                } catch (error) {
+                    if (configStatus) {
+                        configStatus.innerHTML = `
+                            <div class="config-item error">
+                                <span class="icon">❌</span>
+                                Erreur lors de la vérification: ${error instanceof Error ? error.message : 'Erreur inconnue'}
+                            </div>
+                        `;
+                    }
+                } finally {
+                    checkConfigBtn.disabled = false;
+                    checkConfigBtn.textContent = 'Vérifier la configuration';
+                }
+            });
+
+            function displayConfigResults(data: any) {
+                if (!configStatus) return;
+
+                const config = data.config;
+                const checks = data.checks || [];
+                let html = '';
+
+                // Afficher tous les checks détaillés
+                checks.forEach((check: any) => {
+                    html += `<div class="config-item ${check.status}">
+                        <span class="icon">${getStatusIcon(check.status)}</span>
+                        <strong>${check.name}:</strong> ${check.message}
+                    </div>`;
+                });
+
+                // Résumé des capacités
+                html += '<div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">';
+                html += '<h4 style="margin-bottom: 0.5rem; color: #495057;">Capacités disponibles:</h4>';
+                
+                html += `<div class="config-item ${data.summary.canTrigger ? 'success' : 'error'}">
+                    <span class="icon">${data.summary.canTrigger ? '✅' : '❌'}</span>
+                    Déclenchement de builds: ${data.summary.canTrigger ? 'Fonctionnel' : 'Non disponible'}
+                </div>`;
+
+                html += `<div class="config-item ${data.summary.canTrack ? 'success' : 'warning'}">
+                    <span class="icon">${data.summary.canTrack ? '✅' : '⚠️'}</span>
+                    Suivi en temps réel: ${data.summary.canTrack ? 'Complet' : 'Limité'}
+                </div>`;
+
+                html += '</div>';
+
+                // Résumé final
+                html += `<div class="config-summary ${data.ready ? 'ready' : 'not-ready'}">
+                    ${data.ready ? '🎉 Configuration prête pour les tests complets!' : 
+                      data.summary.canTrigger ? '⚠️ Tests possibles avec fonctionnalités limitées' : 
+                      '❌ Configuration insuffisante pour les tests'}
+                </div>`;
+
+                configStatus.innerHTML = html;
+            }
+
+            function getStatusIcon(status: string): string {
+                switch (status) {
+                    case 'success': return '✅';
+                    case 'warning': return '⚠️';
+                    case 'error': return '❌';
+                    case 'info': return 'ℹ️';
+                    default: return '❓';
+                }
+            }
+
+            // Test de build (code existant)
+            triggerBtn?.addEventListener('click', async function() {
+                // Désactiver le bouton et afficher la section de statut
+                triggerBtn.disabled = true;
+                triggerBtn.textContent = 'Build en cours...';
+                buildStatus?.classList.remove('hidden');
+                
+                // Réinitialiser l'interface
+                if (progressFill) progressFill.style.width = '0%';
+                if (progressText) progressText.textContent = '0%';
+                if (statusMessages) statusMessages.innerHTML = '';
+                deployUrl?.classList.add('hidden');
+
+                try {
+                    const response = await fetch('/api/test-build-trigger', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+
+                    const reader = response.body?.getReader();
+                    if (!reader) {
+                        throw new Error('Impossible de lire la réponse');
+                    }
+
+                    const decoder = new TextDecoder();
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n');
+
+                        for (const line of lines) {
+                            if (line.trim() && line.startsWith('data: ')) {
+                                try {
+                                    const data = JSON.parse(line.slice(6));
+                                    updateBuildStatus(data);
+                                } catch (e) {
+                                    console.error('Erreur de parsing JSON:', e);
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du test de build:', error);
+                    addStatusMessage('error', `Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+                } finally {
+                    // Réactiver le bouton
+                    triggerBtn.disabled = false;
+                    triggerBtn.textContent = 'Déclencher un build de test';
+                }
+            });
+
+            function updateBuildStatus(data: any) {
+                // Mettre à jour la barre de progression
+                if (data.progress !== undefined && progressFill && progressText) {
+                    progressFill.style.width = `${data.progress}%`;
+                    progressText.textContent = `${data.progress}%`;
+                }
+
+                // Ajouter le message de statut
+                if (data.message) {
+                    addStatusMessage(data.type || 'info', data.message);
+                }
+
+                // Afficher l'URL de déploiement si disponible
+                if (data.deployUrl && deployUrl) {
+                    deployUrl.innerHTML = `
+                        <strong>Déploiement terminé !</strong><br>
+                        <a href="${data.deployUrl}" target="_blank" rel="noopener noreferrer">
+                            Voir le site déployé →
+                        </a>
+                    `;
+                    deployUrl.classList.remove('hidden');
+                }
+            }
+
+            function addStatusMessage(type: string, message: string) {
+                if (!statusMessages) return;
+                
+                // Vérifier si c'est un message de progression (contient "en cours", "en attente", etc.)
+                const isProgress = /en cours|en attente|démarrage|vérification|upload|build/i.test(message);
+                const messageType = isProgress && type === 'info' ? 'progress' : type;
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `status-message ${messageType}`;
+                
+                if (messageType === 'progress') {
+                    // Pour les messages de progression, ajouter les points animés
+                    const baseMessage = message.replace(/\.+$/, ''); // Enlever les points existants
+                    messageDiv.innerHTML = `${new Date().toLocaleTimeString()} - ${baseMessage}<span class="dots"></span>`;
+                } else {
+                    messageDiv.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+                }
+                
+                statusMessages.appendChild(messageDiv);
+                
+                // Faire défiler vers le bas pour voir le dernier message
+                statusMessages.scrollTop = statusMessages.scrollHeight;
+            }
+        });
+    </script>
+</Layout> 

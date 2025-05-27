@@ -4,40 +4,6 @@ Le but de ce projet est de pouvoir mettre à disposition des fiches de lectures 
 
 # Développement
 
-## Features in Progress
-
-### Intégration OVH
-**Branch:** `feat/ovh-integration`
-
-**Summary:**
-Nous mettons en place un système d'upload de fiches de lecture sur un serveur OVH :
-- Upload sécurisé via SFTP
-- Validation des fichiers
-- Reconstruction automatique via Netlify
-- Stockage des fichiers sur le serveur OVH
-
-**Étapes d'implémentation:**
-1. Configuration du serveur OVH :
-   - [x] Créer un dossier dédié pour les fiches
-   - [-] Configurer les permissions appropriées
-   - [-] Mettre en place un utilisateur SFTP dédié
-
-2. API d'upload :
-   - [x] Créer une route API sécurisée
-   - [ ] Implémenter l'authentification
-   - [x] Configurer l'upload SFTP
-   - [ ] Mettre en place la validation des fichiers
-
-3. Intégration Netlify :
-   - [x] Configurer le webhook de reconstruction
-   - [ ] Tester le processus complet
-
-**To-Do List:**
-- [x] Configuration initiale du serveur OVH
-- [x] Création de l'API d'upload
-- [-] Mise en place de l'authentification
-- [ ] Tests d'intégration
-
 ## 🚀 Project Structure
 
 Inside of your Astro project, you'll see the following folders and files:
@@ -144,6 +110,24 @@ Pour obtenir un build hook Netlify :
 - Préférez l'authentification par clé SSH plutôt que par mot de passe
 - Créez un utilisateur SFTP dédié avec des permissions limitées au dossier des fiches
 - Pour les environnements de développement local, utilisez un fichier `.env` (non commité dans git)
+
+## Messages personnalisés de déploiement
+
+Le système envoie automatiquement des messages personnalisés à Netlify lors des déploiements :
+
+### Format des messages
+- **Upload de fiche** : `Ajout de la fiche "[Titre du livre]" par [Nom du contributeur]`
+- **Test de déploiement** : `Test de déploiement depuis l'interface d'administration`
+
+### Avantages
+- **Traçabilité** : Historique clair des modifications dans Netlify
+- **Identification** : Savoir qui a ajouté quelle fiche
+- **Debugging** : Facilite le diagnostic en cas de problème
+
+Ces messages apparaissent dans :
+- L'historique des déploiements Netlify
+- Les logs de build
+- Les notifications Netlify (si configurées)
 
 ## 🧞 Commands
 
