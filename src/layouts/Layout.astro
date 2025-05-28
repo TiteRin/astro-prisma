@@ -2,6 +2,7 @@
 import Navigation from "@/components/layout/Navigation.astro";
 import AppToolbar from "../components/layout/AppToolbar.astro";
 import "@/styles/global.css";
+import SearchContainer from "@/components/features/search/SearchContainer.astro";
 ---
 
 <!DOCTYPE html>
@@ -24,8 +25,13 @@ import "@/styles/global.css";
 		<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 	</head>
 	<body class="flex flex-col min-h-screen">
-		<AppToolbar />
-		<main class="main-content grow flex flex-ro gap-4">
+		<div class="flex flex-col gap-4">
+			<AppToolbar />
+			<!--
+				<SearchContainer />
+			-->
+		</div>
+		<main class="main-content grow flex flex-row gap-4">
 			<div class="navigation print-hidden">
 				<Navigation />
 			</div>

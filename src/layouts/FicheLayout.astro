@@ -1,8 +1,6 @@
 ---
 import '../styles/fiche.scss';
 import Layout from "./Layout.astro";
-import Navigation from "../components/layout/Navigation.astro";
-import SearchContainer from "../components/features/search/SearchContainer.astro";
 
 interface Props {
     pageTitle?: string;
@@ -14,48 +12,12 @@ const { pageTitle = "Fiche de lecture", title, description } = Astro.props;
 ---
 
 <Layout pageTitle={pageTitle}>
-    <div role="main" class="wrapper">
-        <div class="content">
-            <div class="print-hidden">
-                <SearchContainer />
-            </div>
-            <section>
-                <slot/>
-            </section>
-        </div>
+    <section class="content">
+        <slot/>
     </div>
 </Layout>
 
 <style>
-    html, body {
-        font-family: 'opendyslexic', Avenir, Helvetica, Arial, sans-serif;
-    }
-
-    .wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        min-height: 100%;
-
-        .navigation {
-            flex-shrink: 0;
-        }
-
-        .content {
-            flex-grow: 1;
-        }
-    }
-
-    @media screen and (min-width: 768px) {
-        .wrapper {
-            flex-direction: row;
-
-            .navigation {
-                max-width: 300px;
-            }
-        }
-    }
-
     @media print {
         @page {
             size: A4;
