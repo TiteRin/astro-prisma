@@ -1,75 +1,144 @@
 ---
-import Icons from '../../icons/Icons.astro';
+// Constants
+const ZOOM_KEY = "app-zoom-level";
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 2;
+const ZOOM_STEP = 0.1;
+const BASE_FONT_SIZE = 1; // Base font size in rem
+
+interface ZoomLevel {
+    value: number;
+    label: string;
+    ariaLabel: string;
+    size: string;
+}
+
+const zoomLevels: ZoomLevel[] = [
+    {
+        value: 0.75,
+        label: "A",
+        ariaLabel: "Très petit",
+        size: "text-xs"
+    },
+    {
+        value: 0.875,
+        label: "A",
+        ariaLabel: "Petit",
+        size: "text-sm"
+    },
+    {
+        value: 1,
+        label: "A",
+        ariaLabel: "Moyen",
+        size: "text-base"
+    },
+    {
+        value: 1.25,
+        label: "A",
+        ariaLabel: "Grand",
+        size: "text-lg"
+    },
+    {
+        value: 1.5,
+        label: "A",
+        ariaLabel: "Très grand",
+        size: "text-xl"
+    }
+];
 ---
 
-<section class="zoom-controls">
-    <div class="zoom-controls__wrapper">
-        <button
-            class="zoom-controls__button"
-            onclick="handleZoom('out')"
-            aria-label="Zoom out"
-        >
-            <Icons name="zoom-out" />
-        </button>
+<ul 
+    class="join" 
+    role="radiogroup" 
+    aria-label="Taille du texte"
+    aria-live="polite"
+>
+    {zoomLevels.map((level) => (
+        <li class="join-item btn btn-outline btn-sm px-0">
+            <label 
+                class={`${level.size} transition-all duration-200 px-4`} 
+                for={level.value.toString()} 
+                aria-label={`Taille du texte : ${level.ariaLabel}`} 
+                title={`Taille du texte : ${level.ariaLabel}`}
+            >
+                {level.label}
+            </label>
+            <input
+                type="radio"
+                name="zoom-level"
+                class="hidden"
+                title={level.ariaLabel}
+                value={level.value}
+                checked={level.value === 1}
+                data-value={level.value}
+                id={level.value.toString()}
+            />
+        </li>
+    ))}
+</ul>
 
-        <span class="zoom-controls__value">
-            <span id="zoom-value">100%</span>
-        </span>
+<div id="zoom-status" class="sr-only" aria-live="polite"></div>
 
-        <button
-            class="zoom-controls__button"
-            onclick="handleZoom('in')"
-            aria-label="Zoom in"
-        >
-            <Icons name="zoom-in" />
-        </button>
-    </div>
-</section>
-
-<script is:inline>
-    // Store zoom level in localStorage for persistence
+<script define:vars={{zoomLevels}} is:inline>
     const ZOOM_KEY = "app-zoom-level";
-    const MIN_ZOOM = 0.5;
-    const MAX_ZOOM = 2;
-    const ZOOM_STEP = 0.1;
-    const BASE_FONT_SIZE = 16; // Base font size in pixels
+    const DEFAULT_ZOOM = 1;
+    const STATUS_ID = "zoom-status";
 
     function getStoredZoom() {
         const stored = localStorage.getItem(ZOOM_KEY);
-        return stored ? parseFloat(stored) : 1;
+        return stored ? parseFloat(stored) : DEFAULT_ZOOM;
     }
 
     function setStoredZoom(level) {
         localStorage.setItem(ZOOM_KEY, level.toString());
     }
 
-    function handleZoom(direction) {
-        const currentZoom = getStoredZoom();
-        let newZoom =
-            direction === "in"
-                ? Math.min(currentZoom + ZOOM_STEP, MAX_ZOOM)
-                : Math.max(currentZoom - ZOOM_STEP, MIN_ZOOM);
-
-        setStoredZoom(newZoom);
-        updateZoom(newZoom);
-    }
-
     function updateZoom(level) {
-        const mainContent = document.querySelector(".main-content");
-        if (mainContent) {
-            // Calculate new font size based on zoom level
-            const newFontSize = BASE_FONT_SIZE * level;
-            mainContent.style.fontSize = `${newFontSize}px`;
-        }
+        // Apply zoom to all content except the toolbar
+        document.querySelectorAll('body > *').forEach(element => {
+            element.style.fontSize = `${level}rem`;
+        });
 
-        const zoomValue = document.getElementById("zoom-value");
-        if (zoomValue) {
-            zoomValue.textContent = `${Math.round(level * 100)}%`;
+        // Update radio button states and active class
+        document.querySelectorAll('input[name="zoom-level"]').forEach(radio => {
+            const isChecked = parseFloat(radio.value) === level;
+            radio.checked = isChecked;
+            // Add or remove btn-active class on the parent li element
+            radio.closest('li')?.classList.toggle('btn-active', isChecked);
+        });
+
+        // Update status message for screen readers
+        const status = document.getElementById(STATUS_ID);
+        if (status) {
+            const selectedLevel = zoomLevels.find(l => l.value === level);
+            status.textContent = `Taille du texte définie sur ${selectedLevel?.ariaLabel}`;
         }
     }
+
+    // Handle radio button changes
+    document.querySelectorAll('input[name="zoom-level"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const target = /** @type {HTMLInputElement} */ (e.target);
+            const level = parseFloat(target.value);
+            setStoredZoom(level);
+            updateZoom(level);
+        });
+    });
 
     // Initialize zoom on page load
     document.addEventListener("DOMContentLoaded", () => {
-        updateZoom(getStoredZoom());
+        const storedZoom = getStoredZoom();
+        updateZoom(storedZoom);
+    });
+
+    // Add keyboard support
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            if (e.key === '0') {
+                e.preventDefault();
+                setStoredZoom(DEFAULT_ZOOM);
+                updateZoom(DEFAULT_ZOOM);
+            }
+        }
     });
 </script>
