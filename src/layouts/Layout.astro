@@ -1,4 +1,5 @@
 ---
+import Navigation from "@/components/layout/Navigation.astro";
 import AppToolbar from "../components/layout/AppToolbar.astro";
 import "@/styles/global.css";
 ---
@@ -22,32 +23,15 @@ import "@/styles/global.css";
 		<link href="https://fonts.googleapis.com/css2?family=Andika:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 	</head>
-	<body>
+	<body class="flex flex-col min-h-screen">
 		<AppToolbar />
-		<main class="main-content">
-			<slot />
+		<main class="main-content grow flex flex-ro gap-4">
+			<div class="navigation print-hidden">
+				<Navigation />
+			</div>
+			<div class="content grow">
+				<slot />
+			</div>
 		</main>
 	</body>
 </html>
-
-<style>
-	body {
-		margin: 0;
-		min-height: 100vh;
-		overflow-x: hidden;
-	}
-
-	.main-content {
-		width: 100%;
-		min-height: calc(100vh - var(--app-toolbar-height));
-		transition: font-size 0.2s ease;
-
-		display: flex;
-		flex-direction: column;
-
-		> * {
-			flex: 1;
-			box-sizing: border-box;
-		}
-	}
-</style>

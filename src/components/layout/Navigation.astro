@@ -1,180 +1,193 @@
 ---
 import Icons from '../icons/Icons.astro';
+
+interface NavItem {
+    href: string;
+    icon: string;
+    label: string;
+}
+
+const navItems: NavItem[] = [
+    { href: '/', icon: 'home', label: 'Accueil' },
+    { href: '/tags', icon: 'label', label: 'Index par tag' },
+    { href: '/contributors', icon: 'user', label: 'Index par contributeur·ice' },
+    { href: '/upload', icon: 'upload', label: 'Ajouter une fiche de lecture' }
+];
+
+const { pathname } = Astro.url;
 ---
 
-<div class="navigation-wrapper">    
-    <span class="mobile-only">
-        <button class:list={["btn-action", "action-expand"]}>
-            <Icons name="fast-arrow-down"
-                    aria-label="Ouvrir le menu" size={32}/>
+<div class="
+    /* Layout */
+    hidden
+    md:flex
+    flex-col
+    gap-4
+    h-full
+    p-4
+    w-64
+
+    /* Style */
+    bg-base-200
+    border-r
+    border-base-300
+
+    /* Transition */
+    transition-all
+    duration-300
+    ease-in-out
+
+    /* Collapsed state */
+    [&.collapsed]:w-20
+    [&.collapsed]:p-2
+" role="navigation" aria-label="Navigation principale">
+    <!-- Desktop controls -->
+    <div class="
+        /* Layout */
+        flex
+        justify-end
+        [&.collapsed]:justify-center
+    ">
+        <button 
+            class="
+                /* Layout */
+                btn
+                btn-ghost
+                btn-circle
+
+                /* Style */
+                text-base-content
+
+                /* Visibility */
+                [.collapsed_&]:hidden
+            "
+            aria-expanded="false"
+            aria-controls="navigation-menu"
+            aria-label="Réduire la navigation"
+        >
+            <svg 
+                class="w-6 h-6" 
+                viewBox="0 0 16 16" 
+                fill="currentColor" 
+                aria-hidden="true"
+            >
+                <path d="M1.8 1 0 2.8v10.4L1.8 15h12.4l1.8-1.8V2.8L14.2 1zm4.805 12.2V2.8H14.2v10.4zm-1.8-10.4H1.8v10.4h3.005z" />
+            </svg>
         </button>
-        <button class:list={["btn-action", "action-collapse"]}>
-            <Icons name="fast-arrow-up"
-                    aria-label="Fermer le menu" size={32}/>
-        </button>
-    </span>
-    <span class="desktop-only">
-        <button class:list={["btn-action", "action-collapse"]}>
-            <Icons name="fast-arrow-left"
-                    aria-label="Réduire la navigation" size={32}/>
-        </button>
-    </span>
-    <div class="desktop-only">
-        <button class:list={["btn-action", "action-expand"]}>
-            <Icons name="fast-arrow-right"
-                  aria-label="Agrandir la navigation" size={32}/>
+        <button 
+            class="
+                /* Layout */
+                btn
+                btn-ghost
+                btn-circle
+
+                /* Style */
+                text-base-content
+
+                /* Visibility */
+                hidden
+                [.collapsed_&]:block
+            "
+            aria-expanded="false"
+            aria-controls="navigation-menu"
+            aria-label="Agrandir la navigation"
+        >
+            <svg 
+                class="w-6 h-6" 
+                viewBox="0 0 16 16" 
+                fill="currentColor" 
+                aria-hidden="true"
+            >
+                <path fill-rule="evenodd" d="M1.8 1 0 2.8v10.4L1.8 15h12.4l1.8-1.8V2.8L14.2 1zm4.805 12.2V2.8H14.2v10.4zm-1.8-10.4H1.8v10.4h3.005z" />
+            </svg>
         </button>
     </div>
-    <h1 class="sr-only">Navigation</h1>
-    <nav>
-    <ul>
-        <li>
-            <a href="/">
-                <Icons name="home"/>
-                Accueil
-            </a>
-        </li>
-        <li>
-            <a href="/tags">
-                <Icons name="label"/>
-                Index par tag
-            </a>
-        </li>
-        <li>
-            <a href="/contributors">
-                <Icons name="user"/>
-                Index par contributeur·ice
-            </a>
-        </li>
-        <li>
-            <a href="/upload">
-                <Icons name="upload"/>
-                Ajouter une fiche de lecture
-            </a>
-        </li>
-    </ul>
-</nav>
+
+    <!-- Navigation menu -->
+    <nav id="navigation-menu" class="
+        /* Layout */
+        flex
+        flex-col
+        gap-2
+        flex-grow
+    ">
+        <ul class="
+            /* Layout */
+            menu
+            menu-lg
+            gap-4
+            p-0
+        ">
+            {navItems.map(({ href, icon, label }) => (
+                <li>
+                    <a 
+                        href={href} 
+                        class="
+                            /* Layout */
+                            flex
+                            items-center
+                            gap-2
+
+                            /* Style */
+                            text-base-content
+                            hover:text-primary
+                            hover:bg-base-300
+
+                            /* Transition */
+                            transition-all
+                            duration-300
+
+                            /* Collapsed state */
+                            [.collapsed_&]:justify-center
+                        " 
+                        aria-current={pathname === href ? 'page' : undefined}
+                        aria-label={label}
+                        title={label}
+                    >
+                        <Icons name={icon} size={24} aria-hidden="true" />
+                        <span class="
+                            /* Transition */
+                            transition-all
+                            duration-300
+                            [.collapsed_&]:hidden
+                        ">
+                            {label}
+                        </span>
+                    </a>
+                </li>
+            ))}
+        </ul>
+    </nav>
 </div>
 
-<style>
-    .navigation-wrapper {
-        background-color: var(--color-background);
-        border-right: 1px solid var(--color-border);
-        padding: var(--spacing-md);
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-md);
-        height: 100%;
-        transition: width var(--transition-normal) ease;
-
-        &.collapsed {
-            width: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        h1 {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 0;
-            font-size: var(--font-size-large);
-            font-weight: var(--font-weight-medium);
-
-            .link-home {
-                display: flex;
-                align-items: center;
-                gap: var(--spacing-sm);
-                color: var(--color-text);
-                text-decoration: none;
-
-                &:hover {
-                    color: var(--color-primary);
-                }
-
-                &:focus {
-                    @include focus-ring;
-                }
-
-                svg {
-                    width: var(--spacing-lg);
-                    height: var(--spacing-lg);
-                }
-            }
-        }
-
-        nav {
-            h2 {
-                font-size: var(--font-size-base);
-                font-weight: var(--font-weight-medium);
-                margin: var(--spacing-md) 0 var(--spacing-sm);
-            }
-
-            ul {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-                gap: var(--spacing-sm);
-
-                li {
-                    a {
-                        display: flex;
-                        align-items: center;
-                        gap: var(--spacing-sm);
-                        color: var(--color-text);
-                        text-decoration: none;
-                        padding: var(--spacing-xs) var(--spacing-sm);
-                        border-radius: var(--border-radius-sm);
-
-                        &:hover {
-                            background-color: var(--color-background-alt);
-                            color: var(--color-primary);
-                        }
-
-                        &:focus {
-                            @include focus-ring;
-                        }
-
-                        svg {
-                            width: var(--spacing-md);
-                            height: var(--spacing-md);
-                        }
-                    }
-                }
-            }
-        }
-
-        .mobile-only {
-            @include respond-to(md) {
-                display: none;
-            }
-        }
-
-        .desktop-only {
-            display: none;
-            @include respond-to(md) {
-                display: block;
-            }
-        }
-    }
-</style>
-
 <script>
-    const btnExpand = document.querySelectorAll(".action-expand");
-    const btnCollapse = document.querySelectorAll(".action-collapse");
-    const navigation = document.querySelector(".navigation-wrapper");
+    const navigation = document.querySelector('[role="navigation"]');
+    const expandButtons = document.querySelectorAll('[aria-label*="Agrandir"]');
+    const collapseButtons = document.querySelectorAll('[aria-label*="Réduire"]');
+    const menu = document.getElementById('navigation-menu');
 
-    btnExpand.forEach((button) => {
-        button.addEventListener("click", (e) => {
-            navigation?.classList.toggle("collapsed");
+    // Fonction pour gérer l'état du menu
+    function toggleMenu(expanded: boolean) {
+        if (!navigation || !menu) return;
+
+        // Mettre à jour l'état du menu
+        navigation.classList.toggle('collapsed', !expanded);
+
+        // Mettre à jour les attributs ARIA
+        expandButtons.forEach(button => {
+            button.setAttribute('aria-expanded', expanded.toString());
         });
+        collapseButtons.forEach(button => {
+            button.setAttribute('aria-expanded', expanded.toString());
+        });
+    }
+
+    // Gestionnaires d'événements pour les boutons
+    expandButtons.forEach(button => {
+        button.addEventListener('click', () => toggleMenu(true));
     });
 
-    btnCollapse.forEach((button) => {
-        button.addEventListener("click", (e) => {
-            navigation?.classList.toggle("collapsed");
-        });
+    collapseButtons.forEach(button => {
+        button.addEventListener('click', () => toggleMenu(false));
     });
 </script>
