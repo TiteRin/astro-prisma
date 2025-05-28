@@ -68,13 +68,46 @@ const themes: Theme[] = [
 ];
 ---
 
-<div class="dropdown dropdown-end">
-    <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+<details class="dropdown dropdown-end w-full md:w-auto" id="theme-switcher">
+    <summary class="
+        /* Layout */
+        btn
+        btn-ghost
+        btn-sm
+        w-full
+        md:w-auto
+
+        /* Style */
+        flex
+        items-center
+        gap-2
+    ">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
         </svg>
-    </div>
-    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 max-h-[80vh] overflow-y-auto">
+        <span class="md:hidden">Thèmes</span>
+    </summary>
+
+    <ul class="
+        /* Layout */
+        dropdown-content
+        menu
+        p-2
+        w-full
+        md:w-52
+
+        /* Style */
+        shadow
+        bg-base-100
+        rounded-box
+
+        /* Scroll */
+        md:max-h-[80vh]
+        md:overflow-y-auto
+
+        /* Z-index */
+        z-[1]
+    ">
         {categories.map(category => {
             const categoryThemes = themes.filter(theme => theme.tags.includes(category.name));
             if (categoryThemes.length === 0) return null;
@@ -82,7 +115,12 @@ const themes: Theme[] = [
             return (
                 <li>
                     <details>
-                        <summary class="flex items-center gap-2">
+                        <summary class="
+                            /* Layout */
+                            flex
+                            items-center
+                            gap-2
+                        ">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 {category.icon === "sun" && (
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -100,17 +138,32 @@ const themes: Theme[] = [
                             </svg>
                             {category.name}
                         </summary>
-                        <ul>
+                        <ul class="max-h-[50vh] overflow-y-auto">
                             {categoryThemes.map(theme => (
                                 <li>
                                     <button
-                                        class="flex items-center gap-2"
+                                        class="
+                                            /* Layout */
+                                            flex
+                                            items-center
+                                            gap-2
+                                        "
                                         onclick={`handleThemeSwitch('${theme.name}')`}
                                     >
-                                        <ul data-theme={theme.name} class="join m-0 p-2 border-base-content/20 border-2 rounded-md">
-                                            <div class="join-item w-4 h-4 bg-primary" data-theme={theme.name}></div>
-                                            <div class="join-item w-4 h-4 bg-secondary" data-theme={theme.name}></div>
-                                            <div class="join-item w-4 h-4 bg-accent" data-theme={theme.name}></div>
+                                        <ul data-theme={theme.name} class="
+                                            /* Layout */
+                                            join
+                                            m-0
+                                            p-2
+
+                                            /* Style */
+                                            border-base-content/20
+                                            border-2
+                                            rounded-md
+                                        ">
+                                            <div class="join-item w-4 h-4 bg-primary"></div>
+                                            <div class="join-item w-4 h-4 bg-secondary"></div>
+                                            <div class="join-item w-4 h-4 bg-accent"></div>
                                         </ul>
                                         <span class="capitalize">{theme.name}</span>
                                     </button>
@@ -122,10 +175,12 @@ const themes: Theme[] = [
             );
         })}
     </ul>
-</div>
+</details>
 
 <script is:inline>
     const THEME_KEY = 'app-theme';
+
+    const themeSwitcher = document.getElementById('theme-switcher');
     
     function getStoredTheme() {
         return localStorage.getItem(THEME_KEY) || 'light';
@@ -134,7 +189,7 @@ const themes: Theme[] = [
     function setStoredTheme(theme) {
         localStorage.setItem(THEME_KEY, theme);
     }
-    
+
     function handleThemeSwitch(theme) {
         setStoredTheme(theme);
         updateTheme();
@@ -145,7 +200,7 @@ const themes: Theme[] = [
         document.documentElement.setAttribute('data-theme', theme);
         
         // Update active state
-        document.querySelectorAll('[data-theme]').forEach(button => {
+        themeSwitcher.querySelectorAll('[data-theme]').forEach(button => {
             button.classList.toggle('active', button.getAttribute('data-theme') === theme);
         });
     }
