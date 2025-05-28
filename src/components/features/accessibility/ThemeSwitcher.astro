@@ -1,44 +1,131 @@
 ---
 import Icons from '../../icons/Icons.astro';
+
+interface Theme {
+    name: string;
+    tags: string[];
+}
+
+interface ThemeCategory {
+    name: string;
+    icon: string;
+    description: string;
+}
+
+const categories: ThemeCategory[] = [
+    {
+        name: "Clairs",
+        icon: "sun",
+        description: "Thèmes avec un fond clair"
+    },
+    {
+        name: "Sombres",
+        icon: "moon",
+        description: "Thèmes avec un fond sombre"
+    },
+    {
+        name: "Monochromes",
+        icon: "contrast",
+        description: "Thèmes utilisant une seule couleur principale"
+    },
+    {
+        name: "Haut contraste",
+        icon: "eye",
+        description: "Thèmes optimisés pour la lisibilité"
+    }
+];
+
+const themes: Theme[] = [
+    { name: "light", tags: ["Clairs"] },
+    { name: "dark", tags: ["Sombres"] },
+    { name: "cupcake", tags: ["Clairs"] },
+    { name: "bumblebee", tags: ["Clairs"] },
+    { name: "emerald", tags: ["Clairs"] },
+    { name: "corporate", tags: ["Clairs", "Monochromes"] },
+    { name: "synthwave", tags: ["Sombres"] },
+    { name: "retro", tags: ["Clairs"] },
+    { name: "cyberpunk", tags: ["Clairs", "Haut contraste"] },
+    { name: "valentine", tags: ["Clairs"] },
+    { name: "halloween", tags: ["Sombres"] },
+    { name: "garden", tags: ["Clairs"] },
+    { name: "forest", tags: ["Sombres"] },
+    { name: "aqua", tags: ["Sombres"] },
+    { name: "pastel", tags: ["Clairs"] },
+    { name: "fantasy", tags: ["Clairs"] },
+    { name: "wireframe", tags: ["Clairs", "Monochromes"] },
+    { name: "black", tags: ["Sombres", "Monochromes"] },
+    { name: "luxury", tags: ["Sombres"] },
+    { name: "dracula", tags: ["Sombres"] },
+    { name: "cmyk", tags: ["Clairs"] },
+    { name: "autumn", tags: ["Clairs"] },
+    { name: "business", tags: ["Sombres", "Monochromes"] },
+    { name: "acid", tags: ["Clairs", "Haut contraste"] },
+    { name: "lemonade", tags: ["Clairs"] },
+    { name: "night", tags: ["Sombres"] },
+    { name: "coffee", tags: ["Sombres"] },
+    { name: "winter", tags: ["Clairs"] },
+    { name: "high-contrast", tags: ["Haut contraste"] }
+];
 ---
 
-<section class="theme-switcher">
-    <div class="theme-switcher__mode">
-        <button 
-            class="theme-switcher__button"
-            onclick="handleThemeSwitch('light')"
-            aria-label="Switch to light theme"
-            data-theme="light"
-        >
-            <Icons name="sun-light" />
-        </button>
-        
-        <button 
-            class="theme-switcher__button"
-            onclick="handleThemeSwitch('dark')"
-            aria-label="Switch to dark theme"
-            data-theme="dark"
-        >
-            <Icons name="half-moon" />
-        </button>
+<div class="dropdown dropdown-end">
+    <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+        </svg>
     </div>
-
-    <div class="theme-switcher__contrast">
-        <label class="theme-switcher__switch">
-            <input 
-                type="checkbox" 
-                onchange="handleContrastToggle(this.checked)"
-                aria-label="Toggle high contrast mode"
-            >
-            <span class="theme-switcher__slider"></span>
-        </label>
-        <span class="theme-switcher__label">High contrast</span>
-    </div>
-</section>
+    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 max-h-[80vh] overflow-y-auto">
+        {categories.map(category => {
+            const categoryThemes = themes.filter(theme => theme.tags.includes(category.name));
+            if (categoryThemes.length === 0) return null;
+            
+            return (
+                <li>
+                    <details>
+                        <summary class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                {category.icon === "sun" && (
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                )}
+                                {category.icon === "moon" && (
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                )}
+                                {category.icon === "contrast" && (
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                )}
+                                {category.icon === "eye" && (
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                )}
+                            </svg>
+                            {category.name}
+                        </summary>
+                        <ul>
+                            {categoryThemes.map(theme => (
+                                <li>
+                                    <button
+                                        class="flex items-center gap-2"
+                                        onclick={`handleThemeSwitch('${theme.name}')`}
+                                    >
+                                        <ul data-theme={theme.name} class="join m-0 p-2 border-base-content/20 border-2 rounded-md">
+                                            <div class="join-item w-4 h-4 bg-primary" data-theme={theme.name}></div>
+                                            <div class="join-item w-4 h-4 bg-secondary" data-theme={theme.name}></div>
+                                            <div class="join-item w-4 h-4 bg-accent" data-theme={theme.name}></div>
+                                        </ul>
+                                        <span class="capitalize">{theme.name}</span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </details>
+                </li>
+            );
+        })}
+    </ul>
+</div>
 
 <script is:inline>
     const THEME_KEY = 'app-theme';
-    const CONTRAST_KEY = 'app-high-contrast';
     
     function getStoredTheme() {
         return localStorage.getItem(THEME_KEY) || 'light';
@@ -47,41 +134,20 @@ import Icons from '../../icons/Icons.astro';
     function setStoredTheme(theme) {
         localStorage.setItem(THEME_KEY, theme);
     }
-
-    function getStoredContrast() {
-        return localStorage.getItem(CONTRAST_KEY) === 'true';
-    }
-    
-    function setStoredContrast(contrast) {
-        localStorage.setItem(CONTRAST_KEY, contrast.toString());
-    }
     
     function handleThemeSwitch(theme) {
         setStoredTheme(theme);
         updateTheme();
     }
-
-    function handleContrastToggle(contrast) {
-        setStoredContrast(contrast);
-        updateTheme();
-    }
     
     function updateTheme() {
         const theme = getStoredTheme();
-        const contrast = getStoredContrast();
-        const themeClass = contrast ? `${theme}-high-contrast` : theme;
-        document.documentElement.setAttribute('data-theme', themeClass);
+        document.documentElement.setAttribute('data-theme', theme);
         
-        // Update button states
-        document.querySelectorAll('.theme-switcher__button').forEach(button => {
+        // Update active state
+        document.querySelectorAll('[data-theme]').forEach(button => {
             button.classList.toggle('active', button.getAttribute('data-theme') === theme);
         });
-
-        // Update switch state
-        const switchInput = document.querySelector('.theme-switcher__switch input');
-        if (switchInput) {
-            switchInput.checked = contrast;
-        }
     }
     
     // Initialize theme on page load
