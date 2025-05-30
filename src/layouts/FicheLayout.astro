@@ -1,5 +1,5 @@
 ---
-import '../styles/fiche.scss';
+import '../styles/fiche.css';
 import Layout from "./Layout.astro";
 
 interface Props {
@@ -12,7 +12,7 @@ const { pageTitle = "Fiche de lecture", title, description } = Astro.props;
 ---
 
 <Layout pageTitle={pageTitle}>
-    <section class="content">
+    <section class="fiche-content">
         <slot/>
     </div>
 </Layout>
@@ -40,7 +40,7 @@ const { pageTitle = "Fiche de lecture", title, description } = Astro.props;
             display: none !important;
         }
 
-        .content {
+        .fiche-content {
             padding: 0;
             overflow: visible;
         }

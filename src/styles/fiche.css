@@ -1,0 +1,198 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Styles pour les fiches de lecture */
+.fiche-content {
+
+  @apply m-2 p-2;
+  @apply bg-base-100 text-base-content;
+  @apply rounded-lg;
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply p-2;
+    font-variant-caps: all-small-caps; 
+  }
+  
+  /* En-tête de la fiche */
+  .fiche-header {
+    @apply flex flex-col gap-4;
+    
+    header {
+      @apply flex flex-col items-start gap-4;
+    }
+    
+    h1 {
+      @apply text-primary font-bold;
+    }
+    
+    img {
+      @apply w-full;
+    }
+    
+    .additional-info {
+      @apply flex flex-col gap-4;
+      @apply md:flex-row;
+      
+      .block {
+        @apply w-full;
+        
+        h2 {
+          @apply bg-base-200 text-base-content p-2 mb-2;
+          font-variant-caps: all-small-caps; 
+        }
+        
+        /* Tags */
+        &.tags-block {
+          .tags-list {
+            .tag {
+              @apply max-w-full;
+            }
+          }
+        }
+      }
+    }
+
+    .summary {
+      h2 {
+        @apply bg-primary text-primary-content p-2 mb-2;
+      }
+    }
+  }
+  
+  /* Contenu principal */
+  .fiche-body {
+    @apply bg-base-100 text-base-content overflow-auto;
+
+    h2 {
+
+      &:nth-of-type(3n+1) {
+        @apply bg-primary text-primary-content;
+      }
+
+      &:nth-of-type(3n+2) {
+        @apply bg-secondary text-secondary-content;
+      }
+      
+      &:nth-of-type(3n+3) {
+        @apply bg-accent text-accent-content;
+      }
+    }
+
+    /** Citations */
+    blockquote {
+      @apply m-0 text-base-content/80;
+
+      &::before {
+        content: '"';
+        @apply text-2xl m-4 float-left;
+      }
+
+      p {
+        @apply m-0;
+      }
+
+      footer {
+        @apply p-0 text-left ml-8;
+
+        &::before {
+          content: '—';
+          @apply mr-4;
+        }
+      }
+    }
+  }
+  
+  /* Pied de page */
+  .fiche-footer {
+    @apply text-sm text-center pb-8 text-base-content/80;
+  }
+
+  /* Media Queries */
+@media screen and (min-width: 768px) {
+  .fiche-header header {
+    @apply flex-row-reverse;
+  }
+  
+  .fiche-header h1 {
+    font-size: 6vw;
+  }
+  
+  .fiche-header img {
+    @apply max-w-[30%];
+  }
+  
+  .additional-info {
+    @apply flex-row justify-between;
+  }
+  
+  .additional-info .block {
+    @apply w-[30%];
+  }
+}
+
+/* Styles d'impression */
+@media print {
+  .fiche-header header {
+    @apply flex-row items-center mb-8;
+  }
+  
+  .fiche-header h1 {
+    @apply text-2xl m-0;
+  }
+  
+  .fiche-header img {
+    @apply max-w-[200px] ml-8;
+  }
+  
+  .additional-info {
+    @apply flex-row justify-between mb-8;
+  }
+  
+  .additional-info .block {
+    @apply w-[30%];
+  }
+  
+  .fiche-content {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+  
+  .fiche-content h1,
+  .fiche-content h2,
+  .fiche-content h3,
+  .fiche-content h4,
+  .fiche-content h5,
+  .fiche-content h6 {
+    break-inside: auto;
+    page-break-inside: auto;
+    break-before: auto;
+    page-break-before: auto;
+    break-after: avoid;
+    page-break-after: avoid;
+    @apply mt-8 mb-4 pt-4;
+  }
+  
+  .fiche-content p {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    @apply mb-4;
+  }
+  
+  .fiche-content ul,
+  .fiche-content ol {
+    break-inside: auto;
+    page-break-inside: auto;
+    @apply my-4;
+  }
+  
+  .fiche-content li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    @apply mb-2;
+  }
+} 
+}
+
+
+
+
