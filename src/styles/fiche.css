@@ -62,8 +62,12 @@
   /* Contenu principal */
   .fiche-body {
     @apply bg-base-100 text-base-content overflow-auto;
+    @apply text-base/6;
+
 
     h2 {
+      @apply mt-4 mb-2;
+      @apply text-xl font-bold;
 
       &:nth-of-type(3n+1) {
         @apply bg-primary text-primary-content;
@@ -81,11 +85,8 @@
     /** Citations */
     blockquote {
       @apply m-0 text-base-content/80;
-
-      &::before {
-        content: '"';
-        @apply text-2xl m-4 float-left;
-      }
+      @apply clear-both;
+      @apply my-2;
 
       p {
         @apply m-0;
@@ -99,6 +100,15 @@
           @apply mr-4;
         }
       }
+    }
+
+    ul {
+      @apply list-disc list-inside;
+      @apply pl-8;
+    }
+
+    ul, p, ol {
+      @apply mb-2;
     }
   }
   
