@@ -1,5 +1,12 @@
 ---
-import Icons from '../../icons/Icons.astro';
+import {
+    SwatchBook,
+    Sun,
+    Moon,
+    Aperture,
+    Eye,
+    type Icon as IconType,
+} from "@lucide/astro";
 
 interface Theme {
     name: string;
@@ -8,31 +15,31 @@ interface Theme {
 
 interface ThemeCategory {
     name: string;
-    icon: string;
+    icon: typeof IconType;
     description: string;
 }
 
 const categories: ThemeCategory[] = [
     {
         name: "Clairs",
-        icon: "sun",
-        description: "Thèmes avec un fond clair"
+        icon: Sun,
+        description: "Thèmes avec un fond clair",
     },
     {
         name: "Sombres",
-        icon: "moon",
-        description: "Thèmes avec un fond sombre"
+        icon: Moon,
+        description: "Thèmes avec un fond sombre",
     },
     {
         name: "Monochromes",
-        icon: "contrast",
-        description: "Thèmes utilisant une seule couleur principale"
+        icon: Aperture,
+        description: "Thèmes utilisant une seule couleur principale",
     },
     {
         name: "Haut contraste",
-        icon: "eye",
-        description: "Thèmes optimisés pour la lisibilité"
-    }
+        icon: Eye,
+        description: "Thèmes optimisés pour la lisibilité",
+    },
 ];
 
 const themes: Theme[] = [
@@ -66,128 +73,95 @@ const themes: Theme[] = [
     { name: "night", tags: ["Sombres"] },
     { name: "coffee", tags: ["Sombres"] },
     { name: "winter", tags: ["Clairs"] },
-    { name: "high-contrast", tags: ["Haut contraste"] }
+    { name: "high-contrast", tags: ["Haut contraste"] },
 ];
 ---
 
-<details class="dropdown dropdown-end w-full md:w-auto" id="theme-switcher">
-    <summary class="
-        /* Layout */
-        btn
-        btn-ghost
-        btn-sm
-        w-full
-        md:w-auto
-
-        /* Style */
-        flex
-        items-center
-        gap-2
-    ">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-        </svg>
+<details
+    class:list={[
+        "dropdown dropdown-end", // dropdown component styles
+        "w-full md:w-auto", // responsive width
+    ]}
+    id="theme-switcher"
+>
+    <summary
+        class:list={[
+            "btn btn-ghost btn-sm", // button styles
+            "w-full md:w-auto", // responsive width
+            "flex items-center gap-2", // flex layout
+        ]}
+    >
+        <SwatchBook />
         <span class="md:hidden">Thèmes</span>
     </summary>
 
-    <ul class="
-        /* Layout */
-        dropdown-content
-        menu
-        p-2
-        w-full
-        md:w-52
+    <ul
+        class:list={[
+            "dropdown-content menu p-2", // dropdown menu base styles
+            "w-full md:w-52", // responsive width
+            "shadow bg-base-100 rounded-box", // visual styles
+            "md:max-h-[80vh] md:overflow-y-auto", // responsive height and scroll
+            "z-[1]", // z-index
+        ]}
+    >
+        {
+            categories.map((category) => {
+                const categoryThemes = themes.filter((theme) =>
+                    theme.tags.includes(category.name)
+                );
+                if (categoryThemes.length === 0) return null;
 
-        /* Style */
-        shadow
-        bg-base-100
-        rounded-box
-
-        /* Scroll */
-        md:max-h-[80vh]
-        md:overflow-y-auto
-
-        /* Z-index */
-        z-[1]
-    ">
-        {categories.map(category => {
-            const categoryThemes = themes.filter(theme => theme.tags.includes(category.name));
-            if (categoryThemes.length === 0) return null;
-            
-            return (
-                <li>
-                    <details>
-                        <summary class="
-                            /* Layout */
-                            flex
-                            items-center
-                            gap-2
-                        ">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                {category.icon === "sun" && (
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                                )}
-                                {category.icon === "moon" && (
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                                )}
-                                {category.icon === "contrast" && (
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                                )}
-                                {category.icon === "eye" && (
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                )}
-                            </svg>
-                            {category.name}
-                        </summary>
-                        <ul class="max-h-[50vh] overflow-y-auto">
-                            {categoryThemes.map(theme => (
-                                <li>
-                                    <button
-                                        class="
-                                            /* Layout */
-                                            flex
-                                            items-center
-                                            gap-2
-                                        "
-                                        onclick={`handleThemeSwitch('${theme.name}')`}
-                                    >
-                                        <ul data-theme={theme.name} class="
-                                            /* Layout */
-                                            join
-                                            m-0
-                                            p-2
-
-                                            /* Style */
-                                            border-base-content/20
-                                            border-2
-                                            rounded-md
-                                        ">
-                                            <div class="join-item w-4 h-4 bg-primary"></div>
-                                            <div class="join-item w-4 h-4 bg-secondary"></div>
-                                            <div class="join-item w-4 h-4 bg-accent"></div>
-                                        </ul>
-                                        <span class="capitalize">{theme.name}</span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </details>
-                </li>
-            );
-        })}
+                return (
+                    <li>
+                        <details>
+                            <summary class:list={["flex items-center gap-2"]}>
+                                <category.icon />
+                                {category.name}
+                            </summary>
+                            <ul class:list={["max-h-[50vh] overflow-y-auto"]}>
+                                {categoryThemes.map((theme) => (
+                                    <li>
+                                        <button
+                                            class:list={[
+                                                "flex items-center gap-2",
+                                            ]}
+                                            onclick={`handleThemeSwitch('${theme.name}')`}
+                                        >
+                                            <ul
+                                                data-theme={theme.name}
+                                                class:list={[
+                                                    "join m-0 p-2", // join component styles
+                                                    "border-base-content/20 border-2 rounded-md", // border styles
+                                                ]}
+                                            >
+                                                <div class="join-item w-4 h-4 bg-primary" />
+                                                <div class="join-item w-4 h-4 bg-secondary" />
+                                                <div class="join-item w-4 h-4 bg-accent" />
+                                            </ul>
+                                            <span class="capitalize">
+                                                {theme.name}
+                                            </span>
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </details>
+                    </li>
+                );
+            })
+        }
     </ul>
 </details>
 
 <script is:inline>
-    const THEME_KEY = 'app-theme';
+    const THEME_KEY = "app-theme";
 
-    const themeSwitcher = document.getElementById('theme-switcher');
-    
+    const themeSwitcher = document.getElementById("theme-switcher");
+
     function getStoredTheme() {
-        return localStorage.getItem(THEME_KEY) || 'light';
+        return localStorage.getItem(THEME_KEY) || "light";
     }
-    
+
     function setStoredTheme(theme) {
         localStorage.setItem(THEME_KEY, theme);
     }
@@ -196,19 +170,22 @@ const themes: Theme[] = [
         setStoredTheme(theme);
         updateTheme();
     }
-    
+
     function updateTheme() {
         const theme = getStoredTheme();
-        document.documentElement.setAttribute('data-theme', theme);
-        
+        document.documentElement.setAttribute("data-theme", theme);
+
         // Update active state
-        themeSwitcher.querySelectorAll('[data-theme]').forEach(button => {
-            button.classList.toggle('active', button.getAttribute('data-theme') === theme);
+        themeSwitcher.querySelectorAll("[data-theme]").forEach((button) => {
+            button.classList.toggle(
+                "active",
+                button.getAttribute("data-theme") === theme
+            );
         });
     }
-    
+
     // Initialize theme on page load
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
         updateTheme();
     });
-</script> 
+</script>
