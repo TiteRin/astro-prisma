@@ -1,6 +1,6 @@
 ---
 import "@/styles/features/search.scss";
-import Icons from '../../icons/Icons.astro';
+import { Search } from "@lucide/astro";
 ---
 <div class="search-wrapper">
     <div class="input-with-icon">
@@ -10,7 +10,7 @@ import Icons from '../../icons/Icons.astro';
                 aria-label="Rechercher parmi les fiches"
                 id="global-search"
         />
-        <Icons name="search" />
+        <Search />
     </div>
     <div class="results-wrapper">
         <h1 class="sr-only">Résultat de la recherche</h1>

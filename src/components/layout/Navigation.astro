@@ -1,157 +1,94 @@
 ---
-import Icons from '../icons/Icons.astro';
+import { House, Tags, Users, FileUp, PanelRightOpen, PanelRightClose } from '@lucide/astro';
+import type { Icon as IconType } from '@lucide/astro';
 
 interface NavItem {
     href: string;
-    icon: string;
+    icon: typeof IconType;
     label: string;
 }
 
 const navItems: NavItem[] = [
-    { href: '/', icon: 'home', label: 'Accueil' },
-    { href: '/tags', icon: 'label', label: 'Index par tag' },
-    { href: '/contributors', icon: 'user', label: 'Index par contributeur·ice' },
-    { href: '/upload', icon: 'upload', label: 'Ajouter une fiche de lecture' }
+    { href: '/', icon: House, label: 'Accueil' },
+    { href: '/tags', icon: Tags, label: 'Index par tag' },
+    { href: '/contributors', icon: Users, label: 'Index par contributeur·ice' },
+    { href: '/upload', icon: FileUp, label: 'Ajouter une fiche de lecture' }
 ];
 
 const { pathname } = Astro.url;
 ---
 
-<div class="
-    /* Layout */
-    hidden
-    md:flex
-    flex-col
-    gap-4
-    h-full
-    p-4
-    w-64
-
-    /* Style */
-    bg-base-200
-    border-r
-    border-base-300
-
-    /* Transition */
-    transition-all
-    duration-300
-    ease-in-out
-
-    /* Collapsed state */
-    [&.collapsed]:w-20
-    [&.collapsed]:p-2
-" role="navigation" aria-label="Navigation principale">
+<div 
+    class:list={[
+        "hidden md:flex flex-col gap-4 h-full p-4 w-64", // layout styles
+        "bg-base-200 border-r border-base-300", // visual styles
+        "transition-all duration-300 ease-in-out", // transition styles
+        "[&.collapsed]:w-20 [&.collapsed]:p-2", // collapsed state styles
+    ]}
+    role="navigation" 
+    aria-label="Navigation principale"
+>
     <!-- Desktop controls -->
-    <div class="
-        /* Layout */
-        flex
-        justify-end
-        [&.collapsed]:justify-center
-    ">
+    <div class:list={[
+        "flex justify-end", // layout styles
+        "[&.collapsed]:justify-center", // collapsed state styles
+    ]}>
         <button 
-            class="
-                /* Layout */
-                btn
-                btn-ghost
-                btn-circle
-
-                /* Style */
-                text-base-content
-
-                /* Visibility */
-                [.collapsed_&]:hidden
-            "
+            class:list={[
+                "btn btn-ghost btn-circle", // button styles
+                "text-base-content", // text styles
+                "[.collapsed_&]:hidden", // visibility styles
+            ]}
             aria-expanded="false"
             aria-controls="navigation-menu"
             aria-label="Réduire la navigation"
         >
-            <svg 
-                class="w-6 h-6" 
-                viewBox="0 0 16 16" 
-                fill="currentColor" 
-                aria-hidden="true"
-            >
-                <path d="M1.8 1 0 2.8v10.4L1.8 15h12.4l1.8-1.8V2.8L14.2 1zm4.805 12.2V2.8H14.2v10.4zm-1.8-10.4H1.8v10.4h3.005z" />
-            </svg>
+            <PanelRightOpen>
         </button>
         <button 
-            class="
-                /* Layout */
-                btn
-                btn-ghost
-                btn-circle
-
-                /* Style */
-                text-base-content
-
-                /* Visibility */
-                hidden
-                [.collapsed_&]:block
-            "
+            class:list={[
+                "btn btn-ghost btn-circle", // button styles
+                "text-base-content", // text styles
+                "hidden [.collapsed_&]:block", // visibility styles
+            ]}
             aria-expanded="false"
             aria-controls="navigation-menu"
             aria-label="Agrandir la navigation"
         >
-            <svg 
-                class="w-6 h-6" 
-                viewBox="0 0 16 16" 
-                fill="currentColor" 
-                aria-hidden="true"
-            >
-                <path fill-rule="evenodd" d="M1.8 1 0 2.8v10.4L1.8 15h12.4l1.8-1.8V2.8L14.2 1zm4.805 12.2V2.8H14.2v10.4zm-1.8-10.4H1.8v10.4h3.005z" />
-            </svg>
+            <PanelRightClose />
         </button>
     </div>
 
     <!-- Navigation menu -->
-    <nav id="navigation-menu" class="
-        /* Layout */
-        flex
-        flex-col
-        gap-2
-        flex-grow
-    ">
-        <ul class="
-            /* Layout */
-            menu
-            menu-lg
-            gap-4
-            p-0
-        ">
-            {navItems.map(({ href, icon, label }) => (
+    <nav 
+        id="navigation-menu" 
+        class:list={[
+            "flex flex-col gap-2 flex-grow", // layout styles
+        ]}
+    >
+        <ul class:list={[
+            "menu menu-lg gap-4 p-0", // menu styles
+        ]}>
+            {navItems.map((item) => (
                 <li>
                     <a 
-                        href={href} 
-                        class="
-                            /* Layout */
-                            flex
-                            items-center
-                            gap-2
-
-                            /* Style */
-                            text-base-content
-                            hover:text-primary
-                            hover:bg-base-300
-
-                            /* Transition */
-                            transition-all
-                            duration-300
-
-                            /* Collapsed state */
-                            [.collapsed_&]:justify-center
-                        " 
-                        aria-current={pathname === href ? 'page' : undefined}
-                        aria-label={label}
-                        title={label}
+                        href={item.href} 
+                        class:list={[
+                            "flex items-center gap-2", // layout styles
+                            "text-base-content hover:text-primary hover:bg-base-300", // interactive styles
+                            "transition-all duration-300", // transition styles
+                            "[.collapsed_&]:justify-center", // collapsed state styles
+                        ]}
+                        aria-current={pathname === item.href ? 'page' : undefined}
+                        aria-label={item.label}
+                        title={item.label}
                     >
-                        <Icons name={icon} size={24} aria-hidden="true" />
-                        <span class="
-                            /* Transition */
-                            transition-all
-                            duration-300
-                            [.collapsed_&]:hidden
-                        ">
-                            {label}
+                        <item.icon />
+                        <span class:list={[
+                            "transition-all duration-300", // transition styles
+                            "[.collapsed_&]:hidden", // collapsed state styles
+                        ]}>
+                            {item.label}
                         </span>
                     </a>
                 </li>
