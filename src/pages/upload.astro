@@ -1,9 +1,9 @@
 ---
-import FicheLayout from "../layouts/FicheLayout.astro";
+import Layout from "../layouts/Layout.astro";
 import UploadForm from "../components/features/upload/UploadForm.tsx";
 ---
 
-<FicheLayout>
+<Layout pageTitle="Ajouter une nouvelle fiche de lecture">
     <h1>Ajouter une nouvelle fiche de lecture</h1>
     <UploadForm client:load/>
-</FicheLayout>
+</Layout>
