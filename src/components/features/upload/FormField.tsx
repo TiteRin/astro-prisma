@@ -9,10 +9,14 @@ export interface FormFieldProps {
 }
 
 const FormField = ({ id, label, children, className = "", required = false }: FormFieldProps) => (
-    <div className={`upload-form__field ${className}`}>
-        <label htmlFor={id}>{label} {required && <span className="required-indicator">*</span>}</label>
+    <label className="input" htmlFor={id}>
+        <span className={`label ${className}`}>
+            {label}
+            {required && <span className="required-indicator">*</span>}
+        </span>
         {children}
-    </div>
+    </label>
+    
 );
 
 export default FormField; 

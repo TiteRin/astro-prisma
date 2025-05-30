@@ -1,5 +1,4 @@
-import React, { useState, useRef, ChangeEvent, FormEvent } from "react";
-import "../../../styles/features/upload/index.scss";
+import { useState, useRef, ChangeEvent, FormEvent } from "react";
 import { 
     validateImage, 
     validateMarkdownFile, 
@@ -415,13 +414,13 @@ export default function UploadForm() {
 
     return (
         <form 
-            className="upload-form" 
+            className="form-control w-full max-w-3xl mx-auto p-4 space-y-6" 
             id="uploadForm" 
             ref={formRef} 
             onSubmit={handleSubmit}
             aria-labelledby="upload-form-title"
         >
-            <p>
+            <p className="text-sm text-base-content/70">
                 Après envoi, la fiche de lecture sera disponible après quelques minutes. 
             </p>
 
@@ -432,7 +431,7 @@ export default function UploadForm() {
                 onChange={handleContributorChange}
             />
             
-            <div className="upload-form__flex-wrapper">
+            <div className="flex flex-col md:flex-row gap-6">
                 <CoverUpload 
                     coverPreview={cover.preview}
                     isValid={cover.validation.isValid}
@@ -452,10 +451,10 @@ export default function UploadForm() {
                 />
             </div>
 
-            <div className="upload-form__submit">
+            <div className="flex justify-end">
                 <button 
                     type="submit" 
-                    className="btn-action with-border"
+                    className="btn btn-primary"
                     disabled={status.isUploading}
                     aria-busy={status.isUploading}
                 >

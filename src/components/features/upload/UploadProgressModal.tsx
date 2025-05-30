@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import './UploadProgressModal.scss';
 
 interface ProgressStep {
   id: string;
@@ -32,51 +31,55 @@ export default function UploadProgressModal({
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
+    } else {
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 300);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
   const handleClose = () => {
     if (canClose) {
-      setIsVisible(false);
-      setTimeout(() => onClose(), 300); // Attendre la fin de l'animation
+      onClose();
     }
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && canClose) {
-      handleClose();
+      onClose();
     }
   };
-
-  if (!isOpen) return null;
 
   const getStepIcon = (step: ProgressStep) => {
     switch (step.status) {
       case 'success':
-        return '✅';
+        return '✓';
       case 'error':
-        return '❌';
+        return '✕';
       case 'progress':
-        return '⏳';
+        return '⟳';
       default:
-        return '⏸️';
+        return '○';
     }
   };
 
-  const isCompleted = steps.some(step => step.status === 'success' && (step.id === 'deploy-complete' || step.id === 'final'));
+  const isCompleted = steps.every(step => step.status === 'success');
   const hasError = steps.some(step => step.status === 'error');
+
+  if (!isVisible && !isOpen) return null;
 
   return (
     <div 
-      className={`upload-modal-overlay ${isVisible ? 'visible' : ''}`}
+      className={`modal ${isVisible ? 'modal-open' : ''}`}
       onClick={handleBackdropClick}
     >
-      <div className={`upload-modal ${isVisible ? 'visible' : ''}`}>
-        <div className="upload-modal__header">
-          <h2>Upload de la fiche de lecture</h2>
+      <div className="modal-box">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Upload de la fiche de lecture</h2>
           {canClose && (
             <button 
-              className="upload-modal__close"
+              className="btn btn-sm btn-circle"
               onClick={handleClose}
               aria-label="Fermer"
             >
@@ -85,41 +88,46 @@ export default function UploadProgressModal({
           )}
         </div>
 
-        <div className="upload-modal__content">
-          <div className="upload-modal__steps">
+        <div className="space-y-4">
+          <ul className="steps steps-vertical">
             {steps.map((step) => (
-              <div 
+              <li 
                 key={step.id}
-                className={`upload-step upload-step--${step.status} ${currentStep === step.id ? 'upload-step--current' : ''}`}
+                className={`step ${
+                  step.status === 'success' ? 'step-success' :
+                  step.status === 'error' ? 'step-error' :
+                  currentStep === step.id ? 'step-primary' :
+                  ''
+                }`}
               >
-                <div className="upload-step__icon">
-                  {getStepIcon(step)}
-                </div>
-                <div className="upload-step__content">
-                  <div className="upload-step__message">
-                    {step.status === 'progress' ? (
-                      <>
-                        {step.message.replace(/\.+$/, '')}
-                        <span className="upload-step__dots"></span>
-                      </>
-                    ) : (
-                      step.message
+                <div className="flex items-start gap-2">
+                  <span className="step-icon">{getStepIcon(step)}</span>
+                  <div>
+                    <div className="font-medium">
+                      {step.status === 'progress' ? (
+                        <>
+                          {step.message.replace(/\.+$/, '')}
+                          <span className="loading loading-dots loading-xs"></span>
+                        </>
+                      ) : (
+                        step.message
+                      )}
+                    </div>
+                    {step.timestamp && (
+                      <div className="text-xs text-base-content opacity-70">
+                        {step.timestamp.toLocaleTimeString()}
+                      </div>
                     )}
                   </div>
-                  {step.timestamp && (
-                    <div className="upload-step__timestamp">
-                      {step.timestamp.toLocaleTimeString()}
-                    </div>
-                  )}
                 </div>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
 
           {isCompleted && finalUrl && ficheId && (
-            <div className="upload-modal__success">
-              <div className="upload-modal__success-icon">🎉</div>
-              <div className="upload-modal__success-message">
+            <div className="alert alert-success">
+              <div className="text-2xl">🎉</div>
+              <div>
                 <strong>Déploiement terminé avec succès !</strong>
                 <p>
                   Votre nouvelle fiche est accessible à l'adresse :{' '}
@@ -127,7 +135,7 @@ export default function UploadProgressModal({
                     href={`${finalUrl}/fiches/${ficheId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="upload-modal__fiche-link"
+                    className="link link-success"
                   >
                     {finalUrl}/fiches/{ficheId}
                   </a>
@@ -137,24 +145,24 @@ export default function UploadProgressModal({
           )}
 
           {hasError && (
-            <div className="upload-modal__error">
-              <div className="upload-modal__error-icon">⚠️</div>
-              <div className="upload-modal__error-message">
+            <div className="alert alert-error">
+              <div className="text-2xl">⚠️</div>
+              <div>
                 Une erreur s'est produite pendant l'upload. Vous pouvez fermer cette fenêtre et réessayer.
               </div>
             </div>
           )}
         </div>
 
-        <div className="upload-modal__footer">
+        <div className="modal-action">
           {!canClose && (
-            <div className="upload-modal__info">
-              <small>⏳ Veuillez patienter pendant le traitement...</small>
+            <div className="text-sm text-base-content opacity-70">
+              ⏳ Veuillez patienter pendant le traitement...
             </div>
           )}
           {canClose && (
             <button 
-              className="upload-modal__button upload-modal__button--primary"
+              className="btn btn-primary"
               onClick={handleClose}
             >
               {isCompleted ? 'Terminer' : 'Fermer'}
