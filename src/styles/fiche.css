@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@import "./daisyui.css";
 
 /* Styles pour les fiches de lecture */
 .fiche-content {

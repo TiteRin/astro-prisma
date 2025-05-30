@@ -1,6 +1,17 @@
 {
   "name": "astro-prisma",
   "packageManager": "yarn@4.9.1",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "pagefind": "pagefind --site dist",
+    "copy-pagefind": "node scripts/copy-pagefind.js",
+    "build:full": "astro build && yarn pagefind && yarn copy-pagefind"
+  },
   "dependencies": {
     "@astrojs/mdx": "^4.2.6",
     "@astrojs/netlify": "^6.3.3",
@@ -34,18 +45,10 @@
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
     "postcss-import": "^16.1.0",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.12",
     "sass": "^1.89.0",
     "sass-embedded": "^1.89.0",
     "typescript": "^5.8.3"
-  },
-  "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "pagefind": "pagefind --site dist",
-    "copy-pagefind": "node scripts/copy-pagefind.js",
-    "build:full": "astro build && yarn pagefind && yarn copy-pagefind"
   }
 }
