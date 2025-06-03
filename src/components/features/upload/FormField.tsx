@@ -9,8 +9,8 @@ export interface FormFieldProps {
 }
 
 const FormField = ({ id, label, children, className = "", required = false }: FormFieldProps) => (
-    <label className="input" htmlFor={id}>
-        <span className={`label ${className}`}>
+    <label className={`input ${className}`} htmlFor={id}>
+        <span className={`label`}>
             {label}
             {required && <span className="required-indicator">*</span>}
         </span>

@@ -413,55 +413,64 @@ export default function UploadForm() {
     const { contributor, cover, document, status } = formState;
 
     return (
-        <form 
-            className="form-control w-full max-w-3xl mx-auto p-4 space-y-6" 
-            id="uploadForm" 
-            ref={formRef} 
-            onSubmit={handleSubmit}
-            aria-labelledby="upload-form-title"
-        >
-            <p className="text-sm text-base-content/70">
-                Après envoi, la fiche de lecture sera disponible après quelques minutes. 
-            </p>
+        <>
+            <form 
+                className="card md:card-side card-border bg-base-100 shadow-xl m-4 form-control w-full space-y-6 h-full flex flex-col justify-between" 
+                id="uploadForm" 
+                ref={formRef} 
+                onSubmit={handleSubmit}
+                aria-labelledby="upload-form-title"
+            >
+                <figure className="max-w-[200px]">
+                    <CoverUpload 
+                        coverPreview={cover.preview}
+                        isValid={cover.validation.isValid}
+                        validationMessage={cover.validation.message}
+                        onChange={handleCoverChange}
+                        disabled={status.isUploading}
+                    />
+                </figure>
+                
+                <div className="card-body lg:w-2/3">
+                    
+                    <div className="flex flex-col gap-4 grow items-stretch">
+                        
+                        {/* <StatusMessage message={status.message} type={status.type} /> */}
 
-            <StatusMessage message={status.message} type={status.type} />
+                        <FileUpload 
+                            fileMetadata={document.metadata || null}
+                            fileId={document.id || null}
+                            isValid={document.validation.isValid}
+                            validationMessage={document.validation.message}
+                            onChange={handleFileChange}
+                            onReset={handleResetFile}
+                            disabled={status.isUploading}
+                            className="grow"
+                        />
 
-            <ContributorField 
-                value={contributor}
-                onChange={handleContributorChange}
-            />
-            
-            <div className="flex flex-col md:flex-row gap-6">
-                <CoverUpload 
-                    coverPreview={cover.preview}
-                    isValid={cover.validation.isValid}
-                    validationMessage={cover.validation.message}
-                    onChange={handleCoverChange}
-                    disabled={status.isUploading}
-                />
 
-                <FileUpload 
-                    fileMetadata={document.metadata || null}
-                    fileId={document.id || null}
-                    isValid={document.validation.isValid}
-                    validationMessage={document.validation.message}
-                    onChange={handleFileChange}
-                    onReset={handleResetFile}
-                    disabled={status.isUploading}
-                />
-            </div>
+                        <ContributorField 
+                            value={contributor}
+                            onChange={handleContributorChange}
+                            className="w-full"
+                        />
 
-            <div className="flex justify-end">
-                <button 
-                    type="submit" 
-                    className="btn btn-primary"
-                    disabled={status.isUploading}
-                    aria-busy={status.isUploading}
-                >
-                    {status.isUploading ? 'Envoi en cours...' : 'Ajouter'}
-                </button>
-            </div>
-
+                    </div>
+                    <div className="flex justify-end items-center gap-4">
+                        <p className="text-sm text-base-content/70">
+                            Après envoi, la fiche de lecture sera disponible après quelques minutes. 
+                        </p>
+                        <button 
+                            type="submit" 
+                            className="btn btn-primary"
+                            disabled={status.isUploading}
+                            aria-busy={status.isUploading}
+                        >
+                            {status.isUploading ? 'Envoi en cours...' : 'Ajouter'}
+                        </button>
+                    </div>
+                </div>
+            </form>
             {/* Modal de progression de l'upload */}
             <UploadProgressModal
                 isOpen={uploadProgress.isOpen}
@@ -472,6 +481,6 @@ export default function UploadForm() {
                 finalUrl={uploadProgress.finalUrl}
                 ficheId={uploadProgress.ficheId}
             />
-        </form>
-    );
+        </>
+);
 }
