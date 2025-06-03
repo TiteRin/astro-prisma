@@ -62,9 +62,7 @@ export default function UploadForm() {
     };
 
     // Gestion du changement de fichier de couverture
-    const handleCoverChange = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null;
-        
+    const handleCoverChange = async (file: File | null) => {
         if (!file) {
             // Réinitialiser l'état de couverture
             setFormState(prev => ({
@@ -423,11 +421,12 @@ export default function UploadForm() {
             >
                 <figure className="max-w-[200px]">
                     <CoverUpload 
-                        coverPreview={cover.preview}
-                        isValid={cover.validation.isValid}
-                        validationMessage={cover.validation.message}
+                        value={cover.file}
                         onChange={handleCoverChange}
+                        onError={(error) => setFormState(prev => ({ ...prev, cover: { ...prev.cover, validation: { isValid: false, message: error } } }))}
                         disabled={status.isUploading}
+                        maxSizeMB={5}
+                        allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
                     />
                 </figure>
                 
