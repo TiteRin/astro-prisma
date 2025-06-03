@@ -150,129 +150,6 @@ export default function UploadForm() {
         }
     };
 
-    // Gestion du changement de fichier document
-    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null;
-        
-        if (!file) {
-            return;
-        }
-
-        // Mise à jour initiale du fichier et indication du chargement
-        setFormState(prev => ({
-            ...prev,
-            document: {
-                ...prev.document,
-                file,
-                id: null,
-                metadata: null
-            },
-            status: {
-                isUploading: true,
-                message: "Validation du fichier en cours...",
-                type: 'info'
-            }
-        }));
-
-        // Première validation basique du format de fichier
-        const validationResult = validateMarkdownFile(file);
-        
-        if (!validationResult.isValid) {
-            setFormState(prev => ({
-                ...prev,
-                document: {
-                    ...prev.document,
-                    validation: {
-                        isValid: false,
-                        message: validationResult.errors[0]?.message
-                    }
-                },
-                status: {
-                    isUploading: false,
-                    message: validationResult.errors[0]?.message || "Le fichier markdown n'est pas valide",
-                    type: 'error'
-                }
-            }));
-            return;
-        }
-
-        try {
-            // Upload silencieux pour validation complète sur le serveur
-            const result = await silentUploadFile(file);
-
-            if (!result.success) {
-                // Si nous avons des erreurs spécifiques du serveur
-                if (result.errors && result.errors.length > 0) {
-                    throw new Error(result.errors[0]);
-                } else {
-                    throw new Error("Erreur lors de la validation du fichier");
-                }
-            }
-
-            if (!result.id) {
-                throw new Error("L'ID du fichier est manquant après validation");
-            }
-
-            // Création de l'aperçu avec les métadonnées
-            const metadata = await createFilePreview(file, result.frontmatter);
-            
-            // Fichier valide, mise à jour avec les métadonnées et l'ID
-            setFormState(prev => ({
-                ...prev,
-                document: {
-                    ...prev.document,
-                    id: result.id,
-                    metadata,
-                    validation: {
-                        isValid: true
-                    }
-                },
-                status: {
-                    isUploading: false,
-                    message: "Fichier validé avec succès",
-                    type: 'success'
-                }
-            }));
-
-            // Effacer le message après 3 secondes
-            setTimeout(() => {
-                updateStatus({ isUploading: false });
-            }, 3000);
-        }
-        catch (error) {
-            console.error("Error validating markdown file:", error);
-            setFormState(prev => ({
-                ...prev,
-                document: {
-                    ...prev.document,
-                    validation: {
-                        isValid: false,
-                        message: error instanceof Error ? error.message : "Erreur inconnue"
-                    }
-                },
-                status: {
-                    isUploading: false,
-                    message: `Erreur lors de la validation: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
-                    type: 'error'
-                }
-            }));
-        }
-    };
-
-    // Réinitialisation du champ de fichier
-    const handleResetFile = () => {
-        setFormState(prev => ({
-            ...prev,
-            document: {
-                ...prev.document,
-                file: null,
-                id: null,
-                metadata: null,
-                validation: { isValid: true }
-            }
-        }));
-    };
-
     // Gestion des messages de progression
     const handleUploadProgress = (progress: UploadProgress) => {
         updateStatus({
@@ -437,12 +314,33 @@ export default function UploadForm() {
                         {/* <StatusMessage message={status.message} type={status.type} /> */}
 
                         <FileUpload 
-                            fileMetadata={document.metadata || null}
-                            fileId={document.id || null}
-                            isValid={document.validation.isValid}
-                            validationMessage={document.validation.message}
-                            onChange={handleFileChange}
-                            onReset={handleResetFile}
+                            value={document.file}
+                            onChange={(file, metadata, fileId) => {
+                                setFormState(prev => ({
+                                    ...prev,
+                                    document: {
+                                        ...prev.document,
+                                        file,
+                                        metadata,
+                                        id: fileId,
+                                        validation: { isValid: true }
+                                    }
+                                }));
+                            }}
+                            onError={(error) => {
+                                setFormState(prev => ({
+                                    ...prev,
+                                    document: {
+                                        ...prev.document,
+                                        validation: { isValid: false, message: error }
+                                    },
+                                    status: {
+                                        isUploading: false,
+                                        message: error,
+                                        type: 'error'
+                                    }
+                                }));
+                            }}
                             disabled={status.isUploading}
                             className="grow"
                         />
