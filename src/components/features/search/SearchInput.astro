@@ -1,20 +1,22 @@
 ---
-import "@/styles/features/search.scss";
 import { Search } from "@lucide/astro";
 ---
-<div class="search-wrapper">
-    <div class="input-with-icon">
+<div class="w-full mb-4">
+    <div class="join w-full">
         <input
-                type="search"
-                placeholder="Rechercher parmi les fiches"
-                aria-label="Rechercher parmi les fiches"
-                id="global-search"
+            type="search"
+            placeholder="Rechercher parmi les fiches"
+            aria-label="Rechercher parmi les fiches"
+            id="global-search"
+            class="input input-bordered join-item w-full"
         />
-        <Search />
+        <button class="btn join-item">
+            <Search />
+        </button>
     </div>
-    <div class="results-wrapper">
+    <div class="relative">
         <h1 class="sr-only">Résultat de la recherche</h1>
-        <ul id="results" class="results hidden">
+        <ul id="results" class="menu menu-lg bg-base-100 shadow-lg rounded-box absolute top-0 w-full z-50 hidden max-h-[80vh] overflow-y-auto">
             <li class="loading hidden">Chargement des résultats…</li>
             <li class="no-result hidden">Aucun résultat</li>
         </ul>
@@ -39,51 +41,32 @@ import { Search } from "@lucide/astro";
             tags
         ) {
             const li = document.createElement("li");
-            li.className = "result-item";
+            li.className = "hover:bg-base-200";
 
             const link = document.createElement("a");
             link.href = url;
-            link.className = "result-item__link";
+            link.className = "flex gap-4 p-4";
 
             const content = document.createElement("div");
-            content.className = "result-item__content";
+            content.className = "flex-1 min-w-0";
 
             const header = document.createElement("div");
-            header.className = "result-item__header";
+            header.className = "mb-2";
 
             const titleEl = document.createElement("h2");
-            titleEl.className = "result-item__title";
+            titleEl.className = "text-base font-medium text-primary m-0";
             titleEl.innerHTML = title;
 
             const authorsEl = document.createElement("p");
-            authorsEl.className = "result-item__authors";
+            authorsEl.className = "text-sm text-base-content/70 m-0";
             authorsEl.textContent = authors;
 
             header.appendChild(titleEl);
             header.appendChild(authorsEl);
 
             const excerptEl = document.createElement("p");
-            excerptEl.className = "result-item__excerpt";
+            excerptEl.className = "text-sm text-base-content m-0 mt-2";
             excerptEl.innerHTML = summary;
-
-            /*
-            if (tags && tags.length > 0) {
-                const tagsEl = document.createElement("div");
-                tagsEl.className = "result-item__tags";
-                const tagsList = document.createElement("ul");
-                tagsList.className = "tags";
-                
-                tags.forEach(tag => {
-                    const tagEl = document.createElement("li");
-                    tagEl.className = "tag";
-                    tagEl.textContent = tag;
-                    tagsList.appendChild(tagEl);
-                });
-                
-                tagsEl.appendChild(tagsList);
-                content.appendChild(tagsEl);
-            }
-            */
 
             content.appendChild(header);
             content.appendChild(excerptEl);
@@ -92,7 +75,7 @@ import { Search } from "@lucide/astro";
                 const imgEl = document.createElement("img");
                 imgEl.src = img;
                 imgEl.alt = "";
-                imgEl.className = "result-item__image";
+                imgEl.className = "w-[75px] h-auto object-cover rounded";
                 link.appendChild(imgEl);
             }
 

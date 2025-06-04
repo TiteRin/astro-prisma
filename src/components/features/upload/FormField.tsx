@@ -9,14 +9,15 @@ export interface FormFieldProps {
 }
 
 const FormField = ({ id, label, children, className = "", required = false }: FormFieldProps) => (
-    <label className={`input ${className}`} htmlFor={id}>
-        <span className={`label`}>
-            {label}
-            {required && <span className="required-indicator">*</span>}
-        </span>
+    <div className={`form-control w-full ${className}`}>
+        <label className="label" htmlFor={id}>
+            <span className="label-text">
+                {label}
+                {required && <span className="text-error ml-1">*</span>}
+            </span>
+        </label>
         {children}
-    </label>
-    
+    </div>
 );
 
 export default FormField; 
