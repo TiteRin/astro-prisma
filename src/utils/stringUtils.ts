@@ -27,4 +27,19 @@ declare global {
 // Ajout de la méthode au prototype de String
 String.prototype.truncate = function(maxLength: number = 250): string {
     return truncateText(this.toString(), maxLength);
-}; 
+};
+
+/**
+ * Convertit une chaîne de caractères en slug URL-friendly
+ * @param str La chaîne à convertir
+ * @returns Le slug généré
+ */
+export function slugify(str: string): string {
+    return str
+        .toLowerCase()
+        .normalize('NFD') // Décompose les caractères accentués
+        .replace(/[\u0300-\u036f]/g, '') // Supprime les accents
+        .replace(/[^a-z0-9]+/g, '-') // Remplace les caractères non alphanumériques par des tirets
+        .replace(/^-+|-+$/g, '') // Supprime les tirets au début et à la fin
+        .replace(/-+/g, '-'); // Remplace les tirets multiples par un seul tiret
+} 

@@ -250,11 +250,15 @@ export default function UploadForm() {
                             // Mise à jour du message de build en cours
                             uploadProgress.updateBuildProgress(progress.message);
                         } else if (progress.type === 'success') {
-                            // Extraire l'ID de la fiche depuis la réponse si possible
-                            const ficheId = document.id || 'nouvelle-fiche';
-                            // Utiliser le titre du livre depuis les métadonnées si disponible
-                            const ficheTitle = document.metadata?.title || 'Nouvelle fiche';
-                            uploadProgress.completeBuild(ficheId, window.location.origin);
+                            // Extraire l'URL de déploiement et le slug du message
+                            const deployUrlMatch = progress.message.match(/\(URL: (https?:\/\/[^)]+)\)/);
+                            const deployUrl = deployUrlMatch ? deployUrlMatch[1] : window.location.origin;
+                            
+                            // Extraire le slug du message (format: "slug: mon-slug")
+                            const slugMatch = progress.message.match(/slug: ([^\s,)]+)/);
+                            const finalSlug = slugMatch ? slugMatch[1] : document.id || 'nouvelle-fiche';
+                            
+                            uploadProgress.completeBuild(finalSlug, deployUrl);
                             
                             // Reset du formulaire après succès
                             setTimeout(() => {

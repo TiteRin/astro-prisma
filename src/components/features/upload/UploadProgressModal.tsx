@@ -157,7 +157,7 @@ export default function UploadProgressModal({
                       href={`${finalUrl}/fiches/${ficheId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="link link-success"
+                      className="link link-primary hover:link-secondary font-medium"
                     >
                       {finalUrl}/fiches/{ficheId}
                     </a>
