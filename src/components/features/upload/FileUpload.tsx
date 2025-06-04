@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { FilePreview, validateMarkdownFile, createFilePreview, silentUploadFile } from '../../../utils/uploadService';
+import { FilePreview, validateMarkdownFile, createFilePreview, silentUploadFile } from '@/utils/uploadService';
+import { truncateText } from '@/utils/stringUtils';
 
 export interface FileUploadProps {
     value?: File | null;
@@ -31,7 +32,7 @@ const FilePreviewDisplay = ({
                     <li><strong>Titre:</strong> {fileMetadata?.title || '-'}</li>
                     <li><strong>Auteurs:</strong> {fileMetadata?.authors?.join(', ') || '-'}</li>
                     <li><strong>Tags:</strong> {fileMetadata?.tags?.join(', ') || '-'}</li>
-                    <li><strong>Description:</strong> {fileMetadata?.description || '-'}</li>
+                    <li><strong>Description:</strong> {fileMetadata?.description ? truncateText(fileMetadata.description) : '-'}</li>
                 </ul>
             </div>
 
