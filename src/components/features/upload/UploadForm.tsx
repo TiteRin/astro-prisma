@@ -1,17 +1,12 @@
-import { useState, useRef, ChangeEvent, FormEvent } from "react";
+import { useState, useRef, FormEvent } from "react";
 import { 
     validateImage, 
-    validateMarkdownFile, 
     createImagePreview, 
-    createFilePreview,
     submitUploadForm,
     UploadProgress,
-    silentUploadFile,
-    FilePreview
-} from "../../../utils/uploadService";
+} from "@/utils/uploadService";
 
 // Import des composants
-import StatusMessage from "./StatusMessage";
 import ContributorField from "./ContributorField";
 import CoverUpload from "./CoverUpload";
 import FileUpload from "./FileUpload";
@@ -290,71 +285,75 @@ export default function UploadForm() {
     return (
         <>
             <form 
-                className="card md:card-side card-border bg-base-100 shadow-xl m-4 form-control w-full space-y-6 h-full flex flex-col justify-between" 
+                className="card md:card-side shadow-xl form-control " 
                 id="uploadForm" 
                 ref={formRef} 
                 onSubmit={handleSubmit}
                 aria-labelledby="upload-form-title"
             >
-                <figure className="max-w-[200px]">
-                    <CoverUpload 
-                        value={cover.file}
-                        onChange={handleCoverChange}
-                        onError={(error) => setFormState(prev => ({ ...prev, cover: { ...prev.cover, validation: { isValid: false, message: error } } }))}
-                        disabled={status.isUploading}
-                        maxSizeMB={5}
-                        allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
-                    />
-                </figure>
                 
-                <div className="card-body lg:w-2/3">
-                    
-                    <div className="flex flex-col gap-4 grow items-stretch">
-                        
-                        {/* <StatusMessage message={status.message} type={status.type} /> */}
+                <div className="card-body flex flex-col gap-4">
+                    <div className="flex flex-row gap-4">
 
-                        <FileUpload 
-                            value={document.file}
-                            onChange={(file, metadata, fileId) => {
-                                setFormState(prev => ({
-                                    ...prev,
-                                    document: {
-                                        ...prev.document,
-                                        file,
-                                        metadata,
-                                        id: fileId,
-                                        validation: { isValid: true }
-                                    }
-                                }));
-                            }}
-                            onError={(error) => {
-                                setFormState(prev => ({
-                                    ...prev,
-                                    document: {
-                                        ...prev.document,
-                                        validation: { isValid: false, message: error }
-                                    },
-                                    status: {
-                                        isUploading: false,
-                                        message: error,
-                                        type: 'error'
-                                    }
-                                }));
-                            }}
-                            disabled={status.isUploading}
-                            className="grow"
-                        />
+                        {/* Cover */}
+                        <div className="w-[200px] h-[300px] shrink-0">
+                            <CoverUpload 
+                                value={cover.file}
+                                onChange={handleCoverChange}
+                                onError={(error) => setFormState(prev => ({ ...prev, cover: { ...prev.cover, validation: { isValid: false, message: error } } }))}
+                                disabled={status.isUploading}
+                                maxSizeMB={5}
+                                allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
+                            />       
+                        </div>
+                        <div className="grow">
+                            <div className="flex flex-col gap-4 grow items-stretch">
+                                
+                                {/* <StatusMessage message={status.message} type={status.type} /> */}
+
+                                <FileUpload 
+                                    value={document.file}
+                                    onChange={(file, metadata, fileId) => {
+                                        setFormState(prev => ({
+                                            ...prev,
+                                            document: {
+                                                ...prev.document,
+                                                file,
+                                                metadata,
+                                                id: fileId,
+                                                validation: { isValid: true }
+                                            }
+                                        }));
+                                    }}
+                                    onError={(error) => {
+                                        setFormState(prev => ({
+                                            ...prev,
+                                            document: {
+                                                ...prev.document,
+                                                validation: { isValid: false, message: error }
+                                            },
+                                            status: {
+                                                isUploading: false,
+                                                message: error,
+                                                type: 'error'
+                                            }
+                                        }));
+                                    }}
+                                    disabled={status.isUploading}
+                                    className="grow"
+                                />
 
 
-                        <ContributorField 
-                            value={contributor}
-                            onChange={handleContributorChange}
-                            className="w-full"
-                        />
-
+                                <ContributorField 
+                                    value={contributor}
+                                    onChange={handleContributorChange}
+                                    className="w-full"
+                                />
+                            </div>
+                        </div>
                     </div>
                     <div className="flex justify-end items-center gap-4">
-                        <p className="text-sm text-base-content/70">
+                        <p className="alert alert-info alert-soft">
                             Après envoi, la fiche de lecture sera disponible après quelques minutes. 
                         </p>
                         <button 
