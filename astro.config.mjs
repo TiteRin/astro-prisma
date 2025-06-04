@@ -5,6 +5,7 @@ import react from '@astrojs/react';
 import netlify from '@astrojs/netlify';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import tailwindcss from '@tailwindcss/vite';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,6 +37,9 @@ export default defineConfig({
       'SFTP_',
       'ENVIRONMENT',
       'COVER_IMAGE_URL'
+    ],
+    plugins: [
+      tailwindcss(),
     ],
   }
 });

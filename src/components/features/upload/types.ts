@@ -25,4 +25,22 @@ export interface FormState {
     cover: FileState;
     document: FileState;
     status: UploadStatus;
+}
+
+export interface StepConfig {
+  id: string;
+  messages: {
+    pending: string;
+    progress: string;
+    success: string;
+    error: string;
+  };
+  errorMessage: string;
+  duration: number;
+}
+
+export interface Config {
+  steps: {
+    [key: string]: StepConfig;
+  };
 } 

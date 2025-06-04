@@ -1,0 +1,20 @@
+---
+import Tag from "./Tag.astro";
+interface Props {
+    tags: string[];
+    orientation?: "horizontal" | "vertical";
+}
+const { tags, orientation = "horizontal" } = Astro.props;
+---
+<ul class:list={[
+    "tags-list",
+    "m-0 p-0 list-none flex gap-4",
+    {
+        "flex-row flex-wrap": orientation === "horizontal",
+        "flex-col": orientation === "vertical"
+    }
+]}>
+    {
+        tags.map((tag: string) => <li><Tag>{tag}</Tag></li>)
+    }
+</ul>

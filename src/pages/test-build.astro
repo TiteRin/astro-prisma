@@ -1,46 +1,93 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from '@/layouts/Layout.astro';
+
+interface ConfigItem {
+    icon: string;
+    message: string;
+    status: 'success' | 'warning' | 'error';
+}
+
+interface StatusMessage {
+    type: 'info' | 'success' | 'error' | 'progress';
+    text: string;
+}
+
+const configItems: ConfigItem[] = [];
+const statusMessages: StatusMessage[] = [];
+let isConfigReady = false;
+let progress = 0;
+let deployUrl = '';
 ---
 
 <Layout title="Test de suivi de build Netlify">
     <main class="test-build-page">
-        <div class="container">
-            <h1>Test de suivi de build Netlify</h1>
-            <p>Cette page permet de tester la fonctionnalité de suivi en temps réel des déploiements Netlify.</p>
-            
-            <!-- Section de vérification de la configuration -->
-            <div class="config-check-section">
-                <h2>Vérification de la configuration</h2>
-                <button id="check-config-btn" class="btn btn-info">
-                    Vérifier la configuration
-                </button>
-                
-                <div id="config-results" class="config-results hidden">
-                    <h3>Résultats de la vérification</h3>
-                    <div id="config-status" class="config-status"></div>
-                </div>
-            </div>
-
-            <!-- Section de test de build -->
-            <div class="test-section">
-                <h2>Test de déploiement</h2>
-                <button id="trigger-build-btn" class="btn btn-primary" disabled>
-                    Déclencher un build de test
-                </button>
-                <p class="test-info">
-                    <small>⚠️ Vérifiez d'abord la configuration ci-dessus avant de lancer un test.</small>
-                </p>
-                
-                <div id="build-status" class="build-status hidden">
-                    <h3>État du déploiement</h3>
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div id="progress-fill" class="progress-fill"></div>
+        <div class="container mx-auto p-4">
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h1 class="card-title text-2xl font-bold mb-4">Test de build</h1>
+                    
+                    <div class="space-y-4">
+                        <!-- Configuration Items -->
+                        <div class="space-y-2">
+                            {configItems.map(item => (
+                                <div class={`alert ${item.status === 'success' ? 'alert-success' : item.status === 'warning' ? 'alert-warning' : 'alert-error'}`}>
+                                    <span class="font-bold">{item.icon}</span>
+                                    <span>{item.message}</span>
+                                </div>
+                            ))}
                         </div>
-                        <span id="progress-text">0%</span>
+
+                        <!-- Config Summary -->
+                        <div class={`alert ${isConfigReady ? 'alert-success' : 'alert-error'}`}>
+                            <span class="font-bold">
+                                {isConfigReady ? '✓ Configuration prête' : '✗ Configuration incomplète'}
+                            </span>
+                        </div>
+
+                        <!-- Build Status -->
+                        <div class="card bg-base-200">
+                            <div class="card-body">
+                                <h2 class="card-title">État du build</h2>
+                                
+                                <!-- Progress Bar -->
+                                <div class="flex items-center gap-4 my-4">
+                                    <div class="flex-1 h-5 bg-base-300 rounded-full overflow-hidden">
+                                        <div 
+                                            class="h-full bg-primary transition-all duration-300"
+                                            style={`width: ${progress}%`}
+                                        ></div>
+                                    </div>
+                                    <span class="font-bold min-w-[40px]">{progress}%</span>
+                                </div>
+
+                                <!-- Status Messages -->
+                                <div class="max-h-[300px] overflow-y-auto space-y-2">
+                                    {statusMessages.map(message => (
+                                        <div class={`alert ${message.type === 'info' ? 'alert-info' : message.type === 'success' ? 'alert-success' : message.type === 'error' ? 'alert-error' : 'alert'}`}>
+                                            <span>{message.text}</span>
+                                            {message.type === 'progress' && (
+                                                <span class="loading loading-dots loading-sm"></span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <!-- Deploy URL -->
+                                {deployUrl && (
+                                    <div class="alert alert-success mt-4">
+                                        <a 
+                                            href={deployUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="link link-hover font-bold"
+                                        >
+                                            Voir le site déployé
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                    <div id="status-messages" class="status-messages"></div>
-                    <div id="deploy-url" class="deploy-url hidden"></div>
                 </div>
             </div>
         </div>

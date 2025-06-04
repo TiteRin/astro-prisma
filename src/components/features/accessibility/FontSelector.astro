@@ -1,61 +1,121 @@
 ---
-import "../../../styles/features/accessibility/font-selector.scss";
+import { ChevronDown } from "@lucide/astro";
 
-const fonts = [
+interface Font {
+    name: string;
+    className: string;
+    description: string;
+    category: string;
+}
+
+interface GroupedFonts {
+    [key: string]: Font[];
+}
+
+const fonts: Font[] = [
     {
         name: "Open Dyslexic",
-        className: "font-opendyslexic"
+        className: "font-opendyslexic",
+        description: "Police conçue pour les personnes dyslexiques",
+        category: "Accessibilité"
     },
     {
         name: "Open Sans",
-        className: "font-opensans"
+        className: "font-opensans",
+        description: "Police sans-serif moderne et lisible",
+        category: "Sans-serif"
     },
     {
         name: "Inter",
-        className: "font-inter"
+        className: "font-inter",
+        description: "Police optimisée pour les écrans",
+        category: "Sans-serif"
+    },
+    {
+        name: "Lexend",
+        className: "font-lexend",
+        description: "Police conçue pour améliorer la lisibilité",
+        category: "Sans-serif"
+    },
+    {
+        name: "Atkinson Hyperlegible",
+        className: "font-atkinson",
+        description: "Police conçue pour les malvoyants",
+        category: "Accessibilité"
+    },
+    {
+        name: "Andika",
+        className: "font-andika",
+        description: "Police conçue pour les lecteurs débutants",
+        category: "Sans-serif"
+    },
+    {
+        name: "Merriweather",
+        className: "font-merriweather",
+        description: "Police sérif classique, idéale pour l'impression",
+        category: "Sérif"
+    },
+    {
+        name: "Source Serif Pro",
+        className: "font-sourceserif",
+        description: "Police sérif moderne et élégante",
+        category: "Sérif"
     }
 ]
+
+// Grouper les polices par catégorie
+const groupedFonts: GroupedFonts = fonts.reduce((acc: GroupedFonts, font: Font) => {
+    if (!acc[font.category]) {
+        acc[font.category] = [];
+    }
+    acc[font.category].push(font);
+    return acc;
+}, {});
 ---
 
-<section class="font-selector">
-    <div class="font-selector__select-wrapper">
-        <button 
-            id="font-selector__button"
-            class="font-selector__button"
-            aria-expanded="false"
-            aria-haspopup="listbox"
-            aria-label="Select font"
-        >
-            <span id="font-selector__selected" class="font-selector__selected">Police d’écriture</span>
-            <span class="font-selector__arrow" aria-hidden="true">▼</span>
-        </button>
-        <ul 
-            id="font-selector__list"
-            class="font-selector__list"
-            role="listbox"
-            hidden
-        >
-            {
-                fonts.map(font => (
-                    <li 
-                        role="option"
-                        data-value={font.className}
-                        class="font-selector__option"
-                    >
-                        {font.name}
-                    </li>
-                ))
-            }
-        </ul>
+<div class="dropdown dropdown-end w-full">
+    <div tabindex="0" role="button" class="btn btn-ghost gap-2 w-full">
+        <span id="font-selector__selected" class="font-opensans">Police d'écriture</span>
+        <ChevronDown />
     </div>
-</section>
+    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-72">
+        {
+            Object.entries(groupedFonts).map(([category, fonts]) => (
+                <>
+                    <li class="menu-title px-4 py-2 bg-base-200/50 rounded-lg">
+                        <span class="text-sm font-bold">{category}</span>
+                    </li>
+                    <li class="pl-4">
+                        <ul class="menu menu-compact">
+                            {
+                                fonts.map(font => (
+                                    <li>
+                                        <button 
+                                            class={`${font.className} text-left hover:bg-base-200`}
+                                            data-value={font.className}
+                                        >
+                                            <div class="flex flex-col">
+                                                <span class="font-medium">{font.name}</span>
+                                                <span class="text-xs opacity-70">{font.description}</span>
+                                            </div>
+                                        </button>
+                                    </li>
+                                ))
+                            }
+                        </ul>
+                    </li>
+                </>
+            ))
+        }
+    </ul>
+</div>
 
 <script define:vars={{fonts}} is:inline>
     const FONT_KEY = 'app-font';
     const DEFAULT_FONT = 'font-opensans';
-    const button = document.getElementById('font-selector__button');
-    const list = document.getElementById('font-selector__list');
+    const button = document.querySelector('.dropdown button');
     const selected = document.getElementById('font-selector__selected');
+    const dropdown = document.querySelector('.dropdown');
     
     function getStoredFont() {
         return localStorage.getItem(FONT_KEY) || DEFAULT_FONT;
@@ -74,49 +134,24 @@ const fonts = [
         if (selected) {
             selected.classList.remove(...fonts.map(f => f.className));
             selected.classList.add(font);
+            selected.textContent = 'Polices d\'écriture';
         }
     }
 
-    function toggleList() {
-        if (list && button) {
-            const isExpanded = button.getAttribute('aria-expanded') === 'true';
-            list.hidden = isExpanded;
-            button.setAttribute('aria-expanded', !isExpanded);
-        }
-    }
-
-    function handleOptionClick(option) {
-        const font = option.getAttribute('data-value');
-        if (!font) {
-            setStoredFont(DEFAULT_FONT);
-            updateFont(DEFAULT_FONT);
-            return;
-        }
-        setStoredFont(font);
-        updateFont(font);
-        toggleList();
-    }
-
-    if (button && list) {
-        // Toggle dropdown
-        button.addEventListener('click', toggleList);
-
-        // Handle option selection
-        list.querySelectorAll('.font-selector__option').forEach(option => {
-            option.addEventListener('click', () => handleOptionClick(option));
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!button.contains(e.target) && !list.contains(e.target)) {
-                list.hidden = true;
-                button.setAttribute('aria-expanded', 'false');
+    // Handle option selection
+    dropdown?.querySelectorAll('button[data-value]').forEach(option => {
+        option.addEventListener('click', () => {
+            const font = option.getAttribute('data-value');
+            if (font) {
+                setStoredFont(font);
+                updateFont(font);
             }
         });
-    }
+    });
     
     // Initialize font on page load
     document.addEventListener('DOMContentLoaded', () => {
         updateFont(getStoredFont());
     });
 </script>
+

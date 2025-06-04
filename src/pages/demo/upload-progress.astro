@@ -1,0 +1,122 @@
+---
+import UploadProgressModalDemo from '@/components/features/upload/UploadProgressModalDemo';
+import Layout from '@/layouts/Layout.astro';
+---
+<Layout>
+<div class="min-h-screen bg-base-200">
+  <div class="navbar bg-base-100 shadow-lg">
+    <div class="flex-1">
+      <a class="btn btn-ghost text-xl">Démo Upload Progress</a>
+    </div>
+    <div class="flex-none">
+      <ul class="menu menu-horizontal px-1">
+        <li>
+          <a href="/demo">Retour</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container mx-auto p-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Scénarios -->
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title">Scénarios de démo</h2>
+          <p class="text-base-content/70">
+            Choisissez un scénario pour tester différents cas d'utilisation du modal de progression.
+          </p>
+          <div class="grid grid-cols-2 gap-4 mt-4" id="scenario-buttons">
+            <button 
+              class="btn btn-primary"
+              data-scenario="success"
+            >
+              Succès complet
+            </button>
+            <button 
+              class="btn btn-ghost"
+              data-scenario="validation-error"
+            >
+              Erreur de validation
+            </button>
+            <button 
+              class="btn btn-ghost"
+              data-scenario="upload-error"
+            >
+              Erreur d'upload
+            </button>
+            <button 
+              class="btn btn-ghost"
+              data-scenario="build-error"
+            >
+              Erreur de build
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documentation -->
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title">Documentation</h2>
+          <div class="space-y-4">
+            <div>
+              <h3 class="font-bold">Succès complet</h3>
+              <p class="text-base-content/70">
+                Simule un upload réussi avec validation, envoi et build.
+              </p>
+            </div>
+            <div>
+              <h3 class="font-bold">Erreur de validation</h3>
+              <p class="text-base-content/70">
+                Simule une erreur lors de la validation du fichier (format incorrect, taille trop grande, etc.).
+              </p>
+            </div>
+            <div>
+              <h3 class="font-bold">Erreur d'upload</h3>
+              <p class="text-base-content/70">
+                Simule une erreur lors de l'envoi du fichier (problème réseau, serveur indisponible, etc.).
+              </p>
+            </div>
+            <div>
+              <h3 class="font-bold">Erreur de build</h3>
+              <p class="text-base-content/70">
+                Simule une erreur lors du déploiement (problème de build, conflit, etc.).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Démo -->
+    <div class="mt-8">
+      <UploadProgressModalDemo client:load scenario="success" />
+    </div>
+  </div>
+</div>
+</Layout>
+<script>
+  // Gestion des scénarios
+  const scenarioButtons = document.querySelectorAll('#scenario-buttons button');
+  const demoComponent = document.querySelector('upload-progress-modal-demo');
+
+  scenarioButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const scenario = button.getAttribute('data-scenario') || 'success';
+      
+      // Mise à jour des styles des boutons
+      scenarioButtons.forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-ghost');
+      });
+      button.classList.remove('btn-ghost');
+      button.classList.add('btn-primary');
+
+      // Mise à jour du scénario dans le composant
+      if (demoComponent) {
+        demoComponent.setAttribute('scenario', scenario);
+      }
+    });
+  });
+</script> 

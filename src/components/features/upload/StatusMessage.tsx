@@ -8,8 +8,15 @@ export interface StatusMessageProps {
 const StatusMessage = ({ message, type }: StatusMessageProps) => {
     if (!message) return null;
     
+    const alertClass = `alert ${
+        type === 'success' ? 'alert-success' :
+        type === 'error' ? 'alert-error' :
+        type === 'warning' ? 'alert-warning' :
+        'alert-info'
+    }`;
+    
     return (
-        <div className={`upload-form__status upload-form__status--${type}`} role="alert">
+        <div className={alertClass} role="alert">
             {message}
         </div>
     );

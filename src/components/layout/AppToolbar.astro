@@ -1,50 +1,82 @@
 ---
-import Icons from '../icons/Icons.astro';
-import "../../styles/layout/app-toolbar.scss";
-import "../../styles/features/accessibility/zoom-controls.scss";
-import "../../styles/features/accessibility/theme-switcher.scss";
+import { PersonStanding, User } from '@lucide/astro';
+
 import FontSelector from "../features/accessibility/FontSelector.astro";
 import ZoomControls from "../features/accessibility/ZoomControls.astro";
 import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
 ---
 
-<header class="app-toolbar" role="banner">
-    <div class="app-toolbar__brand">
-        <a href="/" class="app-toolbar__home-link" aria-label="Retour à l'accueil">
-            <h1 class="app-toolbar__app-name">Prisma</h1>
-            <span class="app-toolbar__app-subtitle">Pôle recherche</span>
+<header 
+    class:list={[
+        "app-toolbar sticky top-0 flex items-center gap-2 p-2", // layout styles
+        "bg-base-200 border-b border-base-300", // visual styles
+        "z-50", // z-index
+    ]}
+    role="banner"
+>
+    <div class:list={[
+        "app-toolbar__brand flex items-center min-w-0 flex-grow", // layout styles
+    ]}>
+        <a 
+            href="/" 
+            class:list={[
+                "app-toolbar__home-link flex flex-col items-baseline gap-1 min-w-0", // layout styles
+                "font-medium rounded-sm text-decoration-none", // text styles
+                "outline-none focus-visible:outline-primary-content", // focus styles
+            ]}
+            aria-label="Retour à l'accueil"
+        >
+            <h1 class:list={[
+                "app-toolbar__app-name m-0", // layout styles
+                "text-primary text-2xl font-bold", // text styles
+            ]}>Prisma</h1>
+            <span class:list={[
+                "app-toolbar__app-subtitle m-0 pl-2", // layout styles
+                "text-sm font-normal text-neutral", // text styles
+            ]}>Pôle recherche</span>
         </a>
     </div>
 
     <button 
-        class="app-toolbar__menu-toggle" 
+        class:list={[
+            "app-toolbar__menu-toggle btn btn-circle btn-outline", // button styles
+            "md:hidden", // responsive styles
+        ]}
         aria-label="Menu d'accessibilité" 
         aria-expanded="false" 
         aria-controls="accessibility-menu"
         aria-haspopup="true"
     >
-        <Icons name="accessibility" aria-hidden="true" />
+        <PersonStanding />
     </button>
 
     <div 
         id="accessibility-menu" 
-        class="app-toolbar__accessibility" 
+        class:list={[
+            "app-toolbar__accessibility items-center gap-4 flex p-2", // layout styles
+            "bg-base-200 border-b border-base-300", // visual styles
+            "hidden absolute top-full left-0 w-full flex-col", // mobile styles
+            "md:flex md:w-auto md:relative md:flex-row md:border-none", // desktop styles
+        ]}
         role="menu"
         aria-label="Options d'accessibilité"
-        hidden
     >
         <FontSelector />
         <ZoomControls />
         <ThemeSwitcher />
     </div>
 
-    <div class="app-toolbar__user">
+    <div class:list={[
+        "app-toolbar__user", // layout styles
+    ]}>
         <button 
-            class="app-toolbar__avatar" 
+            class:list={[
+                "app-toolbar__avatar avatar btn btn-circle btn-outline", // button styles
+            ]}
             aria-label="Menu utilisateur"
             aria-haspopup="true"
         >
-            <Icons name="user" aria-hidden="true" />
+            <User />
         </button>
     </div>
 </header>
@@ -52,14 +84,13 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
 <script>
     const menuToggle = document.querySelector<HTMLButtonElement>('.app-toolbar__menu-toggle');
     const accessibilityMenu = document.querySelector<HTMLDivElement>('#accessibility-menu');
-    const toolbar = document.querySelector<HTMLElement>('.app-toolbar');
 
     if (menuToggle && accessibilityMenu) {
         // Handle menu toggle
         menuToggle.addEventListener('click', () => {
             const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
             menuToggle.setAttribute('aria-expanded', (!isExpanded).toString());
-            accessibilityMenu.hidden = isExpanded;
+            accessibilityMenu.classList.toggle('hidden', !isExpanded);
         });
 
         // Handle keyboard navigation
@@ -67,18 +98,6 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 menuToggle.click();
-            }
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            const target = e.target as Node;
-            if (menuToggle && accessibilityMenu && 
-                !menuToggle.contains(target) && 
-                !accessibilityMenu.contains(target) && 
-                !accessibilityMenu.hidden) {
-                menuToggle.setAttribute('aria-expanded', 'false');
-                accessibilityMenu.hidden = true;
             }
         });
 
@@ -115,3 +134,34 @@ import ThemeSwitcher from "../features/accessibility/ThemeSwitcher.astro";
         });
     }
 </script>
+
+<style>
+    /* Styles pour les dropdowns en version mobile */
+    @media (max-width: 768px) {
+        .dropdown-content {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            padding: 1rem !important;
+            z-index: 100 !important;
+        }
+
+        /* Ajout d'un header pour les dropdowns en mobile */
+        .dropdown-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4rem;
+            background: hsl(var(--b2));
+            border-bottom: 1px solid hsl(var(--b3));
+            z-index: -1;
+        }
+    }
+</style>

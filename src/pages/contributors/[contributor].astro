@@ -26,16 +26,26 @@ const {filteredReadingNotes} = Astro.props;
 const {contributor} = Astro.params;
 ---
 <FicheLayout pageTitle={`Navigation par bénévole - ${contributor}`}>
-    <h1>{`${filteredReadingNotes.length} ${pluralize(filteredReadingNotes.length, "fiche")} ${pluralize(filteredReadingNotes.length, "rédigée")}`} par {contributor}</h1>
-    <ul>
-        {
-            filteredReadingNotes.map(readingNote => (
+    <div class="prose max-w-none">
+        <h1 class="text-2xl font-bold mb-6">
+            {`${filteredReadingNotes.length} ${pluralize(filteredReadingNotes.length, "fiche")} ${pluralize(filteredReadingNotes.length, "rédigée")}`} par {contributor}
+        </h1>
+        <ul class="menu menu-lg bg-base-200 rounded-box">
+            {
+                filteredReadingNotes.map(readingNote => (
                     <li>
-                        <a href={`/fiches/${readingNote.id}`}>
-                            {readingNote.data.bookTitle} ({readingNote.data.bookAuthors.join(", ")})
+                        <a 
+                            href={`/fiches/${readingNote.id}`}
+                            class="flex flex-col gap-1 hover:bg-base-300"
+                        >
+                            <span class="font-medium">{readingNote.data.bookTitle}</span>
+                            <span class="text-sm opacity-70">
+                                {readingNote.data.bookAuthors.join(", ")}
+                            </span>
                         </a>
                     </li>
-            ))
-        }
-    </ul>
+                ))
+            }
+        </ul>
+    </div>
 </FicheLayout>
