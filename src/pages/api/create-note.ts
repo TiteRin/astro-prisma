@@ -8,6 +8,8 @@ import { sftpClient } from "@/utils/sftpClient";
 import { readingNoteValidationSchema } from "@/content.config";
 import { randomUUID } from "crypto";
 import { triggerAndTrackNetlifyBuild } from "@/utils/netlifyTrigger";
+import { slugify } from "@/utils/stringUtils";
+import { kebabCase } from "@/utils/functions";
 
 export const prerender = false;
 
@@ -132,6 +134,9 @@ export const POST: APIRoute = async ({ request }) => {
                 return;
             }
 
+            // Générer le slug à partir du titre du livre en utilisant la même fonction qu'Astro
+            const slug = kebabCase(processedAttributes.bookTitle);
+
             await sendProgress({ type: 'info', message: "Déclenchement du build en cours...", step: "build" });
             
             // Construire le message personnalisé pour Netlify
@@ -155,10 +160,10 @@ export const POST: APIRoute = async ({ request }) => {
                 });
             }, customMessage);
             
-            // Notification finale de l'état du build
+            // Notification finale de l'état du build avec le slug
             await sendProgress({ 
                 type: buildResult.success ? 'success' : 'error', 
-                message: buildResult.message + (buildResult.deployUrl ? ` (URL: ${buildResult.deployUrl})` : ''), 
+                message: buildResult.message + (buildResult.deployUrl ? ` (URL: ${buildResult.deployUrl}) (slug: ${slug})` : ''), 
                 step: "build" 
             });
             

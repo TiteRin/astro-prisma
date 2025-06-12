@@ -1,18 +1,12 @@
-import React, { useState, useRef, ChangeEvent, FormEvent } from "react";
-import "../../../styles/features/upload/index.scss";
+import { useState, useRef, FormEvent } from "react";
 import { 
     validateImage, 
-    validateMarkdownFile, 
     createImagePreview, 
-    createFilePreview,
     submitUploadForm,
     UploadProgress,
-    silentUploadFile,
-    FilePreview
-} from "../../../utils/uploadService";
+} from "@/utils/uploadService";
 
 // Import des composants
-import StatusMessage from "./StatusMessage";
 import ContributorField from "./ContributorField";
 import CoverUpload from "./CoverUpload";
 import FileUpload from "./FileUpload";
@@ -63,9 +57,7 @@ export default function UploadForm() {
     };
 
     // Gestion du changement de fichier de couverture
-    const handleCoverChange = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null;
-        
+    const handleCoverChange = async (file: File | null) => {
         if (!file) {
             // Réinitialiser l'état de couverture
             setFormState(prev => ({
@@ -151,129 +143,6 @@ export default function UploadForm() {
                 type: 'error'
             });
         }
-    };
-
-    // Gestion du changement de fichier document
-    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null;
-        
-        if (!file) {
-            return;
-        }
-
-        // Mise à jour initiale du fichier et indication du chargement
-        setFormState(prev => ({
-            ...prev,
-            document: {
-                ...prev.document,
-                file,
-                id: null,
-                metadata: null
-            },
-            status: {
-                isUploading: true,
-                message: "Validation du fichier en cours...",
-                type: 'info'
-            }
-        }));
-
-        // Première validation basique du format de fichier
-        const validationResult = validateMarkdownFile(file);
-        
-        if (!validationResult.isValid) {
-            setFormState(prev => ({
-                ...prev,
-                document: {
-                    ...prev.document,
-                    validation: {
-                        isValid: false,
-                        message: validationResult.errors[0]?.message
-                    }
-                },
-                status: {
-                    isUploading: false,
-                    message: validationResult.errors[0]?.message || "Le fichier markdown n'est pas valide",
-                    type: 'error'
-                }
-            }));
-            return;
-        }
-
-        try {
-            // Upload silencieux pour validation complète sur le serveur
-            const result = await silentUploadFile(file);
-
-            if (!result.success) {
-                // Si nous avons des erreurs spécifiques du serveur
-                if (result.errors && result.errors.length > 0) {
-                    throw new Error(result.errors[0]);
-                } else {
-                    throw new Error("Erreur lors de la validation du fichier");
-                }
-            }
-
-            if (!result.id) {
-                throw new Error("L'ID du fichier est manquant après validation");
-            }
-
-            // Création de l'aperçu avec les métadonnées
-            const metadata = await createFilePreview(file, result.frontmatter);
-            
-            // Fichier valide, mise à jour avec les métadonnées et l'ID
-            setFormState(prev => ({
-                ...prev,
-                document: {
-                    ...prev.document,
-                    id: result.id,
-                    metadata,
-                    validation: {
-                        isValid: true
-                    }
-                },
-                status: {
-                    isUploading: false,
-                    message: "Fichier validé avec succès",
-                    type: 'success'
-                }
-            }));
-
-            // Effacer le message après 3 secondes
-            setTimeout(() => {
-                updateStatus({ isUploading: false });
-            }, 3000);
-        }
-        catch (error) {
-            console.error("Error validating markdown file:", error);
-            setFormState(prev => ({
-                ...prev,
-                document: {
-                    ...prev.document,
-                    validation: {
-                        isValid: false,
-                        message: error instanceof Error ? error.message : "Erreur inconnue"
-                    }
-                },
-                status: {
-                    isUploading: false,
-                    message: `Erreur lors de la validation: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
-                    type: 'error'
-                }
-            }));
-        }
-    };
-
-    // Réinitialisation du champ de fichier
-    const handleResetFile = () => {
-        setFormState(prev => ({
-            ...prev,
-            document: {
-                ...prev.document,
-                file: null,
-                id: null,
-                metadata: null,
-                validation: { isValid: true }
-            }
-        }));
     };
 
     // Gestion des messages de progression
@@ -381,11 +250,15 @@ export default function UploadForm() {
                             // Mise à jour du message de build en cours
                             uploadProgress.updateBuildProgress(progress.message);
                         } else if (progress.type === 'success') {
-                            // Extraire l'ID de la fiche depuis la réponse si possible
-                            const ficheId = document.id || 'nouvelle-fiche';
-                            // Utiliser le titre du livre depuis les métadonnées si disponible
-                            const ficheTitle = document.metadata?.title || 'Nouvelle fiche';
-                            uploadProgress.completeBuild(ficheId, window.location.origin);
+                            // Extraire l'URL de déploiement et le slug du message
+                            const deployUrlMatch = progress.message.match(/\(URL: (https?:\/\/[^)]+)\)/);
+                            const deployUrl = deployUrlMatch ? deployUrlMatch[1] : window.location.origin;
+                            
+                            // Extraire le slug du message (format: "slug: mon-slug")
+                            const slugMatch = progress.message.match(/slug: ([^\s,)]+)/);
+                            const finalSlug = slugMatch ? slugMatch[1] : document.id || 'nouvelle-fiche';
+                            
+                            uploadProgress.completeBuild(finalSlug, deployUrl);
                             
                             // Reset du formulaire après succès
                             setTimeout(() => {
@@ -414,55 +287,90 @@ export default function UploadForm() {
     const { contributor, cover, document, status } = formState;
 
     return (
-        <form 
-            className="upload-form" 
-            id="uploadForm" 
-            ref={formRef} 
-            onSubmit={handleSubmit}
-            aria-labelledby="upload-form-title"
-        >
-            <p>
-                Après envoi, la fiche de lecture sera disponible après quelques minutes. 
-            </p>
+        <>
+            <form 
+                className="card md:card-side shadow-xl form-control " 
+                id="uploadForm" 
+                ref={formRef} 
+                onSubmit={handleSubmit}
+                aria-labelledby="upload-form-title"
+            >
+                
+                <div className="card-body flex flex-col gap-4">
+                    <div className="flex flex-row gap-4">
 
-            <StatusMessage message={status.message} type={status.type} />
+                        {/* Cover */}
+                        <div className="w-[200px] h-[300px] shrink-0">
+                            <CoverUpload 
+                                value={cover.file}
+                                onChange={handleCoverChange}
+                                onError={(error) => setFormState(prev => ({ ...prev, cover: { ...prev.cover, validation: { isValid: false, message: error } } }))}
+                                disabled={status.isUploading}
+                                maxSizeMB={5}
+                                allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
+                            />       
+                        </div>
+                        <div className="grow">
+                            <div className="flex flex-col gap-4 grow items-stretch">
+                                
+                                {/* <StatusMessage message={status.message} type={status.type} /> */}
 
-            <ContributorField 
-                value={contributor}
-                onChange={handleContributorChange}
-            />
-            
-            <div className="upload-form__flex-wrapper">
-                <CoverUpload 
-                    coverPreview={cover.preview}
-                    isValid={cover.validation.isValid}
-                    validationMessage={cover.validation.message}
-                    onChange={handleCoverChange}
-                    disabled={status.isUploading}
-                />
+                                <FileUpload 
+                                    value={document.file}
+                                    onChange={(file, metadata, fileId) => {
+                                        setFormState(prev => ({
+                                            ...prev,
+                                            document: {
+                                                ...prev.document,
+                                                file,
+                                                metadata,
+                                                id: fileId,
+                                                validation: { isValid: true }
+                                            }
+                                        }));
+                                    }}
+                                    onError={(error) => {
+                                        setFormState(prev => ({
+                                            ...prev,
+                                            document: {
+                                                ...prev.document,
+                                                validation: { isValid: false, message: error }
+                                            },
+                                            status: {
+                                                isUploading: false,
+                                                message: error,
+                                                type: 'error'
+                                            }
+                                        }));
+                                    }}
+                                    disabled={status.isUploading}
+                                    className="grow"
+                                />
 
-                <FileUpload 
-                    fileMetadata={document.metadata || null}
-                    fileId={document.id || null}
-                    isValid={document.validation.isValid}
-                    validationMessage={document.validation.message}
-                    onChange={handleFileChange}
-                    onReset={handleResetFile}
-                    disabled={status.isUploading}
-                />
-            </div>
 
-            <div className="upload-form__submit">
-                <button 
-                    type="submit" 
-                    className="btn-action with-border"
-                    disabled={status.isUploading}
-                    aria-busy={status.isUploading}
-                >
-                    {status.isUploading ? 'Envoi en cours...' : 'Ajouter'}
-                </button>
-            </div>
-
+                                <ContributorField 
+                                    value={contributor}
+                                    onChange={handleContributorChange}
+                                    className="w-full"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-end items-center gap-4">
+                        <p className="alert alert-info alert-soft">
+                            Après envoi, la fiche de lecture sera disponible après quelques minutes. 
+                        </p>
+                        <button 
+                            type="submit" 
+                            className="btn btn-primary"
+                            disabled={status.isUploading}
+                            aria-busy={status.isUploading}
+                        >
+                            {status.isUploading ? 'Envoi en cours...' : 'Ajouter'}
+                        </button>
+                    </div>
+                </div>
+            </form>
             {/* Modal de progression de l'upload */}
             <UploadProgressModal
                 isOpen={uploadProgress.isOpen}
@@ -473,6 +381,6 @@ export default function UploadForm() {
                 finalUrl={uploadProgress.finalUrl}
                 ficheId={uploadProgress.ficheId}
             />
-        </form>
-    );
+        </>
+);
 }

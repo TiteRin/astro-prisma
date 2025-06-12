@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import './UploadProgressModal.scss';
+import { Check, AlertCircle, Loader2, X } from 'lucide-react';
 
 interface ProgressStep {
   id: string;
   message: string;
   status: 'pending' | 'progress' | 'success' | 'error';
   timestamp?: Date;
+  errorMessage?: string;
 }
 
 interface UploadProgressModalProps {
@@ -32,129 +33,165 @@ export default function UploadProgressModal({
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
+    } else {
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 300);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
   const handleClose = () => {
     if (canClose) {
-      setIsVisible(false);
-      setTimeout(() => onClose(), 300); // Attendre la fin de l'animation
+      onClose();
     }
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && canClose) {
-      handleClose();
+      onClose();
     }
   };
-
-  if (!isOpen) return null;
 
   const getStepIcon = (step: ProgressStep) => {
     switch (step.status) {
       case 'success':
-        return '✅';
+        return (
+          <div className="flex items-center gap-2 text-success">
+            <Check className="h-6 w-6" />
+            <span>{step.message}</span>
+          </div>
+        );
       case 'error':
-        return '❌';
+        return (
+          <div className="flex items-center gap-2 text-error">
+            <AlertCircle className="h-6 w-6" />
+            <span>{step.message}</span>
+          </div>
+        );
       case 'progress':
-        return '⏳';
+        return (
+          <div className="flex items-center gap-2 text-primary">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span>{step.message}</span>
+          </div>
+        );
       default:
-        return '⏸️';
+        return (
+          <div className="flex items-center gap-2 text-base-content/50">
+            <span className="h-6 w-6" />
+            <span>{step.message}</span>
+          </div>
+        );
     }
   };
 
-  const isCompleted = steps.some(step => step.status === 'success' && (step.id === 'deploy-complete' || step.id === 'final'));
+  const isCompleted = steps.every(step => step.status === 'success');
   const hasError = steps.some(step => step.status === 'error');
 
+  if (!isVisible && !isOpen) return null;
+
   return (
-    <div 
-      className={`upload-modal-overlay ${isVisible ? 'visible' : ''}`}
+    <dialog 
+      className={`modal ${isVisible ? 'modal-open' : ''}`}
       onClick={handleBackdropClick}
     >
-      <div className={`upload-modal ${isVisible ? 'visible' : ''}`}>
-        <div className="upload-modal__header">
-          <h2>Upload de la fiche de lecture</h2>
+      <div className="modal-box max-w-2xl">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold">Upload de la fiche de lecture</h3>
           {canClose && (
             <button 
-              className="upload-modal__close"
+              className="btn btn-ghost btn-circle btn-sm"
               onClick={handleClose}
               aria-label="Fermer"
             >
-              ×
+              <X />
             </button>
           )}
         </div>
 
-        <div className="upload-modal__content">
-          <div className="upload-modal__steps">
+        <div className="space-y-6">
+          <ul className="steps steps-vertical w-full">
             {steps.map((step) => (
-              <div 
+              <li 
                 key={step.id}
-                className={`upload-step upload-step--${step.status} ${currentStep === step.id ? 'upload-step--current' : ''}`}
+                className={`step ${
+                  step.status === 'success' ? 'step-success' :
+                  step.status === 'error' ? 'step-error' :
+                  currentStep === step.id ? 'step-primary' :
+                  ''
+                }`}
               >
-                <div className="upload-step__icon">
-                  {getStepIcon(step)}
-                </div>
-                <div className="upload-step__content">
-                  <div className="upload-step__message">
-                    {step.status === 'progress' ? (
-                      <>
-                        {step.message.replace(/\.+$/, '')}
-                        <span className="upload-step__dots"></span>
-                      </>
-                    ) : (
-                      step.message
-                    )}
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0">
+                    {getStepIcon(step)}
                   </div>
-                  {step.timestamp && (
-                    <div className="upload-step__timestamp">
-                      {step.timestamp.toLocaleTimeString()}
+                  <div className="flex-grow">
+                    <div className="font-medium">
+                      {step.timestamp && (
+                        <div className="text-left text-xs text-base-content/70 mt-1">
+                          {step.timestamp.toLocaleTimeString()}
+                        </div>
+                      )}
+                      {step.errorMessage && (
+                        <div className="text-xs text-error mt-1">
+                          {step.errorMessage}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
 
           {isCompleted && finalUrl && ficheId && (
-            <div className="upload-modal__success">
-              <div className="upload-modal__success-icon">🎉</div>
-              <div className="upload-modal__success-message">
-                <strong>Déploiement terminé avec succès !</strong>
-                <p>
-                  Votre nouvelle fiche est accessible à l'adresse :{' '}
-                  <a 
-                    href={`${finalUrl}/fiches/${ficheId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="upload-modal__fiche-link"
-                  >
-                    {finalUrl}/fiches/{ficheId}
-                  </a>
-                </p>
+            <div className="alert alert-success shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl">🎉</div>
+                <div>
+                  <h3 className="font-bold">Déploiement terminé avec succès !</h3>
+                  <div className="text-sm">
+                    Votre nouvelle fiche est accessible à l'adresse :{' '}
+                    <a 
+                      href={`${finalUrl}/fiches/${ficheId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="link link-primary hover:link-secondary font-medium"
+                    >
+                      {finalUrl}/fiches/{ficheId}
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           {hasError && (
-            <div className="upload-modal__error">
-              <div className="upload-modal__error-icon">⚠️</div>
-              <div className="upload-modal__error-message">
-                Une erreur s'est produite pendant l'upload. Vous pouvez fermer cette fenêtre et réessayer.
+            <div className="alert alert-error shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl">⚠️</div>
+                <div>
+                  <h3 className="font-bold">Une erreur s'est produite</h3>
+                  <div className="text-sm">
+                    Une erreur s'est produite pendant l'upload. Vous pouvez fermer cette fenêtre et réessayer.
+                  </div>
+                </div>
               </div>
             </div>
           )}
         </div>
 
-        <div className="upload-modal__footer">
+        <div className="modal-action mt-6">
           {!canClose && (
-            <div className="upload-modal__info">
-              <small>⏳ Veuillez patienter pendant le traitement...</small>
+            <div className="text-sm text-base-content/70 flex items-center gap-2">
+              <span className="loading loading-spinner loading-xs"></span>
+              Veuillez patienter pendant le traitement...
             </div>
           )}
           {canClose && (
             <button 
-              className="upload-modal__button upload-modal__button--primary"
+              className="btn btn-primary"
               onClick={handleClose}
             >
               {isCompleted ? 'Terminer' : 'Fermer'}
@@ -162,6 +199,6 @@ export default function UploadProgressModal({
           )}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 } 

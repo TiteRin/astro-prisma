@@ -23,6 +23,7 @@ export interface FilePreview {
     authors?: string[];
     tags?: string[];
     description?: string;
+    slug?: string;
 }
 
 // Interface pour le résultat de l'upload silencieux
@@ -140,7 +141,8 @@ export function createFilePreview(file: File, metadata?: Record<string, any>): P
                 title: metadata?.title || metadata?.bookTitle,
                 authors: metadata?.authors || metadata?.bookAuthors,
                 tags: metadata?.tags,
-                description: metadata?.summary || metadata?.description
+                description: metadata?.summary || metadata?.description,
+                slug: metadata?.slug
             };
             resolve(preview);
         } catch (error) {
