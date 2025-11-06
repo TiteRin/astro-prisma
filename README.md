@@ -1,125 +1,28 @@
-# Prisma - Pôle Recherche
-
+# Astro - Prisma
 ## 📚 À propos
 
-Prisma est une application web dédiée à la gestion et au partage de fiches de lecture. Elle permet aux chercheurs et aux étudiants de centraliser, organiser et accéder facilement à leurs notes de lecture.
+Cette application est destinée au pôle recherche de l’association Prisma (Lille), et est un **work in progress**.
+L’objectif est de proposer l’ensemble des fiches de lectures du Pôle Recherche et Pédagogique, en mettant l’accent sur l’**accessibilité visuelle**.  
+L’objectif secondaire est de conserver la main sur les données saisies et de ne pas passer par un service tiers comme Google Drive ou Amazon pour stocker les données. 
 
-### Fonctionnalités principales
+## Fonctionnalités principales
+### Gestion des fiches de lecture
+- Upload de fiches de lectures écrites au format Markdown
+- Stockage sur un VPS
+- Organisation par tags et catégories
+- Recherche avancée
 
-- **Accessibilité avancée**
-  - Thèmes clair/sombre avec mode contraste élevé
-  - Sélection de polices adaptées (OpenDyslexic, Open Sans, Inter)
-  - Contrôles de zoom
-  - Navigation au clavier optimisée
+### Accessibilité
+- Thème clair/sombre avec mode de constraste élevé
+- Sélection de polices adaptées
+- Contrôle du zoom
+- Export PDF
+ 
+## Prochaines étapes
+- Ajouter un système d’authentification / gestion de droits pour sécuriser l’accès
+- Ajouter un formulaire de saisie pour la création/modification des fiches de lectures
 
-- **Gestion des fiches**
-  - Création et édition de fiches de lecture
-  - Organisation par tags et catégories
-  - Recherche avancée
-  - Export PDF optimisé pour l'impression
-
-- **Interface responsive**
-  - Design adaptatif pour tous les appareils
-  - Mise en page optimisée pour l'impression
-  - Navigation intuitive
-
-## 🚧 Feature en cours : Refonte UI avec DaisyUI
-
-### Objectif
-Améliorer l'expérience utilisateur et la cohérence visuelle de l'application en intégrant DaisyUI, une bibliothèque de composants pour Tailwind CSS.
-
-### Plan d'implémentation
-1. **Phase de configuration**
-   - Installation de DaisyUI et dépendances
-   - Configuration de Tailwind CSS
-   - Personnalisation du thème
-
-2. **Migration des composants**
-   - Refonte des composants de mise en page
-   - Mise à jour des formulaires
-   - Implémentation des nouveaux éléments UI
-   - Améliorations responsive
-
-3. **Tests et optimisation**
-   - Tests sur différentes tailles d'écran
-   - Vérification de l'accessibilité
-   - Optimisation des performances
-   - Documentation des composants
-
-## 🛠 Installation
-
-### Prérequis
-- Node.js (v18 ou supérieur)
-- Yarn
-- Serveur SFTP pour le stockage des fiches
-- Compte Netlify pour le déploiement
-
-### Frameworks et bibliothèques principales
-- [Astro](https://astro.build) - Framework web moderne
-- [Tailwind CSS](https://tailwindcss.com) - Framework CSS utilitaire
-- [DaisyUI](https://daisyui.com) - Composants pour Tailwind CSS
-- [PageFind](https://pagefind.app) - Moteur de recherche statique
-
-### Configuration
-
-1. **Cloner le projet**
-   ```bash
-   git clone [URL_DU_REPO]
-   cd astro-prisma
-   ```
-
-2. **Installer les dépendances**
-   ```bash
-   yarn install
-   ```
-
-3. **Configuration de l'environnement**
-   - Copier `.env.example` en `.env`
-   - Remplir les variables d'environnement :
-     ```
-     # Configuration SFTP
-     SFTP_HOST=votre-host.example.com
-     SFTP_PORT=22
-     SFTP_USERNAME=votre-nom-utilisateur
-     SFTP_PASSWORD=votre-mot-de-passe
-     # Ou clé SSH (recommandé)
-     SFTP_PRIVATE_KEY_PATH=/chemin/vers/votre/cle_privee
-
-     # Environnement et chemin
-     ENVIRONMENT=development
-     SFTP_BASE_PATH=/prisma
-
-     # Configuration des images
-     ALLOWED_IMAGE_DOMAINS=imgur.com,github.com,githubusercontent.com
-     BLOCKED_IMAGE_DOMAINS=
-     ```
-
-### Commandes principales
-
-| Commande | Description |
-|:---------|:------------|
-| `yarn dev` | Démarre le serveur de développement sur `localhost:4321` |
-| `yarn build` | Construit le site pour la production dans `./dist/` |
-| `yarn preview` | Prévisualise la version de production localement |
-| `yarn pagefind` | Génère l'index de recherche |
-| `yarn copy-pagefind` | Copie l'index pagefind dans `/public` pour les tests locaux |
-
-## 📝 Structure du projet
-
-```
-/
-├── public/          # Fichiers statiques
-├── src/
-│   ├── components/  # Composants réutilisables
-│   ├── layouts/     # Mises en page
-│   ├── pages/       # Pages de l'application
-│   └── styles/      # Styles globaux et thèmes
-└── package.json
-```
-
-## 🔒 Sécurité
-
-- Utilisation des variables d'environnement pour les informations sensibles
-- Authentification SFTP par clé SSH recommandée
-- Utilisateur SFTP dédié avec permissions limitées
-- Validation des domaines d'images autorisés
+## Stack
+- [Astro](https://astro.build/) : il y a peu d’interaction à prévoir sur le site, donc un site statique semblait approprié. Lorsqu’une fiche est ajoutée, modifiée ou supprimée, le site est reconstruit
+- [Tailwind](https://tailwindcss.com/) et [DaisyUI]([https://astro.build/](https://daisyui.com/)) : Tailwind permet d’avoir facilement accès à de nombreuses classes utilitaires mais j’apprécie la surcouche DaisyUI qui aide à éviter d’avoir un HTML avec trop de classes
+- Pas de base de données - pour le moment
